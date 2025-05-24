@@ -20,12 +20,11 @@ struct TransactionFormView: View {
     @State private var paymentMethod: String = ""
     @State private var note: String = ""
     @State private var showingImagePicker = false
+    @State private var showingActionSheet = false // 新增状态，用于控制ActionSheet的显示
     @State private var inputImage: UIImage?
     private let ocrService = OCRService()
     
-    // 分类选项
-    private let categories = ["请选择分类"]
-    private let paymentMethods = ["请选择"]
+    // 注意：categories 和 paymentMethods 现在从 viewModel 获取，不再是静态私有变量
     
     var body: some View {
         NavigationView {
@@ -74,11 +73,16 @@ struct TransactionFormView: View {
                 
                 Section(header: Text("交易分类")) {
                     Picker("请选择分类", selection: $category) {
-                        ForEach(categories, id: \.self) {
+                        ForEach(viewModel.categories(for: selectedType), id: \.self) { // 使用 viewModel 的动态列表
                             Text($0)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .onChange(of: selectedType) { oldValue, newValue in // 当收支类型改变时，如果当前分类不在新列表中，则重置分类
+                        if !viewModel.categories(for: newValue).contains(category) {
+                            category = viewModel.categories(for: newValue).first ?? ""
+                        }
+                    }
                 }
                 
                 Section(header: Text("收/支类型")) {
@@ -92,11 +96,16 @@ struct TransactionFormView: View {
                 
                 Section(header: Text("付款/收款方式")) {
                     Picker("请选择", selection: $paymentMethod) {
-                        ForEach(paymentMethods, id: \.self) {
+                        ForEach(viewModel.paymentMethods(for: selectedType), id: \.self) { // 使用 viewModel 的动态列表
                             Text($0)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .onChange(of: selectedType) { oldValue, newValue in // 当收支类型改变时，如果当前支付方式不在新列表中，则重置支付方式
+                        if !viewModel.paymentMethods(for: newValue).contains(paymentMethod) {
+                            paymentMethod = viewModel.paymentMethods(for: newValue).first ?? ""
+                        }
+                    }
                 }
                 
                 Section(header: Text("备注")) {
@@ -134,22 +143,40 @@ struct TransactionFormView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("上传数据（请选择图像来源）") {
-                        showingImagePicker = true
+                    Button("上传数据") { // 修改按钮文字
+                        showingActionSheet = true // 点击按钮时显示ActionSheet
+                    }
+                    .actionSheet(isPresented: $showingActionSheet) { // 添加ActionSheet
+                        ActionSheet(title: Text("选择图像来源"), buttons: [
+                            .default(Text("从相册选择")) { showingImagePicker = true },
+                            .default(Text("加载测试图片1 (生活服务)")) { loadTestImage(name: "sample_bill_1.PNG") },
+                            .default(Text("加载测试图片2 (不二君)")) { loadTestImage(name: "sample_bill_2.PNG") },
+                            .cancel()
+                        ])
                     }
                     .sheet(isPresented: $showingImagePicker) {
                         ImagePicker(image: $inputImage)
                     }
-                    .onChange(of: inputImage) { newValue in
+                    .onChange(of: inputImage) { oldValue, newValue in
                         guard let selectedImage = newValue else { return }
                         ocrService.recognizeText(from: selectedImage) { transaction in
                             if let transaction = transaction {
                                 self.amount = String(format: "%.2f", transaction.amount)
                                 self.date = transaction.date
                                 self.description = transaction.description
-                                self.category = transaction.category
-                                self.selectedType = transaction.type
-                                self.paymentMethod = transaction.paymentMethod
+                                self.selectedType = transaction.type // 先更新类型
+                                // 根据OCR识别的类型，从viewModel获取对应的分类和支付方式列表，并尝试匹配
+                                // 如果OCR结果中的分类/支付方式不在对应列表，则选择列表的第一个作为默认值
+                                if viewModel.categories(for: transaction.type).contains(transaction.category) {
+                                    self.category = transaction.category
+                                } else {
+                                    self.category = viewModel.categories(for: transaction.type).first ?? ""
+                                }
+                                if viewModel.paymentMethods(for: transaction.type).contains(transaction.paymentMethod) {
+                                    self.paymentMethod = transaction.paymentMethod
+                                } else {
+                                    self.paymentMethod = viewModel.paymentMethods(for: transaction.type).first ?? ""
+                                }
                                 self.note = transaction.note
                             }
                         }
@@ -183,10 +210,21 @@ struct TransactionFormView: View {
         amount = ""
         date = Date()
         description = ""
-        category = ""
-        selectedType = .expense
-        paymentMethod = ""
+        selectedType = .expense // 先确定类型，再根据类型设置默认分类和支付方式
+        category = viewModel.categories(for: .expense).first ?? "" 
+        paymentMethod = viewModel.paymentMethods(for: .expense).first ?? ""
         note = ""
+        inputImage = nil // 重置时也清空选择的图片
+    }
+    
+    // 新增方法：加载项目内的测试图片
+    private func loadTestImage(name: String) {
+        if let testImage = UIImage(named: name) {
+            self.inputImage = testImage
+        } else {
+            print("测试图片 \(name) 加载失败")
+            // 可以考虑在这里给用户一些提示，比如弹出一个Alert
+        }
     }
 }
 
