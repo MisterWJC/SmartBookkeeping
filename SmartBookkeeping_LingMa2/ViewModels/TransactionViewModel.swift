@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import CoreData
 
 class TransactionViewModel: ObservableObject {
     // 静态列表数据
@@ -36,7 +37,12 @@ class TransactionViewModel: ObservableObject {
     // 当前月份的统计数据
     private var cancellables = Set<AnyCancellable>()
     
-    init() {
+    private var viewContext: NSManagedObjectContext
+    
+    init(context: NSManagedObjectContext) {
+        self.viewContext = context
+        fetchTransactions()
+        
         // 监听交易数据变化，更新统计信息
         $transactions
             .sink { [weak self] transactions in
@@ -69,7 +75,67 @@ class TransactionViewModel: ObservableObject {
     }
     
     func addTransaction(_ transaction: Transaction) {
-        transactions.append(transaction)
+        let newTransaction = TransactionItem(context: viewContext)
+        newTransaction.id = transaction.id
+        newTransaction.amount = transaction.amount
+        newTransaction.date = transaction.date
+        newTransaction.category = transaction.category
+        newTransaction.desc = transaction.description // 'description' is a reserved keyword
+        newTransaction.type = transaction.type.rawValue
+        newTransaction.paymentMethod = transaction.paymentMethod
+        newTransaction.note = transaction.note
+        
+        saveContext()
+        fetchTransactions() // Refresh the transactions array
+    }
+    
+    private func fetchTransactions() {
+        let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionItem.date, ascending: false)]
+        
+        do {
+            let results = try viewContext.fetch(request)
+            transactions = results.map { entity in
+                Transaction(id: entity.id ?? UUID(),
+                            amount: entity.amount,
+                            date: entity.date ?? Date(),
+                            category: entity.category ?? "",
+                            description: entity.desc ?? "", // Use 'desc' here
+                            type: Transaction.TransactionType(rawValue: entity.type ?? "expense") ?? .expense,
+                            paymentMethod: entity.paymentMethod ?? "",
+                            note: entity.note ?? "")
+            }
+        } catch {
+            print("获取交易数据失败: \(error.localizedDescription)")
+        }
+    }
+    
+    func deleteTransaction(offsets: IndexSet) {
+        offsets.map { transactions[$0] }.forEach { transaction in
+            let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+            request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
+            
+            do {
+                let results = try viewContext.fetch(request)
+                if let entityToDelete = results.first {
+                    viewContext.delete(entityToDelete)
+                }
+            } catch {
+                print("查找要删除的交易失败: \(error.localizedDescription)")
+            }
+        }
+        saveContext()
+        fetchTransactions() // Refresh the transactions array
+    }
+
+    private func saveContext() {
+        do {
+            try viewContext.save()
+            print("保存上下文成功！")
+        } catch {
+            let nsError = error as NSError
+            fatalError("保存上下文未解决的错误 \(nsError), \(nsError.userInfo)")
+        }
     }
     
     func getTransactionTypeDistribution() -> [String: Double] {

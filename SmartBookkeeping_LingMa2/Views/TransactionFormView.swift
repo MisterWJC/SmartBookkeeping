@@ -67,8 +67,9 @@ struct TransactionFormView: View {
                         .labelsHidden()
                 }
                 
-                Section(header: Text("商品类别")) {
+                Section(header: Text("商品明细")) {
                     TextField("例：超市购物/餐饮消费", text: $description)
+                        .keyboardType(.default) // 确保弹出系统默认输入法
                 }
                 
                 Section(header: Text("交易分类")) {
@@ -121,7 +122,7 @@ struct TransactionFormView: View {
                     }
                     .listRowBackground(Color.blue)
                     
-                    Button(action: { dismiss() }) {
+                    Button(action: resetForm) { // 修改action为调用resetForm
                         Text("重置")
                             .frame(maxWidth: .infinity)
                             .foregroundColor(.primary)
@@ -229,6 +230,17 @@ struct TransactionFormView: View {
 }
 
 // 预览
+//#Preview {
+//    TransactionFormView(viewModel: TransactionViewModel())
+//}
+// 预览
 #Preview {
-    TransactionFormView(viewModel: TransactionViewModel())
+    // 1. Get the preview context from your PersistenceController
+    let previewContext = PersistenceController.preview.container.viewContext
+
+    // 2. Create the TransactionViewModel with the context
+    let transactionViewModel = TransactionViewModel(context: previewContext)
+
+    // 3. Pass the initialized viewModel to your TransactionFormView
+    TransactionFormView(viewModel: transactionViewModel)
 }
