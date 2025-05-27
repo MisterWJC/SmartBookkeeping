@@ -9,43 +9,74 @@ import SwiftUI
 
 struct TransactionHistoryView: View {
     @ObservedObject var viewModel: TransactionViewModel // 从外部传入
-    @State private var selectedTimeRange: TimeRange = .currentMonth
+    @State private var selectedTimeRange: TimeRange = .month // 默认按月分组
+    @State private var selectedAccount: String = "全部账户"
+
+    private var allAccounts: [String] {
+        ["全部账户"] + Array(Set(viewModel.transactions.map { $0.paymentMethod }.filter { !$0.isEmpty })).sorted()
+    }
 
     enum TimeRange: String, CaseIterable, Identifiable {
-        case currentMonth = "本月"
-        case lastMonth = "上月"
-        case currentQuarter = "本季度"
-        case currentYear = "本年"
+        case day = "天"
+        case week = "周"
+        case month = "月"
+        case quarter = "季度"
+        case year = "年"
         var id: String { self.rawValue }
     }
 
-    // 根据选择的时间范围筛选和分组交易
+    // 根据选择的时间范围（分组粒度）对所有交易进行分组
     private var filteredAndGroupedTransactions: [Date: [Transaction]] {
         let calendar = Calendar.current
-        let now = Date()
-        var startDate: Date
-        var endDate: Date = now
+        
+        // 使用辅助函数获取分组键
+        func groupKey(for transaction: Transaction, by range: TimeRange) -> Date {
+            let date = transaction.date
+            switch range {
+            case .day:
+                return calendar.startOfDay(for: date)
+            case .week:
+                // 获取当前日期所在周的周一
+                // weekday 1 = Sunday, 2 = Monday, ..., 7 = Saturday. 我们希望周一是每周的开始。
+                let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+                return calendar.date(from: components)! // 这通常返回周日或周一，取决于地区设置
+                                                        // 为了统一为周一，可以进一步调整：
+//                guard let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)) else {
+//                    return calendar.startOfDay(for: date) // fallback
+//                }
+//                let weekday = calendar.component(.weekday, from: startOfWeek)
+//                if calendar.firstWeekday == 1 && weekday == 1 { // Sunday is first day, and current is Sunday
+//                    return calendar.date(byAdding: .day, value: 1, to: startOfWeek) ?? startOfWeek // Move to Monday
+//                } else if calendar.firstWeekday == 2 && weekday == 2 { // Monday is first day, and current is Monday
+//                    return startOfWeek
+//                } else if weekday == 1 { // Sunday, and Monday is not first day
+//                     return calendar.date(byAdding: .day, value: -6, to: startOfWeek) ?? startOfWeek // Should be start of this week's Monday
+//                }
+//                // A more robust way for Monday as start of week
+                var gregorianCalendar = Calendar(identifier: .gregorian)
+                gregorianCalendar.firstWeekday = 2 // Monday
+                return gregorianCalendar.date(from: gregorianCalendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
 
-        switch selectedTimeRange {
-        case .currentMonth:
-            startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
-        case .lastMonth:
-            let firstOfCurrentMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
-            endDate = calendar.date(byAdding: .day, value: -1, to: firstOfCurrentMonth)!
-            startDate = calendar.date(from: calendar.dateComponents([.year, .month], from: endDate))!
-        case .currentQuarter:
-            let quarter = calendar.component(.quarter, from: now)
-            let year = calendar.component(.year, from: now)
-            let firstMonthOfQuarter = (quarter - 1) * 3 + 1
-            startDate = calendar.date(from: DateComponents(year: year, month: firstMonthOfQuarter, day: 1))!
-        case .currentYear:
-            startDate = calendar.date(from: calendar.dateComponents([.year], from: now))!
+            case .month:
+                return calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
+            case .quarter:
+                let quarter = calendar.component(.quarter, from: date)
+                let year = calendar.component(.year, from: date)
+                let firstMonthOfQuarter = (quarter - 1) * 3 + 1
+                return calendar.date(from: DateComponents(year: year, month: firstMonthOfQuarter, day: 1))!
+            case .year:
+                return calendar.date(from: calendar.dateComponents([.year], from: date))!
+            }
         }
         
-        let filtered = viewModel.transactions.filter { $0.date >= startDate && $0.date <= endDate }
-        // 按日期（忽略时间）分组
-        return Dictionary(grouping: filtered) { transaction in
-            calendar.startOfDay(for: transaction.date)
+        // 首先根据账户筛选
+        let accountFilteredTransactions = viewModel.transactions.filter {
+            selectedAccount == "全部账户" || $0.paymentMethod == selectedAccount
+        }
+        
+        // 然后对筛选后的交易进行分组
+        return Dictionary(grouping: accountFilteredTransactions) { transaction in
+            groupKey(for: transaction, by: selectedTimeRange)
         }
     }
     
@@ -70,12 +101,23 @@ struct TransactionHistoryView: View {
             VStack(spacing: 0) {
                 // 顶部概览区域
                 VStack {
-                    Picker("选择时间范围", selection: $selectedTimeRange) {
-                        ForEach(TimeRange.allCases) { range in
-                            Text(range.rawValue).tag(range)
+                    HStack {
+                        Picker("时间范围", selection: $selectedTimeRange) {
+                            ForEach(TimeRange.allCases) { range in
+                                Text(range.rawValue).tag(range)
+                            }
                         }
+                        .pickerStyle(.menu)
+
+                        Picker("账户", selection: $selectedAccount) {
+                            ForEach(allAccounts, id: \.self) { account in
+                                Text(account).tag(account)
+                            }
+                        }
+                        .pickerStyle(.menu)
+
+                        Spacer() // 将选择器推到左边
                     }
-                    .pickerStyle(SegmentedPickerStyle())
                     .padding()
 
                     HStack {
@@ -114,7 +156,8 @@ struct TransactionHistoryView: View {
                         LazyVStack(spacing: 16) {
                             ForEach(sortedDates, id: \.self) { date in
                                 if let transactionsForDate = filteredAndGroupedTransactions[date] {
-                                    DailyTransactionListView(date: date, transactions: transactionsForDate.sorted(by: { $0.date > $1.date }))
+                                    DailyTransactionListView(date: date, transactions: transactionsForDate.sorted(by: { $0.date > $1.date }), timeRange: selectedTimeRange)
+                                        .environmentObject(viewModel) // 注入ViewModel
                                 }
                             }
                         }
@@ -122,16 +165,18 @@ struct TransactionHistoryView: View {
                     }
                 }
                 .background(Color(UIColor.secondarySystemBackground)) // 列表背景色，使其与顶部区域区分
-                .edgesIgnoringSafeArea(.bottom) // 允许列表滚动到底部安全区域
+                // .edgesIgnoringSafeArea(.bottom) // 移除此行以避免与 TabView 重叠
             }
             .navigationTitle("账单明细")
-            .navigationBarItems(trailing: Button(action: {
-                // TODO: 实现日历选择功能
-                print("日历按钮被点击")
-            }) {
-                Image(systemName: "calendar")
-            })
+            // 移除了右上角的日历按钮
         }
+        .onAppear {
+            // 可以在这里加载初始数据或执行其他设置
+        }
+        // 在NavigationView的顶层注入ViewModel，使其对所有子视图可用
+        // 如果DailyTransactionListView是唯一需要它的地方，则在上面直接注入也可以
+        // 但通常在父视图或根视图注入更常见
+        // .environmentObject(viewModel) // 考虑是否在此处注入，或者在SmartBookkeeping_LingMa2App中注入
     }
 }
 

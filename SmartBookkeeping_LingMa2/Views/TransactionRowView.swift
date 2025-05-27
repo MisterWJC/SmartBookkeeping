@@ -26,6 +26,9 @@ struct TransactionRowView: View {
                 Text(transaction.category)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                Text(transaction.date, style: .date) // 占位，将被替换
+                    .font(.footnote)
+                    .foregroundColor(.gray)
             }
 
             Spacer()
@@ -36,6 +39,13 @@ struct TransactionRowView: View {
         }
         .padding(.vertical, 8)
     }
+
+    // 添加一个静态的 DateFormatter 用于显示日期和时间
+    private static let dateTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return formatter
+    }()
 
     // 根据分类返回SF Symbol名称的辅助函数
     // TODO: 需要根据实际的分类名称完善图标映射

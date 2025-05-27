@@ -30,15 +30,16 @@ struct ContentView: View {
                     Label("明细", systemImage: "list.bullet")
                 }
             
-            Text("统计 (待开发)")
+            ChartView(viewModel: transactionViewModel) // 传递 viewModel
                 .tabItem {
                     Label("统计", systemImage: "chart.pie.fill")
                 }
             
-            Text("我的 (待开发)")
+            ProfileView()
                 .tabItem {
                     Label("我的", systemImage: "person.fill")
                 }
+                .environmentObject(transactionViewModel) // 确保 ProfileView 能访问 ViewModel
         }
     }
 }

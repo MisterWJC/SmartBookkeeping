@@ -29,32 +29,6 @@ struct TransactionFormView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("本月统计")) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("本月支出")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("¥\(viewModel.currentMonthExpense, specifier: "%.2f")")
-                                .font(.headline)
-                        }
-                        
-                        Spacer()
-                        
-                        VStack(alignment: .trailing) {
-                            Text("本月收入")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("¥\(viewModel.currentMonthIncome, specifier: "%.2f")")
-                                .font(.headline)
-                        }
-                    }
-                    
-                    // 饼图
-                    ChartView(data: viewModel.getTransactionTypeDistribution())
-                        .frame(height: 200)
-                        .padding(.vertical)
-                }
                 
                 Section(header: Text("金额")) {
                     TextField("请输入金额", text: $amount)
@@ -62,7 +36,7 @@ struct TransactionFormView: View {
                 }
                 
                 Section(header: Text("交易日期")) {
-                    DatePicker("", selection: $date, displayedComponents: [.date])
+                    DatePicker("", selection: $date, displayedComponents: [.date, .hourAndMinute]) // 修改此处
                         .datePickerStyle(CompactDatePickerStyle())
                         .labelsHidden()
                 }
@@ -137,64 +111,96 @@ struct TransactionFormView: View {
                     if viewModel.transactions.isEmpty {
                         Text("暂无账单记录。")
                             .foregroundColor(.secondary)
+                    } else {
+                        List {
+                            ForEach(viewModel.transactions.prefix(3)) { transaction in
+                                TransactionRowView(transaction: transaction)
+                            }
+                        }
+                        .frame(height: 70) // Adjust height as needed
                     }
                 }
             }
             .navigationTitle("智能记账助手")
+            .onTapGesture {
+                hideKeyboard()
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("上传数据") { // 修改按钮文字
-                        showingActionSheet = true // 点击按钮时显示ActionSheet
+                    Button("上传数据") {
+                        showingActionSheet = true
                     }
-                    .actionSheet(isPresented: $showingActionSheet) { // 添加ActionSheet
-                        ActionSheet(title: Text("选择图像来源"), buttons: [
-                            .default(Text("从相册选择")) { showingImagePicker = true },
-                            .default(Text("加载测试图片1 (生活服务)")) { loadTestImage(name: "sample_bill_1.PNG") },
-                            .default(Text("加载测试图片2 (不二君)")) { loadTestImage(name: "sample_bill_2.PNG") },
-                            .cancel()
-                        ])
-                    }
-                    .sheet(isPresented: $showingImagePicker) {
-                        ImagePicker(image: $inputImage)
-                    }
-                    .onChange(of: inputImage) { oldValue, newValue in
-                        guard let selectedImage = newValue else { return }
-                        ocrService.recognizeText(from: selectedImage) { transaction in
-                            if let transaction = transaction {
-                                self.amount = String(format: "%.2f", transaction.amount)
-                                self.date = transaction.date
-                                self.description = transaction.description
-                                self.selectedType = transaction.type // 先更新类型
-                                // 根据OCR识别的类型，从viewModel获取对应的分类和支付方式列表，并尝试匹配
-                                // 如果OCR结果中的分类/支付方式不在对应列表，则选择列表的第一个作为默认值
-                                if viewModel.categories(for: transaction.type).contains(transaction.category) {
-                                    self.category = transaction.category
-                                } else {
-                                    self.category = viewModel.categories(for: transaction.type).first ?? ""
-                                }
-                                if viewModel.paymentMethods(for: transaction.type).contains(transaction.paymentMethod) {
-                                    self.paymentMethod = transaction.paymentMethod
-                                } else {
-                                    self.paymentMethod = viewModel.paymentMethods(for: transaction.type).first ?? ""
-                                }
-                                self.note = transaction.note
-                            }
-                        }
-                    }
-                    .font(.caption)
                 }
             }
+            // 将以下的修饰符从 Button 移到 Form 上
+            .actionSheet(isPresented: $showingActionSheet) {
+                ActionSheet(title: Text("选择图像来源"), buttons: [
+                    .default(Text("从相册选择")) { showingImagePicker = true },
+                    .default(Text("从文件选择器选择")) { showingImagePicker = true }, // 修改了文本以更清晰地表示其功能
+                    .default(Text("加载 alipay_1.jpeg")) { loadTestImage(name: "alipay_1.jpeg") },
+                    .default(Text("加载 alipay_2.png")) { loadTestImage(name: "alipay_2.png") },
+                    .default(Text("加载 alipay_3.PNG")) { loadTestImage(name: "alipay_3.PNG") },
+                    .default(Text("加载 wechat_pay1.jpg")) { loadTestImage(name: "wechat_pay1.jpg") },
+                    .default(Text("加载 wechat_pay2.png")) { loadTestImage(name: "wechat_pay2.png") },
+                    .default(Text("加载 wechat_pay3.PNG")) { loadTestImage(name: "wechat_pay3.PNG") },
+                    .default(Text("加载 yunshanfu1.jpg")) { loadTestImage(name: "yunshanfu1.jpg") },
+                    .default(Text("加载 yunshanfu2.png")) { loadTestImage(name: "yunshanfu2.png") },
+                    .cancel()
+                ])
+            }
+            .sheet(isPresented: $showingImagePicker) {
+                ImagePicker(image: $inputImage)
+            }
+            .onChange(of: inputImage) { oldValue, newValue in
+                guard let selectedImage = newValue else { return }
+                ocrService.recognizeText(from: selectedImage) { transaction in
+                    if let transaction = transaction {
+                        self.amount = String(format: "%.2f", transaction.amount)
+                        self.date = transaction.date
+                        self.description = transaction.description
+                        self.selectedType = .expense // 强制设置为支出类型
+                        // 根据OCR识别的类型（此处已强制为支出），从viewModel获取对应的分类和支付方式列表，并尝试匹配
+                        // 如果OCR结果中的分类不在对应列表，则设置为“未分类”
+                        if viewModel.categories(for: .expense).contains(transaction.category) {
+                            self.category = transaction.category
+                        } else {
+                            self.category = "未分类"
+                        }
+                        // 如果OCR结果中的支付方式不在对应列表，则设置为“未知”或列表第一个
+                        if viewModel.paymentMethods(for: .expense).contains(transaction.paymentMethod) {
+                            self.paymentMethod = transaction.paymentMethod
+                        } else {
+                            self.paymentMethod = viewModel.paymentMethods(for: .expense).first ?? "未知"
+                        }
+                        self.note = transaction.note
+                    }
+                }
+            }
+            //.font(.caption)
         }
     }
-    
+
     private func saveTransaction() {
-        guard let amountValue = Double(amount), amountValue > 0 else {
+        guard let rawAmountValue = Double(amount) else { // 先确保能转换为Double
+            // 金额无效，可以考虑给用户提示
+            print("无效的金额输入")
+            return
+        }
+        
+        // 根据交易类型调整金额的符号，支出为负，收入为正
+        // 或者，更常见的做法是，金额始终为正，通过交易类型（支出/收入）来区分
+        // 这里我们采用金额始终为正，由type区分的策略
+        let amountValue = abs(rawAmountValue) // 取绝对值
+
+        // 检查金额是否大于0，因为金额不能为0或负数（在已取绝对值的情况下）
+        guard amountValue > 0 else {
+            print("金额必须大于0")
             return
         }
         
         let transaction = Transaction(
-            amount: amountValue,
+            amount: amountValue, // 保存绝对值金额
             date: date,
             category: category.isEmpty ? "未分类" : category,
             description: description,
@@ -227,13 +233,12 @@ struct TransactionFormView: View {
             // 可以考虑在这里给用户一些提示，比如弹出一个Alert
         }
     }
+
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 }
 
-// 预览
-//#Preview {
-//    TransactionFormView(viewModel: TransactionViewModel())
-//}
-// 预览
 #Preview {
     // 1. Get the preview context from your PersistenceController
     let previewContext = PersistenceController.preview.container.viewContext

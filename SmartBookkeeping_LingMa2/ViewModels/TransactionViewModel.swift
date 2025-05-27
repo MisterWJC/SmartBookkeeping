@@ -41,14 +41,14 @@ class TransactionViewModel: ObservableObject {
     
     init(context: NSManagedObjectContext) {
         self.viewContext = context
-        fetchTransactions()
-        
         // 监听交易数据变化，更新统计信息
         $transactions
             .sink { [weak self] transactions in
                 self?.updateStatistics(with: transactions)
             }
             .store(in: &cancellables)
+        
+        fetchTransactions() // 初始化时获取一次数据
     }
     
     func updateStatistics(with transactions: [Transaction]) {
@@ -86,7 +86,19 @@ class TransactionViewModel: ObservableObject {
         newTransaction.note = transaction.note
         
         saveContext()
-        fetchTransactions() // Refresh the transactions array
+        // 将新创建的 Transaction 对象添加到 transactions 数组的开头，以便立即在UI上反映
+        let newDisplayTransaction = Transaction(
+            id: newTransaction.id ?? UUID(),
+            amount: newTransaction.amount,
+            date: newTransaction.date ?? Date(),
+            category: newTransaction.category ?? "",
+            description: newTransaction.desc ?? "",
+            type: Transaction.TransactionType(rawValue: newTransaction.type ?? "expense") ?? .expense,
+            paymentMethod: newTransaction.paymentMethod ?? "",
+            note: newTransaction.note ?? ""
+        )
+        // transactions.insert(newDisplayTransaction, at: 0) // 直接插入可能无法正确触发依赖此数组的视图更新
+        fetchTransactions() // 重新获取数据以确保视图正确刷新
     }
     
     private func fetchTransactions() {
@@ -110,22 +122,34 @@ class TransactionViewModel: ObservableObject {
         }
     }
     
-    func deleteTransaction(offsets: IndexSet) {
-        offsets.map { transactions[$0] }.forEach { transaction in
-            let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
-            request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
-            
-            do {
-                let results = try viewContext.fetch(request)
-                if let entityToDelete = results.first {
-                    viewContext.delete(entityToDelete)
-                }
-            } catch {
-                print("查找要删除的交易失败: \(error.localizedDescription)")
+    // 修改 deleteTransaction 方法以接受 Transaction 对象
+    func deleteTransaction(transaction: Transaction) {
+        let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+        // 使用 transaction.id 来查找要删除的 TransactionItem
+        request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
+        
+        do {
+            let results = try viewContext.fetch(request)
+            if let entityToDelete = results.first {
+                viewContext.delete(entityToDelete)
+                saveContext()
+                fetchTransactions() // 删除后刷新列表
+            } else {
+                print("未找到要删除的交易，ID: \(transaction.id)")
             }
+        } catch {
+            print("删除交易失败: \(error.localizedDescription)")
         }
-        saveContext()
-        fetchTransactions() // Refresh the transactions array
+    }
+
+    // 保留旧的 deleteTransaction(offsets: IndexSet) 方法，以防其他地方仍在使用
+    // 或者根据实际情况决定是否移除或重构
+    func deleteTransaction(offsets: IndexSet) {
+        offsets.map { transactions[$0] }.forEach { transactionToDelete in
+            // 调用新的删除方法
+            deleteTransaction(transaction: transactionToDelete)
+        }
+        // 注意：saveContext() 和 fetchTransactions() 已经在新的 deleteTransaction(transaction:) 中调用
     }
 
     private func saveContext() {
@@ -138,18 +162,45 @@ class TransactionViewModel: ObservableObject {
         }
     }
     
-    func getTransactionTypeDistribution() -> [String: Double] {
+    func getTransactionTypeDistribution(forMonth: String? = nil) -> [String: Double] {
         var distribution: [String: Double] = [
             "收入": 0,
             "支出": 0,
-            "转账": 0,
+            // "转账": 0, // 根据实际需求决定是否包含转账
             // "投资": 0
         ]
         
-        for transaction in transactions {
-            distribution[transaction.type.rawValue]? += transaction.amount
+        let filteredTransactions: [Transaction]
+        if let month = forMonth, month != "全部月份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年MM月"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == month
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        
+        for transaction in filteredTransactions {
+            if transaction.type == .income {
+                distribution["收入"]? += transaction.amount
+            } else if transaction.type == .expense {
+                distribution["支出"]? += transaction.amount
+            }
+            // 根据需要添加对转账和投资的处理
         }
         
         return distribution
+    }
+    
+    func getAllMonths() -> [String] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy年MM月"
+        dateFormatter.locale = Locale(identifier: "zh_CN")
+        
+        let months = Set(transactions.map { dateFormatter.string(from: $0.date) })
+        return ["全部月份"] + Array(months).sorted().reversed() // reversed() 使最近的月份在前
     }
 }
