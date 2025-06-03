@@ -7,6 +7,7 @@
 
 import UIKit
 import Social
+import MobileCoreServices
 
 class ShareViewController: SLComposeServiceViewController {
 
@@ -27,4 +28,59 @@ class ShareViewController: SLComposeServiceViewController {
         return []
     }
 
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        handleIncomingImage()
+    }
+
+    private func handleIncomingImage() {
+        guard let extensionItem = extensionContext?.inputItems.first as? NSExtensionItem,
+              let attachments = extensionItem.attachments else {
+            self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+            return
+        }
+
+        for provider in attachments {
+            if provider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
+                provider.loadItem(forTypeIdentifier: kUTTypeImage as String, options: nil) { (item, error) in
+                    if let url = item as? URL, let imageData = try? Data(contentsOf: url) {
+                        // 1. 保存图片到 App Group
+                        self.saveImageToAppGroup(imageData: imageData)
+                        // 2. 唤起主 App
+                        self.openMainApp()
+                    } else if let image = item as? UIImage, let imageData = image.pngData() {
+                        self.saveImageToAppGroup(imageData: imageData)
+                        self.openMainApp()
+                    } else {
+                        print("无法获取图片数据")
+                    }
+                    // 3. 关闭扩展
+                    self.extensionContext?.completeRequest(returningItems: [], completionHandler: nil)
+                }
+                break
+            }
+        }
+    }
+
+    private func saveImageToAppGroup(imageData: Data) {
+        // 你的 App Group Identifier
+        let appGroupID = "group.com.yourcompany.smartbookkeeping"
+        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
+            let fileURL = containerURL.appendingPathComponent("shared_image.png")
+            try? imageData.write(to: fileURL)
+        }
+    }
+
+    private func openMainApp() {
+        // 用 URL Scheme 唤起主 App
+        let url = URL(string: "smartbookkeeping://fromShareExtension")!
+        var responder = self as UIResponder?
+        while responder != nil {
+            if let application = responder as? UIApplication {
+                application.performSelector(onMainThread: Selector(("openURL:")), with: url, waitUntilDone: false)
+                break
+            }
+            responder = responder?.next
+        }
+    }
 }
