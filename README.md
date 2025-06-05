@@ -26,7 +26,7 @@ This is an iOS app for smart bookkeeping. It helps users track their expenses an
 
 - **UI Designs and Demo Video:** You can find the UI documentation and a demo video for the product MVP in the `SmartBookkeeping-PRD/Presentations/` directory.
     - [SmartBookkeeping_MVP.pdf](./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP.pdf)
-    - <video controls width="600">
-        <source src="./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4" type="video/mp4">
-        Your browser does not support the video tag. Please download the video <a href="./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4">here</a>.
+    - <video src="
+https://github.com/MisterWJC/SmartBookkeeping/raw/refs/heads/v0.1.0_zhipu/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4" controls width="600">
+        Your browser does not support the video tag. You can download the video from [this link](./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4).
       </video>
