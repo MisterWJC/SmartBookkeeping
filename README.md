@@ -24,9 +24,9 @@ This is an iOS app for smart bookkeeping. It helps users track their expenses an
 
 ## Product MVP
 
-- **UI Designs and Demo Video:** You can find the UI documentation and a demo video for the product MVP in the `/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/` directory.
-    - [SmartBookkeeping_MVP.pdf](/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP.pdf)
+- **UI Designs and Demo Video:** You can find the UI documentation and a demo video for the product MVP in the `SmartBookkeeping-PRD/Presentations/` directory.
+    - [SmartBookkeeping_MVP.pdf](./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP.pdf)
     - <video controls width="600">
-        <source src="/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4" type="video/mp4">
-        Your browser does not support the video tag. Please download the video <a href="/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4">here</a>.
+        <source src="./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4" type="video/mp4">
+        Your browser does not support the video tag. Please download the video <a href="./SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4">here</a>.
       </video>
