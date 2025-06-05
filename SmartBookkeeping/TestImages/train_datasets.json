@@ -1,0 +1,352 @@
+[
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "20:071\n#H 4G\n完成\n支付成功\n¥10.90\n阮家拌面\n天天返活动红包\n交易方式\n¥11.00\n-¥0.10\n花呗\n目 点击给商家对账\n支付有福利\n庄园小鸡\n支付宝红1\n反馈与投诉\n去使用\n肥料\n1000g 芭芭农场肥料\n领取后前往任务列表查看\n1个 随机海洋伙伴拼图\n神奇海洋 前往任务列表收取\n立即领\n免费领\n4 设置提醒，更多福利不错过\n提醒我\n完成"},
+        {"role": "assistant", "content": "{\"amount\": 10.90, \"transaction_time\": \"\", \"item_description\": \"阮家拌面\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"支付成功。原价¥11.00, 天天返活动红包-¥0.10。屏幕显示时间20:07。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "12:39\n\"分份\n<\n账单详情\n管理自动扣款\n支付时间\n付款方式\n收款方全称\n哈啰出行\n-1.50\n自动扣款成功\n骑行费用免密支付\n2023-05-19 18:48:09\n余额宝＞\n上海哈啰普惠科技有限公司\n更多\n订单详情\n订单已完成\n2023-05-19 18:45 单车\n骑行2分30秒\n账单管理\n账单分类\n标签和备注\n交通出行＞\n添加＞\n联系商家\n臼 往来流水证明\n③ 对此订单有疑问\n园 查看往来记录\n28 进入生活号\n① 投诉"},
+        {"role": "assistant", "content": "{\"amount\": 1.50, \"transaction_time\": \"2023年05月19日 18:48:09\", \"item_description\": \"哈啰出行单车骑行\", \"category\": \"车辆交通\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"自动扣款成功，骑行费用免密支付。收款方: 上海哈啰普惠科技有限公司。订单详情: 2023-05-19 18:45 单车，骑行2分30秒。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "23:59 1\n＜记账详情\n：砂100\n••◎\n记录时间\n来源\n账户\n备注\n①\n生活服务\n-16.50\n2025年05月22日 18:33:25\n账单同步\n招商银行（0847）\n樟荣沙县小吃（上海浦东上南\n路店）-美团App-2505221110\n0300001308775585172399\n支出\n收支类型\n所属账本\n标签\n照片\nL\n总账本\n删除\n编辑"},
+        {"role": "assistant", "content": "{\"amount\": 16.50, \"transaction_time\": \"2025年05月22日 18:33:25\", \"item_description\": \"樟荣沙县小吃（上海浦东上南路店）\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"招商银行卡\", \"notes\": \"来源: 账单同步。备注: 美团App-25052211100300001308775585172399。App内分类: 生活服务。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "识别结果：4:37\n• 唯品会\n.今0\n• 支付成功\n唯品会\n唯品会＞\n¥36.90\n返回商家"},
+        {"role": "assistant", "content": "{\"amount\": 36.90, \"transaction_time\": \"\", \"item_description\": \"唯品会\", \"category\": \"服装饰品\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"支付成功。屏幕显示时间4:37。付款方式未在OCR结果中提供。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "12:40\n搜索\nX\n当前状态\n支付时间\n商品\n商户全称\n收单机构\n支付方式\n交易单号\n商户单号\n商家小程序\n账单服务\n•星巴克咖啡服务。\n星轩餐饮\n-14.00\n支付成功\n2023年5月16日 12:55:21\n冰拿铁咖啡\n广州星轩餐饮有限公司\n财付通支付科技有限公司\n招商银行信用卡（1440）\n由网联清算有限公司提供付款清算服\n务\n4200001880202305164227146245\n2023051612551128665014360T1\nJ We Proudly Serve＞\n<\n>"},
+        {"role": "assistant", "content": "{\"amount\": 14.00, \"transaction_time\": \"2023年05月16日 12:55:21\", \"item_description\": \"冰拿铁咖啡 (星巴克咖啡服务)\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"支付成功。商户全称: 广州星轩餐饮有限公司。收单机构: 财付通支付科技有限公司。交易单号: 4200001880202305164227146245。商户单号: 2023051612551128665014360T1。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "00:00\n100\n×\n不二君（世博天地店）\n-3.00\n当前状态\n支付时间\n商品\n商户全称\n收单机构\n支付方式\n交易单号\n商户单号\n支付成功\n2025年5月17日 14:00:23\n不二君（世博天地店）\n上海函达餐饮管理有限公司\n乐刷支付科技有限公司\n由中国银联股份有限公司提供收款清算服务\n零钱通 ①\n4200002737202505173421161566\n可在支持的商户扫码退款\n1000732143625137\n账单服务\n对订单有疑惑\n目 在此商户的交易\n园 发起群收款"},
+        {"role": "assistant", "content": "{\"amount\": 3.00, \"transaction_time\": \"2025年05月17日 14:00:23\", \"item_description\": \"不二君（世博天地店）\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"支付成功。商户全称: 上海函达餐饮管理有限公司。收单机构: 乐刷支付科技有限公司。交易单号: 4200002737202505173421161566。商户单号: 1000732143625137。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "◎ 支付成功\n完成\n¥0.00\n¥22.95\n美好生活365-大天享U惠\n订单信息\n付款方式\n- ¥22.95\n美团\n招商银行银联信用卡\n优酷广告特权卡免费领\n去领取，\n广告\nYOUKU>\n优酷视频\n广告特权卡\n点击跳转至第三方服务\n蟷30元\n大家乐66卡6.6元购\n去查看\n寻福集福珠\n抽万元红包\n去查看，\ni百联薅羊毛\n低至3.9元起\n去查看，\nAOYAINGMAO\nAPO YANGHAD\n司号：180609283|\n"},
+        {"role": "assistant", "content": "{\"amount\": 22.95, \"transaction_time\": \"\", \"item_description\": \"美好生活365-大天享U惠\", \"category\": \"日用百货\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"支付成功。通过美团支付。司号：180609283。OCR文本包含''。交易时间未在OCR结果中提供。\"}"}
+      ]
+    },
+    {
+      "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "12:54\n<\n账单详情\n京东商城平台商户\n-¥500.00\n当前状态\n订单金额\n付款方式\n订单时间\n订单编号\n商户订单号\n交易成功\n¥500.00\n招商银行银联信用卡\n2023年6月9日 00:09:48\n742519806978285758217\n19892792306090009480759230\n206"},
+        {"role": "assistant", "content": "{\"amount\": 500.00, \"transaction_time\": \"2023年06月09日 00:09:48\", \"item_description\": \"京东商城平台商户\", \"category\": \"日用百货\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"交易成功。订单金额: ¥500.00。订单编号: 742519806978285758217。商户订单号: 19892792306090009480759230206。\"}"}
+      ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "订单完成\n星光影城\n电影票 - 《深空任务》\n金额：¥98.00 (2张)\n支付方式：微信支付\n时间：2024/05/15 19:30\n订单号：XZ2024051578932"},
+        {"role": "assistant", "content": "{\"amount\": 98.00, \"transaction_time\": \"2024年05月15日 19:30:00\", \"item_description\": \"星光影城 电影票 - 《深空任务》 (2张)\", \"category\": \"娱乐休闲\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"订单号：XZ2024051578932\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "麦当劳（五道口店）\n消费：35.50元\n商品：麦辣鸡腿堡套餐\n支付时间 2024年05月16日 12:15:33\n付款：支付宝-花呗\n流水：ALIPAY2024051600123"},
+        {"role": "assistant", "content": "{\"amount\": 35.50, \"transaction_time\": \"2024年05月16日 12:15:33\", \"item_description\": \"麦当劳（五道口店）- 麦辣鸡腿堡套餐\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"流水：ALIPAY2024051600123\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "滴滴出行\n快车服务\n金额：28.70元\n2024.05.16 09:05 AM\n上车：中关村软件园\n下车：西二旗地铁站\n付款：招商银行信用卡(尾号8822)"},
+        {"role": "assistant", "content": "{\"amount\": 28.70, \"transaction_time\": \"2024年05月16日 09:05:00\", \"item_description\": \"滴滴出行 快车 (中关村软件园 - 西二旗地铁站)\", \"category\": \"车辆交通\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "北京地铁\n票价：4.00\n入站：大望路\n时间：2024-05-17 08:33:12\n支付：一卡通余额"},
+        {"role": "assistant", "content": "{\"amount\": 4.00, \"transaction_time\": \"2024年05月17日 08:33:12\", \"item_description\": \"北京地铁 (入站：大望路)\", \"category\": \"车辆交通\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "7-ELEVEN便利店\n商品：三明治，咖啡\n总计：18.5元\n交易时间：2024/05/17 07:45\n方式：Apple Pay (建行储蓄卡)"},
+        {"role": "assistant", "content": "{\"amount\": 18.50, \"transaction_time\": \"2024年05月17日 07:45:00\", \"item_description\": \"7-ELEVEN便利店：三明治，咖啡\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "猫眼电影\n《疯狂动物城2》预售\n1张 - 68.00 CNY\n2024年05月18日 10:02:56\n支付账户：支付宝余额"},
+        {"role": "assistant", "content": "{\"amount\": 68.00, \"transaction_time\": \"2024年05月18日 10:02:56\", \"item_description\": \"猫眼电影 - 《疯狂动物城2》预售票 (1张)\", \"category\": \"娱乐休闲\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "海底捞（西直门店）\n消费金额：¥256.00\n支付成功\n时间：2024-05-18 18:55:03\n付款：美团支付 (绑定工行信用卡)"},
+        {"role": "assistant", "content": "{\"amount\": 256.00, \"transaction_time\": \"2024年05月18日 18:55:03\", \"item_description\": \"海底捞（西直门店）\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"支付成功\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "公交集团\n线路：300路快\n费用：2.00元\n刷卡时间：2024.05.19 09:12\n卡号：**** **** **** 1234 (市政一卡通)"},
+        {"role": "assistant", "content": "{\"amount\": 2.00, \"transaction_time\": \"2024年05月19日 09:12:00\", \"item_description\": \"公交300路快\", \"category\": \"车辆交通\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"卡号尾号1234\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "网易云音乐\n黑胶VIP会员自动续费\n¥15.00\n扣款日期：2024-05-20\n支付方式：微信零钱"},
+        {"role": "assistant", "content": "{\"amount\": 15.00, \"transaction_time\": \"2024年05月20日 00:00:00\", \"item_description\": \"网易云音乐 黑胶VIP会员自动续费\", \"category\": \"娱乐休闲\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"具体扣款时间未提供，默认为当天开始。\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "美团外卖\n商家：肯德基宅急送（清河店）\n商品：香辣鸡腿堡，薯条（中）\n总价：¥42.50\n支付：2024年05月20日 18:30 通过支付宝"},
+        {"role": "assistant", "content": "{\"amount\": 42.50, \"transaction_time\": \"2024年05月20日 18:30:00\", \"item_description\": \"美团外卖 - 肯德基宅急送（清河店）：香辣鸡腿堡，薯条（中）\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "中国移动\n话费充值：100元\n充值时间：2024.05.21 10:00\n支付渠道：招商银行App"},
+        {"role": "assistant", "content": "{\"amount\": 100.00, \"transaction_time\": \"2024年05月21日 10:00:00\", \"item_description\": \"中国移动 话费充值\", \"category\": \"充值缴费\", \"transaction_type\": \"支出\", \"payment_method\": \"招商银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "亚马逊购物\nKindle电子书 - 《三体全集》\n价格：¥58.00\n2024/05/22 14:20:15\n付款：中信银行信用卡"},
+        {"role": "assistant", "content": "{\"amount\": 58.00, \"transaction_time\": \"2024年05月22日 14:20:15\", \"item_description\": \"亚马逊购物 Kindle电子书 - 《三体全集》\", \"category\": \"自我提升\", \"transaction_type\": \"支出\", \"payment_method\": \"中信银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "收到转账\n来自：张三\n金额：500.00元\n时间：2024-05-23 09:00\n方式：支付宝好友转账"},
+        {"role": "assistant", "content": "{\"amount\": 500.00, \"transaction_time\": \"2024年05月23日 09:00:00\", \"item_description\": \"收到张三转账\", \"category\": \"红包礼金\", \"transaction_type\": \"收入\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "工资收入\n公司：ABC科技有限公司\n数额：¥12000.00\n日期：2024/05/10 (已到账)\n银行：招商银行"},
+        {"role": "assistant", "content": "{\"amount\": 12000.00, \"transaction_time\": \"2024年05月10日 00:00:00\", \"item_description\": \"工资收入 - ABC科技有限公司\", \"category\": \"主业收入\", \"transaction_type\": \"收入\", \"payment_method\": \"招商银行卡\", \"notes\": \"具体到账时间未提供，默认为当天开始。\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "股票投资收益\n代码：000001 (平安银行)\n盈利：850.75元\n日期：2024-05-24\n券商：华泰证券"},
+        {"role": "assistant", "content": "{\"amount\": 850.75, \"transaction_time\": \"2024年05月24日 00:00:00\", \"item_description\": \"股票投资收益 - 000001 (平安银行)\", \"category\": \"投资理财\", \"transaction_type\": \"收入\", \"payment_method\": \"支付宝\", \"notes\": \"券商：华泰证券。具体入账时间未提供，默认为当天开始。支付方式未明确，暂定为支付宝。\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "国家大剧院\n演出票：话剧《茶馆》\n金额：¥380.00\n2024.05.23 14:00 (购票时间)\n支付宝扫码支付"},
+        {"role": "assistant", "content": "{\"amount\": 380.00, \"transaction_time\": \"2024年05月23日 14:00:00\", \"item_description\": \"国家大剧院 话剧《茶馆》演出票\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"购票时间\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "哈啰单车\n骑行30分钟\n费用：1.50元\n2024-05-24 18:15:30\n自动扣款-支付宝"},
+        {"role": "assistant", "content": "{\"amount\": 1.50, \"transaction_time\": \"2024年05月24日 18:15:30\", \"item_description\": \"哈啰单车骑行30分钟\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"自动扣款\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "小吊梨汤（团结湖店）\n晚餐消费\n合计：188元\n付款时间：2024/05/24 20:30:00\n支付方式：中信银行信用卡"},
+        {"role": "assistant", "content": "{\"amount\": 188.00, \"transaction_time\": \"2024年05月24日 20:30:00\", \"item_description\": \"小吊梨汤（团结湖店）晚餐\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"中信银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "北京公交\n乘车扫码\n金额：-1.00 (优惠后)\n2024年05月25日 07:50:12\n亿通行App（支付宝渠道）"},
+        {"role": "assistant", "content": "{\"amount\": 1.00, \"transaction_time\": \"2024年05月25日 07:50:12\", \"item_description\": \"北京公交乘车\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"优惠后金额\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "Steam游戏平台\n游戏：《心灵杀手2》\n价格：138.00 CNY\n购买日期：2024-05-25\n支付：招商信用卡"},
+        {"role": "assistant", "content": "{\"amount\": 138.00, \"transaction_time\": \"2024年05月25日 00:00:00\", \"item_description\": \"Steam游戏：《心灵杀手2》\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"具体购买时间未详，按日期记录\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "美团外卖\n商家：田老师红烧肉\n餐品：红烧肉套餐\n金额：25.8元\n2024/05/26 12:33 PM\n支付：支付宝"},
+        {"role": "assistant", "content": "{\"amount\": 25.80, \"transaction_time\": \"2024年05月26日 12:33:00\", \"item_description\": \"美团外卖 - 田老师红烧肉 (红烧肉套餐)\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "首汽约车\n舒适型轿车\n金额：78.00\n2024-05-26 19:00 (预计出发)\n付款：微信支付\n订单号：SQYC202405269981"},
+        {"role": "assistant", "content": "{\"amount\": 78.00, \"transaction_time\": \"2024年05月26日 19:00:00\", \"item_description\": \"首汽约车 (舒适型)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"订单号：SQYC202405269981，时间为预计出发时间\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "KTV欢唱\n果盘、啤酒等\n消费总额：¥358\n时间：2024年05月27日 23:10:22\n支付：朋友代付后转账 (支付宝)"},
+        {"role": "assistant", "content": "{\"amount\": 358.00, \"transaction_time\": \"2024年05月27日 23:10:22\", \"item_description\": \"KTV消费 (果盘、啤酒等)\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"朋友代付后转账\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "全家FamilyMart\n饭团 x2, 酸奶 x1\n15.00元\n2024-05-28 08:00:05\n会员码支付（绑定支付宝）"},
+        {"role": "assistant", "content": "{\"amount\": 15.00, \"transaction_time\": \"2024年05月28日 08:00:05\", \"item_description\": \"全家FamilyMart (饭团x2, 酸奶x1)\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"会员码支付\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "滴滴顺风车\n行程：国贸 - 通州万达\n费用：35.0元\n2024/05/28 18:30\n支付方式：交通银行卡"},
+        {"role": "assistant", "content": "{\"amount\": 35.00, \"transaction_time\": \"2024年05月28日 18:30:00\", \"item_description\": \"滴滴顺风车 (国贸 - 通州万达)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"交通银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "上海地铁\n10号线 交通大学-南京东路\n票款：3元\n2024年05月29日 10:11:45\n支付方式：交通银行卡"},
+        {"role": "assistant", "content": "{\"amount\": 3.00, \"transaction_time\": \"2024年05月29日 10:11:45\", \"item_description\": \"上海地铁10号线 (交通大学-南京东路)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"交通银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "Bilibili大会员\n连续包月服务\n12.00 CNY (优惠价)\n扣款时间：2024-05-29\n付款：招行信用卡自动扣费"},
+        {"role": "assistant", "content": "{\"amount\": 12.00, \"transaction_time\": \"2024年05月29日 00:00:00\", \"item_description\": \"Bilibili大会员连续包月\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"招商信用卡\", \"notes\": \"优惠价，具体扣款时间未详，按日期记录\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "吉野家（中关村店）\n大份牛肉饭\n28元\n时间 2024/05/30 12:45:02\n微信扫码点餐"},
+        {"role": "assistant", "content": "{\"amount\": 28.00, \"transaction_time\": \"2024年05月30日 12:45:02\", \"item_description\": \"吉野家（中关村店）- 大份牛肉饭\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"扫码点餐\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "机场快轨\n东直门 - T3航站楼\n¥25.00\n2024-05-30 15:03:11\n线下购票 (现金)"},
+        {"role": "assistant", "content": "{\"amount\": 25.00, \"transaction_time\": \"2024年05月30日 15:03:11\", \"item_description\": \"机场快轨 (东直门 - T3航站楼)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"现金\", \"notes\": \"线下购票\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "西少爷肉夹馍\n经典肉夹馍+酸梅汤\n消费：22元\n2024/05/31 19:00\n支付宝付款"},
+        {"role": "assistant", "content": "{\"amount\": 22.00, \"transaction_time\": \"2024年05月31日 19:00:00\", \"item_description\": \"西少爷肉夹馍 (经典肉夹馍+酸梅汤)\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "北京出租车\n费用：45.00 (含燃油附加费)\n日期：2024年06月01日 时间：10:30\n付款：微信支付"},
+        {"role": "assistant", "content": "{\"amount\": 45.00, \"transaction_time\": \"2024年06月01日 10:30:00\", \"item_description\": \"北京出租车\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"含燃油附加费\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "密室逃脱 - 迷城主题\n4人套票优惠价 ￥480\n平摊费用：120元/人\n2024-06-01 15:45:20\n组织者统一付款后AA (微信转账)"},
+        {"role": "assistant", "content": "{\"amount\": 120.00, \"transaction_time\": \"2024年06月01日 15:45:20\", \"item_description\": \"密室逃脱 - 迷城主题 (AA费用)\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"4人套票480元，个人平摊费用。\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "巴黎贝甜\n商品：牛奶吐司，羊角包\n金额：32.00 元\n交易时间：2024年06月02日 09:00:15\n支付：浦发银行信用卡"},
+        {"role": "assistant", "content": "{\"amount\": 32.00, \"transaction_time\": \"2024年06月02日 09:00:15\", \"item_description\": \"巴黎贝甜 (牛奶吐司，羊角包)\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"浦发信用卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "青桔单车月卡\n25元连续包月\n自动续费成功 2024.06.03\n付款账户：支付宝"},
+        {"role": "assistant", "content": "{\"amount\": 25.00, \"transaction_time\": \"2024年06月03日 00:00:00\", \"item_description\": \"青桔单车月卡 (连续包月)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"自动续费，具体时间未详，按日期记录\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "奈雪的茶（朝阳大悦城店）\n霸气芝士草莓，一口欧包\n总计：55.00\n2024-06-03 16:20:45\n会员小程序支付（微信）"},
+        {"role": "assistant", "content": "{\"amount\": 55.00, \"transaction_time\": \"2024年06月03日 16:20:45\", \"item_description\": \"奈雪的茶（朝阳大悦城店）- 霸气芝士草莓，一口欧包\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"会员小程序支付\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "大麦网\n周杰伦嘉年华演唱会北京站\n门票：看台580元区\n抢票成功 2024/06/04 10:00 AM\n付款：支付宝-花呗分期"},
+        {"role": "assistant", "content": "{\"amount\": 580.00, \"transaction_time\": \"2024年06月04日 10:00:00\", \"item_description\": \"大麦网 - 周杰伦嘉年华演唱会北京站门票 (看台580元区)\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"抢票成功\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "首都机场T2出租车\n费用：123.00元 (夜间+高速费)\n支付时间：2024年06月05日 01:30:55\n付款：交通银行信用卡"},
+        {"role": "assistant", "content": "{\"amount\": 123.00, \"transaction_time\": \"2024年06月05日 01:30:55\", \"item_description\": \"首都机场T2出租车\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \"交通信用卡\", \"notes\": \"夜间+高速费\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "和合谷（望京店）\n宫保鸡丁饭套餐\n26.00\n2024-06-05 12:55\n微信支付（龙支付优惠-2元）"},
+        {"role": "assistant", "content": "{\"amount\": 26.00, \"transaction_time\": \"2024年06月05日 12:55:00\", \"item_description\": \"和合谷（望京店）- 宫保鸡丁饭套餐\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"龙支付优惠减2元，实际支付24元，记录订单金额26元\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "腾讯视频VIP\n超级影视VIP包年\n¥238.00 (活动价)\n2024.06.06\n微信零钱通"},
+        {"role": "assistant", "content": "{\"amount\": 238.00, \"transaction_time\": \"2024年06月06日 00:00:00\", \"item_description\": \"腾讯视频 超级影视VIP包年\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"微信\", \"notes\": \"活动价，具体购买时间未详，按日期记录\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "地铁1号线苹果园-国贸\n票价：5元\n支付时间：2024-06-07 07:58:02\n支付方式：交通银行卡（6704）"},
+        {"role": "assistant", "content": "{\"amount\": 5.00, \"transaction_time\": \"2024年06月07日 07:58:02\", \"item_description\": \"地铁1号线 (苹果园-国贸)\", \"category\": \"交通出行\", \"transaction_type\": \"支出\", \"payment_method\": \" 交通银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "呷哺呷哺（西单店）\n双人套餐 + 肥牛一份\n共消费：158元\n2024年06月07日 19:22:10\n建设银行储蓄卡刷卡"},
+        {"role": "assistant", "content": "{\"amount\": 158.00, \"transaction_time\": \"2024年06月07日 19:22:10\", \"item_description\": \"呷哺呷哺（西单店）- 双人套餐 + 肥牛一份\", \"category\": \"餐饮美食\", \"transaction_type\": \"支出\", \"payment_method\": \"建设银行卡\", \"notes\": \"\"}"}
+        ]
+    },
+    {
+        "messages": [
+        {"role": "system", "content": "你是一个智能记账助手，你需要从用户提供的账单文本中提取关键的记账信息，并以JSON格式返回。提取的字段包括：amount (金额，数字类型), transaction_time (交易时间，格式YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。"},
+        {"role": "user", "content": "优酷VIP会员\n黄金会员 月卡\n￥20.00\n购买日期：2024.06.08\n支付宝快捷支付"},
+        {"role": "assistant", "content": "{\"amount\": 20.00, \"transaction_time\": \"2024年06月08日 00:00:00\", \"item_description\": \"优酷VIP黄金会员月卡\", \"category\": \"休闲娱乐\", \"transaction_type\": \"支出\", \"payment_method\": \"支付宝\", \"notes\": \"具体购买时间未详，按日期记录\"}"}
+        ]
+    }
+]
