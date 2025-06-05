@@ -21,3 +21,9 @@ This is an iOS app for smart bookkeeping. It helps users track their expenses an
 *   SwiftUI
 *   Core Data
 *   Vision (for OCR)
+
+## Product MVP
+
+- **UI Designs and Demo Video:** You can find the UI documentation and a demo video for the product MVP in the `/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/` directory.
+    - [SmartBookkeeping_MVP.pdf](/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP.pdf)
+    - [SmartBookkeeping_MVP_Demo.mp4](/Users/jasonwang/Desktop/SmartBookkeeping/SmartBookkeeping-PRD/Presentations/SmartBookkeeping_MVP_Demo.mp4)
