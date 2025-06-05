@@ -1,0 +1,125 @@
+body { font-family: 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif; background: #f7f8fa; margin: 0; padding: 0; }
+.app-header { background: #fff; padding: 24px 0 16px 0; text-align: center; box-shadow: 0 2px 8px #f0f1f2; }
+.app-header h1 { margin: 0; font-size: 1.6rem; color: #222; }
+.main-content { max-width: 420px; margin: 32px auto; background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); padding: 24px 20px; }
+.screenshot-upload { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+.screenshot-upload label { font-size: 1rem; color: #666; margin-bottom: 8px; }
+.screenshot-upload input[type="file"] { margin-bottom: 12px; }
+.form-section { margin-bottom: 20px; }
+.form-section label { display: block; margin-bottom: 6px; color: #444; font-size: 1rem; }
+.form-section input, .form-section select, .form-section textarea { box-sizing: border-box; width: 100%; padding: 8px 10px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 1rem; margin-bottom: 8px; }
+.form-section textarea { resize: vertical; min-height: 48px; }
+.actions { display: flex; justify-content: space-between; gap: 12px; }
+.actions button { flex: 1; padding: 10px 0; border: none; border-radius: 6px; font-size: 1.1rem; cursor: pointer; }
+.actions .save { background: #4f8cff; color: #fff; }
+.actions .reset { background: #f0f1f2; color: #333; }
+.bill-list { margin-top: 32px; }
+.bill-list h2 { font-size: 1.2rem; color: #333; margin-bottom: 12px; }
+.bill-item { background: #f7f8fa; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.bill-info { display: flex; flex-direction: column; }
+.bill-amount { font-weight: bold; color: #4f8cff; font-size: 1.1rem; }
+.bill-meta { font-size: 0.95rem; color: #888; }
+.bill-actions button { background: none; border: none; color: #4f8cff; cursor: pointer; margin-left: 8px; font-size: 0.95rem; }
+
+/* Styles for stat-card from inline */
+.stat-card {
+    margin: 0 auto 28px auto;
+    background: #f7f8fa;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    padding: 22px 12px 28px 12px;
+    max-width: 370px;
+}
+
+.stat-card > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.stat-card > div:first-child > div:first-child {
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.stat-card > div:first-child > div:last-child {
+    font-size: 0.98rem;
+    color: #a0a0a0;
+}
+
+.stat-card > div:nth-child(2) {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.stat-card > div:nth-child(2) > div {
+    flex:1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.stat-card > div:nth-child(2) > div > div:first-child {
+    font-size: 0.98rem;
+    color: #888;
+}
+
+.stat-card > div:nth-child(2) > div > div:last-child {
+    font-size: 1.32rem;
+    font-weight: bold;
+    color: #222;
+}
+
+.stat-card > div:nth-child(3) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-card svg circle {
+    stroke-linecap: round; /* Ensure this is applied if not directly on element */
+}
+
+.stat-card > div:nth-child(3) > div:last-child {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 10px;
+    font-size: 0.98rem;
+}
+
+.stat-card > div:nth-child(3) > div:last-child > div {
+    display: flex;
+    align-items: center;
+}
+
+.stat-card > div:nth-child(3) > div:last-child > div > span {
+    display:inline-block;
+    width:14px;
+    height:8px;
+    border-radius:4px;
+    margin-right:5px;
+}
+
+@media (max-width: 480px) { 
+    .main-content { padding: 16px 12px; } /* Adjusted padding for smaller screens */
+    .form-section input, .form-section select, .form-section textarea {
+        font-size: 0.95rem; /* Slightly smaller font for inputs on mobile */
+    }
+    .actions button {
+        font-size: 1rem;
+    }
+    .bill-item {
+        padding: 10px 12px;
+    }
+    .bill-amount {
+        font-size: 1rem;
+    }
+    .bill-meta {
+        font-size: 0.9rem;
+    }
+}
