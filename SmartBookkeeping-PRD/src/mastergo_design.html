@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>智能记账助手主界面（MasterGo 设计稿还原）</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-header">
+    <h1>智能记账助手</h1>
+    <div style="font-size:0.98rem;color:#888;">截图识别 · 智能记账 · 数据分析</div>
+  </div>
+  <div class="main-content">
+    <form>
+      <div class="screenshot-upload">
+        <label for="screenshot">上传截图（自动识别账单信息）</label>
+        <input type="file" id="screenshot" accept="image/*">
+      </div>
+      <!-- 统计图表区域开始 -->
+      <div class="stat-card" style="margin: 0 auto 28px auto; background: #f7f8fa; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); padding: 22px 12px 28px 12px; max-width: 370px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div style="font-size: 1.18rem; font-weight: 600; color: #222;">本月统计</div>
+          <div style="font-size: 0.98rem; color: #a0a0a0;">2024 年 1 月</div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-bottom: 18px;">
+          <div style="flex:1; background: #fff; border-radius: 8px; padding: 10px 0; text-align: center;">
+            <div style="font-size: 0.98rem; color: #888;">总支出</div>
+            <div style="font-size: 1.32rem; font-weight: bold; color: #222;">¥3,280.50</div>
+          </div>
+          <div style="flex:1; background: #fff; border-radius: 8px; padding: 10px 0; text-align: center;">
+            <div style="font-size: 0.98rem; color: #888;">日均支出</div>
+            <div style="font-size: 1.32rem; font-weight: bold; color: #222;">¥109.35</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center;">
+          <!-- 环形图 -->
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#e5e7ef" stroke-width="16" />
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#4f68d9" stroke-width="16" stroke-dasharray="110 165" stroke-dashoffset="0" stroke-linecap="round" />
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#8fd16a" stroke-width="16" stroke-dasharray="55 220" stroke-dashoffset="110" stroke-linecap="round" />
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#ffd34f" stroke-width="16" stroke-dasharray="55 220" stroke-dashoffset="165" stroke-linecap="round" />
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#f36c6c" stroke-width="16" stroke-dasharray="35 240" stroke-dashoffset="220" stroke-linecap="round" />
+          </svg>
+          <!-- 图例 -->
+          <div style="display: flex; justify-content: center; gap: 18px; margin-top: 10px; font-size: 0.98rem;">
+            <div style="display: flex; align-items: center;"><span style="display:inline-block;width:14px;height:8px;background:#4f68d9;border-radius:4px;margin-right:5px;"></span>餐饮</div>
+            <div style="display: flex; align-items: center;"><span style="display:inline-block;width:14px;height:8px;background:#8fd16a;border-radius:4px;margin-right:5px;"></span>交通</div>
+            <div style="display: flex; align-items: center;"><span style="display:inline-block;width:14px;height:8px;background:#ffd34f;border-radius:4px;margin-right:5px;"></span>购物</div>
+            <div style="display: flex; align-items: center;"><span style="display:inline-block;width:14px;height:8px;background:#f36c6c;border-radius:4px;margin-right:5px;"></span>居住</div>
+          </div>
+        </div>
+      </div>
+      <!-- 统计图表区域结束 -->
+      <div class="form-section">
+        <label for="amount">金额</label>
+        <input type="number" id="amount" placeholder="请输入金额">
+      </div>
+      <div class="form-section">
+        <label for="date">交易时间</label>
+        <input type="datetime-local" id="date">
+      </div>
+      <div class="form-section">
+        <label for="desc">商品说明</label>
+        <input type="text" id="desc" placeholder="如：超市购物/餐饮/转账等">
+      </div>
+      <div class="form-section">
+        <label for="category">交易分类</label>
+        <select id="category">
+          <option value="">请选择分类</option>
+          <optgroup label="支出场景">
+            <option value="food">餐饮</option>
+            <option value="shopping">购物</option>
+            <option value="transport">交通</option>
+            <option value="housing">居住</option>
+            <option value="entertainment">娱乐</option>
+            <option value="medical">医疗健康</option>
+            <option value="education">教育培训</option>
+            <option value="daily">日常杂费</option>
+            <option value="transfer">转账/还款</option>
+            <option value="other_expense">其他支出</option>
+          </optgroup>
+          <optgroup label="收入场景">
+            <option value="salary">主业收入</option>
+            <option value="side_income">副业收入</option>
+            <option value="investment">投资理财</option>
+            <option value="gift">红包礼金</option>
+            <option value="other_income">其他收入</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="form-section">
+        <label for="type">收/支类型</label>
+        <select id="type">
+          <option value="">请选择</option>
+          <option value="income">收入</option>
+          <option value="expense">支出</option>
+        </select>
+      </div>
+      <div class="form-section">
+        <label for="method">付款/收款方式</label>
+        <input type="text" id="method" placeholder="如：微信/支付宝/银行卡等">
+      </div>
+      <div class="form-section">
+        <label for="note">备注</label>
+        <textarea id="note" placeholder="可填写补充信息"></textarea>
+      </div>
+      <div class="actions">
+        <button type="submit" class="save">保存</button>
+        <button type="reset" class="reset">重置</button>
+      </div>
+    </form>
+    <div class="bill-list">
+      <h2>最近账单</h2>
+      <div class="bill-item">
+        <div class="bill-info">
+          <span class="bill-amount">- ¥68.00</span>
+          <span class="bill-meta">2024-05-01 12:30 · 餐饮 · 微信</span>
+        </div>
+        <div class="bill-actions">
+          <button>编辑</button>
+          <button>删除</button>
+        </div>
+      </div>
+      <div class="bill-item">
+        <div class="bill-info">
+          <span class="bill-amount">+ ¥500.00</span>
+          <span class="bill-meta">2024-04-28 09:10 · 收入 · 支付宝</span>
+        </div>
+        <div class="bill-actions">
+          <button>编辑</button>
+          <button>删除</button>
+        </div>
+      </div>
+      <!-- 更多账单可在此追加 -->
+    </div>
+  </div>
+  <script src="script.js" defer></script>
+</body>
+</html>
