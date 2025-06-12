@@ -1,98 +1,72 @@
 import SwiftUI
-import Vision
-import VisionKit
+import UIKit
+import CoreData
 
 class ShortcutManager: ObservableObject {
     @Published var isProcessing = false
-    @Published var recognizedText: String = ""
-    @Published var processedData: TransactionData?
+    @Published var processedData: Transaction?
     @Published var error: String?
     
     func handleShortcutImage(_ imageData: Data) {
         isProcessing = true
         error = nil
         
-        // 1. 将图片数据转换为 UIImage
+        // 将图片数据转换为 UIImage
         guard let image = UIImage(data: imageData) else {
-            error = "无法处理图片数据"
-            isProcessing = false
+            DispatchQueue.main.async {
+                self.error = "无法处理图片数据"
+                self.isProcessing = false
+            }
             return
         }
         
-        // 2. 执行 OCR
-        performOCR(on: image) { [weak self] result in
-            switch result {
-            case .success(let text):
-                self?.recognizedText = text
-                // 3. 使用 Zhipu AI 处理文本
-                self?.processWithZhipuAI(text)
-            case .failure(let error):
-                self?.error = error.localizedDescription
-                self?.isProcessing = false
+        // 使用 OCR 服务识别图片
+        let ocrService = OCRService()
+        ocrService.recognizeText(from: image) { [weak self] transaction in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                
+                if let transaction = transaction {
+                    self.processedData = transaction
+                    self.error = nil
+                } else {
+                    self.error = "无法识别账单信息"
+                }
+                
+                self.isProcessing = false
             }
         }
     }
     
-    private func performOCR(on image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
-        guard let cgImage = image.cgImage else {
-            completion(.failure(NSError(domain: "OCR", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法处理图片"])))
-            return
-        }
+    private func saveTransaction(_ transaction: Transaction) {
+        // 获取 Core Data 上下文
+        let context = PersistenceController.shared.container.viewContext
         
-        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-        let request = VNRecognizeTextRequest { request, error in
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            
-            guard let observations = request.results as? [VNRecognizedTextObservation] else {
-                completion(.failure(NSError(domain: "OCR", code: -1, userInfo: [NSLocalizedDescriptionKey: "无法识别文本"])))
-                return
-            }
-            
-            let recognizedText = observations.compactMap { observation in
-                observation.topCandidates(1).first?.string
-            }.joined(separator: "\n")
-            
-            completion(.success(recognizedText))
-        }
+        // 创建新的 TransactionItem
+        let newTransaction = TransactionItem(context: context)
+        newTransaction.id = UUID()
+        newTransaction.amount = transaction.amount
+        newTransaction.date = transaction.date
+        newTransaction.desc = transaction.description
+        newTransaction.category = transaction.category
+        newTransaction.type = transaction.type.rawValue
+        newTransaction.paymentMethod = transaction.paymentMethod
+        newTransaction.note = transaction.note
+        newTransaction.timestamp = Date()
         
-        // 配置 OCR 请求
-        request.recognitionLevel = .accurate
-        request.usesLanguageCorrection = true
-        
+        // 保存到 Core Data
         do {
-            try requestHandler.perform([request])
+            try context.save()
+            print("通过URL Scheme识别的交易已保存到 Core Data")
         } catch {
-            completion(.failure(error))
-        }
-    }
-    
-    private func processWithZhipuAI(_ text: String) {
-        // TODO: 实现 Zhipu AI 处理逻辑
-        // 这里需要调用 Zhipu AI API 处理文本
-        // 处理完成后，将结果转换为 TransactionData
-        
-        // 示例实现：
-        let mockData = TransactionData(
-            amount: 0,
-            category: "",
-            date: Date(),
-            note: text,
-            type: .expense
-        )
-        
-        DispatchQueue.main.async { [weak self] in
-            self?.processedData = mockData
-            self?.isProcessing = false
+            print("保存交易失败: \(error)")
+            self.error = "保存失败: \(error.localizedDescription)"
         }
     }
     
     func reset() {
         isProcessing = false
-        recognizedText = ""
         processedData = nil
         error = nil
     }
-} 
+}

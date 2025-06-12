@@ -20,7 +20,7 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            TransactionFormView(viewModel: transactionViewModel)
+            TransactionFormView(context: viewContext, transactionViewModel: transactionViewModel)
                 .tabItem {
                     Label("记账", systemImage: "pencil.and.scribble")
                 }

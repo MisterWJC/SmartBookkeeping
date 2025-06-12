@@ -36,13 +36,22 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            picker.dismiss(animated: true)
-
-            guard let provider = results.first?.itemProvider else { return }
-
-            if provider.canLoadObject(ofClass: UIImage.self) {
-                provider.loadObject(ofClass: UIImage.self) { image, _ in
-                    self.parent.image = image as? UIImage
+            // 首先检查是否有选择结果
+            let hasResults = !results.isEmpty
+            
+            // 先关闭选择器，并在完成后处理结果
+            picker.dismiss(animated: true) { [weak self] in
+                guard let self = self, hasResults else { return }
+                
+                guard let provider = results.first?.itemProvider else { return }
+                
+                if provider.canLoadObject(ofClass: UIImage.self) {
+                    provider.loadObject(ofClass: UIImage.self) { [weak self] image, _ in
+                        // 确保在主线程更新UI，并添加延迟以避免视图控制器冲突
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            self?.parent.image = image as? UIImage
+                        }
+                    }
                 }
             }
         }
