@@ -64,7 +64,7 @@ class ShareViewController: SLComposeServiceViewController {
 
     private func saveImageToAppGroup(imageData: Data) {
         // 你的 App Group Identifier
-        let appGroupID = "group.com.yourcompany.smartbookkeeping"
+        let appGroupID = "group.com.jason.smartbookkeeping" // 改为你的实际 App Group ID
         if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
             let fileURL = containerURL.appendingPathComponent("shared_image.png")
             try? imageData.write(to: fileURL)

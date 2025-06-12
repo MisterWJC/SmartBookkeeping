@@ -12,10 +12,12 @@ import CoreData
 
 class TransactionViewModel: ObservableObject {
     // 静态列表数据
-    let expenseCategories = ["请选择分类", "数码电器", "餐饮美食", "自我提升", "服装饰品", "日用百货", "车辆交通", "娱乐休闲", "医疗健康", "家庭支出", "充值缴费", "其他", "总计"]
-    let incomeCategories = ["请选择分类", "副业收入", "投资理财", "主业收入", "红包礼金", "合计"]
+    let expenseCategories = ["请选择分类", "未分类", "数码电器", "餐饮美食", "自我提升", "服装饰品", "日用百货", "车辆交通", "娱乐休闲", "医疗健康", "家庭支出", "充值缴费", "其他", "总计"]
+    let incomeCategories = ["请选择分类", "未分类", "副业收入", "投资理财", "主业收入", "红包礼金", "合计"]
     let paymentMethods = ["请选择", "现金", "招商银行卡", "中信银行卡", "交通银行卡", "建设银行卡", "微信", "支付宝", "招商信用卡"]
     
+    @Published var rawInput: String = "" // Add this line
+
     // 根据交易类型动态返回分类列表
     func categories(for type: Transaction.TransactionType) -> [String] {
         switch type {
@@ -101,7 +103,7 @@ class TransactionViewModel: ObservableObject {
         fetchTransactions() // 重新获取数据以确保视图正确刷新
     }
     
-    private func fetchTransactions() {
+    func fetchTransactions() {
         let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionItem.date, ascending: false)]
         
