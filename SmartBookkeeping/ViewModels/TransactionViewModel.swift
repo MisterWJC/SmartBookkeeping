@@ -154,6 +154,33 @@ class TransactionViewModel: ObservableObject {
         }
     }
     
+    // 更新交易方法
+    func updateTransaction(_ transaction: Transaction) {
+        let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %@", transaction.id as CVarArg)
+        
+        do {
+            let results = try viewContext.fetch(request)
+            if let entityToUpdate = results.first {
+                entityToUpdate.amount = transaction.amount
+                entityToUpdate.date = transaction.date
+                entityToUpdate.category = transaction.category
+                entityToUpdate.desc = transaction.description
+                entityToUpdate.type = transaction.type.rawValue
+                entityToUpdate.paymentMethod = transaction.paymentMethod
+                entityToUpdate.note = transaction.note
+                
+                saveContext()
+                fetchTransactions() // 更新后刷新列表
+                print("交易更新成功，ID: \(transaction.id)")
+            } else {
+                print("未找到要更新的交易，ID: \(transaction.id)")
+            }
+        } catch {
+            print("更新交易失败: \(error.localizedDescription)")
+        }
+    }
+    
     // 修改 deleteTransaction 方法以接受 Transaction 对象
     func deleteTransaction(transaction: Transaction) {
         let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
@@ -234,5 +261,43 @@ class TransactionViewModel: ObservableObject {
         
         let months = Set(transactions.map { dateFormatter.string(from: $0.date) })
         return ["全部月份"] + Array(months).sorted().reversed() // reversed() 使最近的月份在前
+    }
+    
+    func getMonthlyIncome(forMonth: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if forMonth != "全部月份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年MM月"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == forMonth
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        
+        return filteredTransactions
+            .filter { $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getMonthlyExpense(forMonth: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if forMonth != "全部月份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年MM月"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == forMonth
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        
+        return filteredTransactions
+            .filter { $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
     }
 }

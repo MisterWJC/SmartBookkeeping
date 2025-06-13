@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TransactionRowView: View {
     let transaction: Transaction
+    @State private var showingEditView = false
 
     var body: some View {
         HStack {
@@ -38,6 +39,13 @@ struct TransactionRowView: View {
                 .foregroundColor(transaction.type == .income ? .green : .red)
         }
         .padding(.vertical, 8)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            showingEditView = true
+        }
+        .sheet(isPresented: $showingEditView) {
+            TransactionEditView(transaction: transaction)
+        }
     }
 
     // 添加一个静态的 DateFormatter 用于显示日期和时间

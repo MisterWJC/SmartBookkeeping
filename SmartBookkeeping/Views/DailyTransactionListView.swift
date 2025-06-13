@@ -12,6 +12,7 @@ struct DailyTransactionListView: View {
     let date: Date // 代表分组的起始日期 (天、周一、月初、季度初、年初)
     let transactions: [Transaction]
     let timeRange: TransactionHistoryView.TimeRange // 传入当前选择的时间范围
+    @State private var transactionToEdit: Transaction?
 
     private var dailyIncome: Double {
         transactions.filter { $0.type == .income }.reduce(0) { $0 + $1.amount }
@@ -20,36 +21,42 @@ struct DailyTransactionListView: View {
     private var dailyExpense: Double {
         transactions.filter { $0.type == .expense }.reduce(0) { $0 + $1.amount }
     }
-
-    private func deleteTransaction(at offsets: IndexSet) {
-        // 从transactions数组中获取要删除的交易
-        // 注意：这里的transactions是传入的局部常量，直接修改它不会影响ViewModel
-        // 我们需要通过ID找到ViewModel中的对应交易并删除
-        let transactionsToDelete = offsets.map { transactions[$0] }
-        for transaction in transactionsToDelete {
-            viewModel.deleteTransaction(transaction: transaction)
-        }
+    
+    private var dailyBalance: Double {
+        dailyIncome - dailyExpense
     }
+
+
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(formattedDateTitle(for: date, range: timeRange))
-                    .font(.headline)
-                // 周视图时，可以额外显示周的起止日期，或者只显示周数
-                // 其他视图下，星期的概念可能不那么重要，或者可以省略
-                if timeRange == .day {
-                    Text(date, formatter: Self.weekdayFormatter)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(formattedDateTitle(for: date, range: timeRange))
+                        .font(.headline)
+                    // 周视图时，可以额外显示周的起止日期，或者只显示周数
+                    // 其他视图下，星期的概念可能不那么重要，或者可以省略
+                    if timeRange == .day {
+                        Text(date, formatter: Self.weekdayFormatter)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 Spacer()
-                Text("支出 ¥\(dailyExpense, specifier: "%.2f")")
-                    .font(.subheadline)
-                    .foregroundColor(.red)
-                Text("收入 ¥\(dailyIncome, specifier: "%.2f")")
-                    .font(.subheadline)
-                    .foregroundColor(.green)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("结余 \(String(format: "%.2f", dailyBalance))")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(dailyBalance >= 0 ? .primary : .red)
+                    HStack(spacing: 12) {
+                        Text("收入 \(String(format: "%.2f", dailyIncome))")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                        Text("支出 \(String(format: "%.2f", dailyExpense))")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
             }
             .padding(.horizontal)
             
@@ -64,8 +71,18 @@ struct DailyTransactionListView: View {
                         TransactionRowView(transaction: transaction)
                             .listRowInsets(EdgeInsets()) // 移除List的默认边距
                             .listRowSeparator(.hidden) // 隐藏分隔线
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button("删除") {
+                                    deleteTransaction(transaction)
+                                }
+                                .tint(.red)
+                                
+                                Button("编辑") {
+                                    editTransaction(transaction)
+                                }
+                                .tint(.blue)
+                            }
                     }
-                    .onDelete(perform: deleteTransaction)
                 }
                 .listStyle(PlainListStyle()) // 使用朴素样式，避免额外的背景和边距
                 .frame(height: CGFloat(transactions.count) * 70) // 根据内容动态调整高度，假设每行大约70高
@@ -75,6 +92,17 @@ struct DailyTransactionListView: View {
         .background(Color(UIColor.systemGray6))
         .cornerRadius(10)
         .padding(.horizontal)
+        .sheet(item: $transactionToEdit) { transaction in
+            TransactionEditView(transaction: transaction)
+        }
+    }
+    
+    private func editTransaction(_ transaction: Transaction) {
+        transactionToEdit = transaction
+    }
+    
+    private func deleteTransaction(_ transaction: Transaction) {
+        viewModel.deleteTransaction(transaction: transaction)
     }
 
     static let weekdayFormatter: DateFormatter = {

@@ -26,6 +26,19 @@ struct ChartView: View {
         chartData.values.reduce(0, +)
     }
     
+    // 计算当前选择月份的收入、支出和结余
+    private var monthlyIncome: Double {
+        viewModel.getMonthlyIncome(forMonth: selectedMonth)
+    }
+    
+    private var monthlyExpense: Double {
+        viewModel.getMonthlyExpense(forMonth: selectedMonth)
+    }
+    
+    private var monthlyBalance: Double {
+        monthlyIncome - monthlyExpense
+    }
+    
     private var colors: [Color] = [.blue, .green, .orange, .red] // 可以根据需要扩展颜色
     
     var body: some View {
@@ -38,6 +51,49 @@ struct ChartView: View {
             }
             .pickerStyle(MenuPickerStyle())
             .padding()
+            
+            // 结余统计信息
+            VStack(spacing: 12) {
+                // 结余信息
+                HStack {
+                    Spacer()
+                    VStack {
+                        Text("结余")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.2f", monthlyBalance))
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(monthlyBalance >= 0 ? .primary : .red)
+                    }
+                    Spacer()
+                }
+                
+                // 收入支出详情
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("收入")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.2f", monthlyIncome))
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(.green)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing) {
+                        Text("支出")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(String(format: "%.2f", monthlyExpense))
+                            .font(.title3)
+                            .fontWeight(.medium)
+                            .foregroundColor(.red)
+                    }
+                }
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
 
             Spacer() 
             

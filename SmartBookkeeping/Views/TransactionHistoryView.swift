@@ -120,25 +120,43 @@ struct TransactionHistoryView: View {
                     }
                     .padding()
 
+                    // 结余信息
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text("总支出")
+                        Spacer()
+                        VStack {
+                            Text("结余")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text("¥\(totalExpenseInSelectedRange, specifier: "%.2f")")
-                                .font(.title2)
+                            Text(String(format: "%.2f", totalIncomeInSelectedRange - totalExpenseInSelectedRange))
+                                .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .foregroundColor(.red)
+                                .foregroundColor(totalIncomeInSelectedRange - totalExpenseInSelectedRange >= 0 ? .primary : .red)
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                    
+                    // 收入支出详情
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("收入")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text(String(format: "%.2f", totalIncomeInSelectedRange))
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.green)
                         }
                         Spacer()
                         VStack(alignment: .trailing) {
-                            Text("总收入")
+                            Text("支出")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
-                            Text("¥\(totalIncomeInSelectedRange, specifier: "%.2f")")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.green)
+                            Text(String(format: "%.2f", totalExpenseInSelectedRange))
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.red)
                         }
                     }
                     .padding(.horizontal)

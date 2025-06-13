@@ -170,8 +170,8 @@ struct TransactionFormView: View {
                 .pickerStyle(MenuPickerStyle())
             }
 
-            Section(header: Text("商品明细")) {
-                TextField("例：超市购物/餐饮消费", text: $viewModel.formData.description)
+            Section("商品明细") {
+                TextField("请输入商品明细", text: $viewModel.formData.description)
                     .focused($focusedField, equals: .description)
             }
 
@@ -184,7 +184,7 @@ struct TransactionFormView: View {
                 .pickerStyle(MenuPickerStyle())
             }
 
-            Section(header: Text("备注")) {
+            Section("备注") {
                 TextEditor(text: $viewModel.formData.note)
                     .frame(minHeight: 100)
                     .focused($focusedField, equals: .note)

@@ -65,7 +65,8 @@ struct RecognizeBillIntent: AppIntent {
         // 保存到 Core Data
         let context = PersistenceController.shared.container.viewContext
         let newTransaction = TransactionItem(context: context)
-        newTransaction.id = UUID()
+        let transactionId = UUID()
+        newTransaction.id = transactionId
         newTransaction.amount = recognizedTransaction.amount
         newTransaction.date = recognizedTransaction.date
         newTransaction.desc = recognizedTransaction.description
@@ -77,7 +78,7 @@ struct RecognizeBillIntent: AppIntent {
         
         do {
             try context.save()
-            let resultMessage = formatTransactionResult(recognizedTransaction)
+            let resultMessage = formatTransactionResult(recognizedTransaction, transactionId: transactionId)
             return .result(value: resultMessage)
         } catch {
             return .result(value: "保存失败：\(error.localizedDescription)")
@@ -133,7 +134,7 @@ struct RecognizeBillIntent: AppIntent {
         }
     }
     
-    private func formatTransactionResult(_ transaction: Transaction) -> String {
+    private func formatTransactionResult(_ transaction: Transaction, transactionId: UUID) -> String {
         var result = "✅ 账单识别成功！\n\n"
         result += "💰 金额：¥\(String(format: "%.2f", transaction.amount))\n"
         result += "📅 日期：\(DateFormatter.localizedString(from: transaction.date, dateStyle: .medium, timeStyle: .none))\n"
@@ -146,7 +147,9 @@ struct RecognizeBillIntent: AppIntent {
             result += "📄 备注：\(transaction.note)\n"
         }
         
-        result += "\n✨ 已自动保存到记账本"
+        result += "\n✨ 已自动保存到记账本\n"
+        result += "\n❓ 信息是否准确？如需修改请选择编辑修改\n"
+        result += "\n🔗 编辑链接：smartbookkeeping://edit?transactionId=\(transactionId.uuidString)&action=quickEdit"
         return result
     }
  

@@ -81,6 +81,10 @@ final class TransactionFormViewModel: ObservableObject {
     @Published var isProcessingAI: Bool = false  // 新增：跟踪AI处理状态
     var recordingStartTime: Date? = nil
     
+    // Edit mode state
+    @Published var isEditMode: Bool = false
+    @Published var editingTransactionId: String? = nil
+    
     // Dependencies
     private let _context: NSManagedObjectContext
     
@@ -107,16 +111,37 @@ final class TransactionFormViewModel: ObservableObject {
     // MARK: - URL Data Handling
     
     func populateFromURLData(_ data: [String: String]) {
+        // 检查是否为编辑模式
+        if let transactionIdString = data["transactionId"], let _ = UUID(uuidString: transactionIdString) {
+            editingTransactionId = transactionIdString
+            isEditMode = true
+            print("进入编辑模式，交易ID: \(transactionIdString)")
+        }
+        
+        // 先处理交易类型，因为分类验证依赖于类型
+        var targetType = formData.type // 默认使用当前类型
+        if let typeStr = data["type"], let type = Transaction.TransactionType(rawValue: typeStr) {
+            targetType = type
+            formData.type = type
+        }
+        
         // 解析并填充表单数据
         if let amountStr = data["amount"], let amount = Double(amountStr) {
             formData.amount = String(format: "%.2f", amount)
         }
         
         if let dateStr = data["date"] {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            if let date = dateFormatter.date(from: dateStr) {
+            // 尝试ISO8601格式
+            let iso8601Formatter = ISO8601DateFormatter()
+            if let date = iso8601Formatter.date(from: dateStr) {
                 formData.date = date
+            } else {
+                // 回退到原有格式
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                if let date = dateFormatter.date(from: dateStr) {
+                    formData.date = date
+                }
             }
         }
         
@@ -124,14 +149,30 @@ final class TransactionFormViewModel: ObservableObject {
             formData.description = description
         }
         
+        // 处理分类，基于最终确定的交易类型进行验证
         if let category = data["category"] {
-            formData.category = category
-        }
-        
-        if let typeStr = data["type"], let type = Transaction.TransactionType(rawValue: typeStr) {
-            formData.type = type
-            // 更新分类以匹配新的类型
-            updateCategoryForType(type)
+            // 验证分类是否在目标交易类型的有效分类列表中
+            let validCategories = CategoryDataManager.shared.categories(for: targetType)
+            if validCategories.contains(category) {
+                formData.category = category
+                print("分类 '\(category)' 验证通过，已设置")
+            } else {
+                // 如果分类无效，尝试使用相似度匹配
+                if let bestMatch = findBestCategoryMatch(category, for: targetType) {
+                    formData.category = bestMatch
+                    print("分类 '\(category)' 不完全匹配，使用最佳匹配: '\(bestMatch)'")
+                } else {
+                    // 如果没有好的匹配，设置为默认分类
+                    let defaultCategory = targetType == .income ? "其他收入" : "其他"
+                    formData.category = defaultCategory
+                    print("分类 '\(category)' 不在有效分类列表中，已设置为'\(defaultCategory)'")
+                }
+            }
+        } else {
+            // 如果没有提供分类，且交易类型发生了变化，则更新为该类型的默认分类
+            if targetType != formData.type {
+                updateCategoryForType(targetType)
+            }
         }
         
         if let paymentMethod = data["paymentMethod"] {
@@ -169,6 +210,104 @@ final class TransactionFormViewModel: ObservableObject {
         if let firstCategory = categories.first {
             formData.category = firstCategory
         }
+    }
+    
+    // 使用相似度匹配找到最佳分类
+    private func findBestCategoryMatch(_ inputCategory: String, for type: Transaction.TransactionType) -> String? {
+        let validCategories = CategoryDataManager.shared.categories(for: type)
+        
+        // 首先尝试精确匹配（忽略大小写）
+        if let exactMatch = validCategories.first(where: { $0.lowercased() == inputCategory.lowercased() }) {
+            return exactMatch
+        }
+        
+        // 然后尝试包含匹配
+        if let containsMatch = validCategories.first(where: { $0.contains(inputCategory) || inputCategory.contains($0) }) {
+            return containsMatch
+        }
+        
+        // 最后使用Jaro-Winkler相似度匹配
+        var bestMatch: String?
+        var bestSimilarity: Double = 0.6 // 设置阈值
+        
+        for category in validCategories {
+            let similarity = jaroWinklerSimilarity(inputCategory, category)
+            if similarity > bestSimilarity {
+                bestSimilarity = similarity
+                bestMatch = category
+            }
+        }
+        
+        return bestMatch
+    }
+    
+    // Jaro-Winkler相似度计算
+    private func jaroWinklerSimilarity(_ s1: String, _ s2: String) -> Double {
+        let jaroSim = jaroSimilarity(s1, s2)
+        if jaroSim < 0.7 { return jaroSim }
+        
+        let prefixLength = min(4, commonPrefixLength(s1, s2))
+        return jaroSim + (0.1 * Double(prefixLength) * (1.0 - jaroSim))
+    }
+    
+    private func jaroSimilarity(_ s1: String, _ s2: String) -> Double {
+        let len1 = s1.count
+        let len2 = s2.count
+        
+        if len1 == 0 && len2 == 0 { return 1.0 }
+        if len1 == 0 || len2 == 0 { return 0.0 }
+        
+        let matchWindow = max(len1, len2) / 2 - 1
+        if matchWindow < 0 { return 0.0 }
+        
+        let s1Array = Array(s1)
+        let s2Array = Array(s2)
+        
+        var s1Matches = Array(repeating: false, count: len1)
+        var s2Matches = Array(repeating: false, count: len2)
+        
+        var matches = 0
+        
+        // 找到匹配的字符
+        for i in 0..<len1 {
+            let start = max(0, i - matchWindow)
+            let end = min(i + matchWindow + 1, len2)
+            
+            for j in start..<end {
+                if s2Matches[j] || s1Array[i] != s2Array[j] { continue }
+                s1Matches[i] = true
+                s2Matches[j] = true
+                matches += 1
+                break
+            }
+        }
+        
+        if matches == 0 { return 0.0 }
+        
+        // 计算转置
+        var transpositions = 0
+        var k = 0
+        for i in 0..<len1 {
+            if !s1Matches[i] { continue }
+            while !s2Matches[k] { k += 1 }
+            if s1Array[i] != s2Array[k] { transpositions += 1 }
+            k += 1
+        }
+        
+        return (Double(matches) / Double(len1) + Double(matches) / Double(len2) + Double(matches - transpositions/2) / Double(matches)) / 3.0
+    }
+    
+    private func commonPrefixLength(_ s1: String, _ s2: String) -> Int {
+        let s1Array = Array(s1)
+        let s2Array = Array(s2)
+        let minLength = min(s1Array.count, s2Array.count)
+        
+        for i in 0..<minLength {
+            if s1Array[i] != s2Array[i] {
+                return i
+            }
+        }
+        return minLength
     }
     
     func toggleExtraButtons() {
@@ -293,7 +432,7 @@ final class TransactionFormViewModel: ObservableObject {
             return
         }
         
-        let newTransaction = Transaction(
+        let transactionData = Transaction(
             amount: abs(amountValue),
             date: formData.date,
             category: formData.category,
@@ -303,35 +442,68 @@ final class TransactionFormViewModel: ObservableObject {
             note: formData.note
         )
         
-        // Logic to add to Core Data context
-        let transactionItem = TransactionItem(context: context)
-        transactionItem.id = UUID() // Assuming your TransactionItem has an id
-        transactionItem.amount = newTransaction.amount
-        transactionItem.date = newTransaction.date
-        transactionItem.category = newTransaction.category
-        transactionItem.desc = newTransaction.description // Ensure 'desc' matches your Core Data attribute name
-        transactionItem.type = newTransaction.type.rawValue // Assuming 'type' is a String in Core Data
-        transactionItem.paymentMethod = newTransaction.paymentMethod
-        transactionItem.note = newTransaction.note
-        // Add any other properties from newTransaction to transactionItem
-
         do {
-            try context.save()
-            print("Transaction saved successfully: \(newTransaction.description) - \(newTransaction.amount)")
-            resetForm()
-            alertItem = AlertItem(title: "成功", message: "账单已保存。", type: .info)
+            if isEditMode, let editingId = editingTransactionId, let transactionId = UUID(uuidString: editingId) {
+                // 编辑模式：更新现有交易
+                let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %@", transactionId as CVarArg)
+                request.fetchLimit = 1
+                
+                let transactions = try context.fetch(request)
+                if let existingTransaction = transactions.first {
+                    // 更新现有交易的数据
+                    existingTransaction.amount = transactionData.amount
+                    existingTransaction.date = transactionData.date
+                    existingTransaction.category = transactionData.category
+                    existingTransaction.desc = transactionData.description
+                    existingTransaction.type = transactionData.type.rawValue
+                    existingTransaction.paymentMethod = transactionData.paymentMethod
+                    existingTransaction.note = transactionData.note
+                    existingTransaction.timestamp = Date() // 更新修改时间
+                    
+                    try context.save()
+                    print("Transaction updated successfully: \(transactionData.description) - \(transactionData.amount)")
+                    resetForm()
+                    alertItem = AlertItem(title: "成功", message: "账单已更新。", type: .info)
+                } else {
+                    alertItem = AlertItem(title: "错误", message: "未找到要编辑的交易记录。", type: .error)
+                    return
+                }
+            } else {
+                // 新增模式：创建新交易
+                let transactionItem = TransactionItem(context: context)
+                transactionItem.id = UUID()
+                transactionItem.amount = transactionData.amount
+                transactionItem.date = transactionData.date
+                transactionItem.category = transactionData.category
+                transactionItem.desc = transactionData.description
+                transactionItem.type = transactionData.type.rawValue
+                transactionItem.paymentMethod = transactionData.paymentMethod
+                transactionItem.note = transactionData.note
+                transactionItem.timestamp = Date()
+                
+                try context.save()
+                print("Transaction saved successfully: \(transactionData.description) - \(transactionData.amount)")
+                resetForm()
+                alertItem = AlertItem(title: "成功", message: "账单已保存。", type: .info)
+            }
+            
             // Notify that transaction was saved
             onTransactionSaved?()
         } catch {
             // Handle the error appropriately
             let nsError = error as NSError
             print("Error saving transaction: \(nsError), \(nsError.userInfo)")
-            alertItem = AlertItem(title: "保存失败", message: "保存账单时发生错误: \(nsError.localizedDescription)", type: .error)
+            let action = isEditMode ? "更新" : "保存"
+            alertItem = AlertItem(title: "\(action)失败", message: "\(action)账单时发生错误: \(nsError.localizedDescription)", type: .error)
         }
     }
     
     func resetForm() {
         formData = TransactionFormData()
+        // 重置编辑模式状态
+        isEditMode = false
+        editingTransactionId = nil
         // TransactionFormData已经设置了正确的默认值，无需额外设置
     }
     

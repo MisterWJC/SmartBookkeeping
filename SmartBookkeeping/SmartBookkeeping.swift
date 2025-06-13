@@ -39,7 +39,7 @@ struct SmartBookkeeping_App: App {
         }
         
         // 处理编辑页面 URL
-        if url.absoluteString.hasPrefix("smartbookkeeping://") && url.path == "/edit" {
+        if url.absoluteString.hasPrefix("smartbookkeeping://edit") {
             print("处理编辑页面 URL")
             handleEditURL(url)
             return
@@ -88,9 +88,18 @@ struct SmartBookkeeping_App: App {
         
         print("解析的交易数据: \(transactionData)")
         
-        // 将数据传递给 ShortcutManager
-        shortcutManager.handleEditURLData(transactionData)
-        print("数据已传递给 ShortcutManager")
+        // 检查是否为快速编辑操作
+        if let action = transactionData["action"], action == "quickEdit",
+           let transactionIdString = transactionData["transactionId"],
+           let transactionId = UUID(uuidString: transactionIdString) {
+            // 直接跳转到编辑页面
+            shortcutManager.handleQuickEdit(transactionId: transactionId)
+            print("处理快速编辑，交易ID: \(transactionId)")
+        } else {
+            // 将数据传递给 ShortcutManager（保持原有逻辑）
+            shortcutManager.handleEditURLData(transactionData)
+            print("数据已传递给 ShortcutManager")
+        }
     }
     
     private func handleImageURL(_ fileURL: URL) {
