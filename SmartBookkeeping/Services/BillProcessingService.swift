@@ -83,8 +83,6 @@ class BillProcessingService {
         
         if typeString.contains("收入") {
             return .income
-        } else if typeString.contains("转账") {
-            return .transfer
         } else {
             return .expense
         }
@@ -237,17 +235,30 @@ class BillProcessingService {
     private func findBestMatch(for input: String?, from list: [String]) -> String? {
         guard let input = input, !input.isEmpty, !list.isEmpty else { return nil }
         
-        // 完全匹配优先
-        if list.contains(input) {
-            return input
+        let lowercaseInput = input.lowercased()
+        
+        // 1. 完全匹配优先（忽略大小写）
+        for item in list {
+            if item.lowercased() == lowercaseInput {
+                return item
+            }
         }
         
+        // 2. 包含匹配（输入包含在列表项中，或列表项包含在输入中）
+        for item in list {
+            let lowercaseItem = item.lowercased()
+            if lowercaseInput.contains(lowercaseItem) || lowercaseItem.contains(lowercaseInput) {
+                return item
+            }
+        }
+        
+        // 3. 使用相似度算法进行模糊匹配
         var bestMatch: String? = nil
         var maxSimilarity = 0.0
         
         for item in list {
             // 使用 Jaro-Winkler 相似度算法
-            let similarity = jaroWinklerSimilarity(a: input, b: item)
+            let similarity = jaroWinklerSimilarity(a: lowercaseInput, b: item.lowercased())
             
             // 如果找到更相似的匹配
             if similarity > maxSimilarity {
@@ -256,30 +267,42 @@ class BillProcessingService {
             }
         }
         
-        // 设置相似度阈值，如果最大相似度低于阈值，则认为没有好的匹配
-        if maxSimilarity < 0.6 {
-            // 尝试使用 Levenshtein 距离作为备选方法
-            var minDistance = Int.max
-            var levenshteinBestMatch: String? = nil
-            
-            for item in list {
-                let distance = levenshteinDistance(a: input, b: item)
-                if distance < minDistance {
-                    minDistance = distance
-                    levenshteinBestMatch = item
-                }
-            }
-            
-            // 如果 Levenshtein 距离足够小，使用它的结果
-            if let match = levenshteinBestMatch, minDistance <= (input.count / 2) + 2 {
-                return match
-            }
-            
-            // 如果两种方法都没有找到好的匹配，返回 nil
-            return nil
+        // 降低相似度阈值到 0.4，提高匹配成功率
+        if maxSimilarity >= 0.4 {
+            return bestMatch
         }
         
-        return bestMatch
+        // 4. 使用 Levenshtein 距离作为备选方法
+        var minDistance = Int.max
+        var levenshteinBestMatch: String? = nil
+        
+        for item in list {
+            let distance = levenshteinDistance(a: lowercaseInput, b: item.lowercased())
+            if distance < minDistance {
+                minDistance = distance
+                levenshteinBestMatch = item
+            }
+        }
+        
+        // 如果 Levenshtein 距离足够小，使用它的结果
+        let maxAllowedDistance = max(2, min(lowercaseInput.count, 4) / 2)
+        if let match = levenshteinBestMatch, minDistance <= maxAllowedDistance {
+            return match
+        }
+        
+        // 5. 最后尝试部分匹配（检查是否有任何字符重叠）
+        for item in list {
+            let lowercaseItem = item.lowercased()
+            let commonChars = Set(lowercaseInput).intersection(Set(lowercaseItem))
+            let overlapRatio = Double(commonChars.count) / Double(max(lowercaseInput.count, lowercaseItem.count))
+            
+            if overlapRatio >= 0.5 {
+                return item
+            }
+        }
+        
+        // 如果所有方法都没有找到好的匹配，返回 nil
+        return nil
     }
     
     /// 包含关键词检查

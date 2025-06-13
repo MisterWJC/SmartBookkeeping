@@ -12,6 +12,11 @@ import AppIntents
 struct SmartBookkeeping_App: App {
     let persistenceController = PersistenceController.shared
     @StateObject private var shortcutManager = ShortcutManager()
+    
+    init() {
+        // 注册 App Shortcuts
+        SmartBookkeepingShortcuts.updateAppShortcutParameters()
+    }
 
     var body: some Scene {
         WindowGroup {

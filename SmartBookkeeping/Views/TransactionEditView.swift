@@ -23,6 +23,7 @@ struct TransactionEditView: View {
     @State private var note: String
     
     @State private var showingDeleteAlert = false
+    @State private var refreshTrigger = false
     
     init(transaction: Transaction) {
         self.transaction = transaction
@@ -185,6 +186,12 @@ struct TransactionEditView: View {
             .keyboardAdaptive()
             .navigationTitle("编辑交易")
             .navigationBarTitleDisplayMode(.inline)
+            .onReceive(CategoryDataManager.shared.$categoriesDidChange) { _ in
+                refreshTrigger.toggle()
+            }
+            .onReceive(CategoryDataManager.shared.$paymentMethodsDidChange) { _ in
+                refreshTrigger.toggle()
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("返回") {

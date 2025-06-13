@@ -6,5 +6,7 @@
 	<array>
 		<string>group.com.jason.smartbookkeeping</string>
 	</array>
+	<key>application-identifier</key>
+	<string>$(AppIdentifierPrefix)com.jason.SmartBookkeeping</string>
 </dict>
 </plist>

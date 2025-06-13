@@ -7,9 +7,13 @@
 
 import Foundation
 import CoreData
+import Combine
 
-class CategoryDataManager {
+class CategoryDataManager: ObservableObject {
     static let shared = CategoryDataManager()
+    
+    @Published var categoriesDidChange = false
+    @Published var paymentMethodsDidChange = false
     
     private let context = PersistenceController.shared.container.viewContext
     
@@ -24,7 +28,7 @@ class CategoryDataManager {
     private let defaultIncomeCategories = ["副业收入", "投资理财", "主业收入", "红包礼金", "其他收入"]
     
     // 默认支付方式
-    private let defaultPaymentMethods = ["现金", "招商银行卡", "中信银行卡", "交通银行卡", "建设银行卡", "微信", "支付宝", "招商信用卡", "其他"]
+    private let defaultPaymentMethods = ["现金", "招商银行卡", "中信银行卡", "交通银行卡", "建设银行卡", "微信", "支付宝", "招商信用卡", "其他支付"]
     
     // 检查是否需要初始化默认数据
     private func initializeDefaultDataIfNeeded() {
@@ -137,6 +141,10 @@ class CategoryDataManager {
         
         do {
             try context.save()
+            // 通知数据变化
+            DispatchQueue.main.async {
+                self.categoriesDidChange.toggle()
+            }
         } catch {
             print("添加分类失败: \(error)")
         }
@@ -156,6 +164,10 @@ class CategoryDataManager {
         
         do {
             try context.save()
+            // 通知数据变化
+            DispatchQueue.main.async {
+                self.paymentMethodsDidChange.toggle()
+            }
         } catch {
             print("添加支付方式失败: \(error)")
         }

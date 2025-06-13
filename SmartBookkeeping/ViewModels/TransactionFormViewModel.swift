@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 import AVFoundation
 import CoreData
+import Speech
 
 // MARK: - Supporting Types for State Management
 
@@ -93,6 +94,7 @@ final class TransactionFormViewModel: ObservableObject {
     }
     private let ocrService = OCRService()
     private let speechService = SpeechRecognitionService()
+    private var categoryDataCancellables = Set<AnyCancellable>()
     // Other dependencies like AIService, ShortcutManager would be injected or accessed here.
     
     // Callback to refresh transaction data
@@ -106,6 +108,27 @@ final class TransactionFormViewModel: ObservableObject {
     init(context: NSManagedObjectContext) {
         self._context = context
         setupSpeechRecognitionSinks()
+        setupCategoryDataObserver()
+    }
+    
+    private func setupCategoryDataObserver() {
+        // 监听分类数据变化
+        CategoryDataManager.shared.$categoriesDidChange
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
+            }
+            .store(in: &categoryDataCancellables)
+        
+        // 监听支付方式数据变化
+        CategoryDataManager.shared.$paymentMethodsDidChange
+            .sink { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.objectWillChange.send()
+                }
+            }
+            .store(in: &categoryDataCancellables)
     }
     
     // MARK: - URL Data Handling
@@ -397,7 +420,7 @@ final class TransactionFormViewModel: ObservableObject {
                             category: "未分类",
                             description: self.quickInputText,
                             type: .expense,
-                            paymentMethod: "其他",
+                            paymentMethod: "其他支付",
                             note: ""
                         )
                         self.updateForm(with: transaction)
@@ -411,7 +434,7 @@ final class TransactionFormViewModel: ObservableObject {
                         category: "未分类",
                         description: self.quickInputText,
                         type: .expense,
-                        paymentMethod: "其他",
+                        paymentMethod: "其他支付",
                         note: ""
                     )
                     self.updateForm(with: transaction)
@@ -574,7 +597,7 @@ final class TransactionFormViewModel: ObservableObject {
         if methods.contains(data.paymentMethod) {
             formData.paymentMethod = data.paymentMethod
         } else {
-            formData.paymentMethod = methods.first ?? "其他"
+            formData.paymentMethod = methods.first ?? "其他支付"
         }
     }
 

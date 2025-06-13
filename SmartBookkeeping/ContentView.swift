@@ -13,8 +13,10 @@ struct ContentView: View {
     @EnvironmentObject var shortcutManager: ShortcutManager
     @State private var selectedTab = 0
     @State private var showingInitialSetup = false
+    @State private var showingAPISetup = false
     
     private let categoryManager = CategoryDataManager.shared
+    private let configManager = ConfigurationManager.shared
 
     init() {
         // Initialize transactionViewModel in init. 
@@ -63,11 +65,19 @@ struct ContentView: View {
             InitialSetupView()
                 .interactiveDismissDisabled(true) // 防止用户手动关闭
         }
+        .sheet(isPresented: $showingAPISetup) {
+            APISetupView(isPresented: $showingAPISetup)
+        }
     }
     
     private func checkInitialSetup() {
         if !categoryManager.hasCompletedInitialSetup() {
             showingInitialSetup = true
+        } else if !configManager.isAPIConfigured {
+            // 延迟显示API设置，避免与初始设置冲突
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showingAPISetup = true
+            }
         }
     }
 }

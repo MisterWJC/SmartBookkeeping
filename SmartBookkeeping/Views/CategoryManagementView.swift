@@ -225,6 +225,10 @@ struct CategoryManagementView: View {
                 viewContext.delete(item)
             }
             try viewContext.save()
+            // 通知数据变化
+            DispatchQueue.main.async {
+                CategoryDataManager.shared.categoriesDidChange.toggle()
+            }
         } catch {
             print("删除分类失败: \(error)")
         }
@@ -241,6 +245,10 @@ struct CategoryManagementView: View {
                 viewContext.delete(item)
             }
             try viewContext.save()
+            // 通知数据变化
+            DispatchQueue.main.async {
+                CategoryDataManager.shared.paymentMethodsDidChange.toggle()
+            }
         } catch {
             print("删除付款方式失败: \(error)")
         }

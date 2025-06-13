@@ -2,21 +2,55 @@ import Foundation
 
 class AIService {
     static let shared = AIService()
-    private let apiKey = "6478f55ce43641d99966ed79355c0e6f.OKofLW4z3kFSXGkw"
-    private let baseURL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+    private let configManager = ConfigurationManager.shared
     
     private init() {}
     
+    private var apiKey: String? {
+        return configManager.zhipuAPIKey
+    }
+    
+    private var baseURL: String {
+        return configManager.zhipuBaseURL
+    }
+    
     func processText(_ text: String, completion: @escaping (ZhipuAIResponse?) -> Void) {
+        // 检查API密钥是否已配置
+        guard let apiKey = self.apiKey, !apiKey.isEmpty else {
+            print("错误：智谱AI API密钥未配置")
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+            return
+        }
+        
         let prompt = """
         请从以下文本中提取交易信息，并以JSON格式返回，包含以下字段：
         - amount: 交易金额（数字）
         - transaction_time: 交易时间（格式：yyyy年MM月dd日 HH:mm:ss）
         - item_description: 商品描述
-        - category: 交易类别
+        - category: 交易类别（必须从以下预定义列表中选择最匹配的）
         - transaction_type: 交易类型（收入/支出）
-        - payment_method: 支付方式
+        - payment_method: 支付方式（必须从以下预定义列表中选择最匹配的）
         - notes: 备注信息
+
+        支出类别选项：数码电器、餐饮美食、自我提升、服装饰品、日用百货、车辆交通、娱乐休闲、医疗健康、家庭支出、充值缴费、其他
+        
+        收入类别选项：主业收入、副业收入、投资理财、红包礼金、其他收入
+        
+        支付方式选项：现金、招商银行卡、中信银行卡、交通银行卡、建设银行卡、工商银行卡、农业银行卡、中国银行卡、民生银行卡、光大银行卡、华夏银行卡、平安银行卡、浦发银行卡、兴业银行卡、信用卡、招商信用卡、建行信用卡、工行信用卡、微信、支付宝、Apple Pay、Samsung Pay、云闪付、数字人民币、银行转账、网银转账、手机银行、其他支付
+        
+        分类规则：
+        1. 优先根据商户名称、商品描述进行分类
+        2. 如果包含品牌名（如麦当劳、星巴克等）请归类到对应类别
+        3. 如果无法确定具体类别，选择"其他"或"其他收入"
+        4. 支付方式要根据实际支付渠道选择，如微信支付选择"微信"，银行卡支付选择对应银行
+        
+        示例：
+        - "麦当劳 汉堡套餐" → category: "餐饮美食"
+        - "苹果专卖店 iPhone" → category: "数码电器"
+        - "滴滴出行 打车费" → category: "车辆交通", payment_method: "微信"
+        - "工资发放" → category: "主业收入", transaction_type: "收入"
 
         文本内容：
         \(text)
