@@ -62,6 +62,16 @@ class TransactionViewModel: ObservableObject {
             }
         }
         
+        // 监听持久化存储远程变化通知
+        NotificationCenter.default.addObserver(
+            forName: .NSPersistentStoreRemoteChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("检测到持久化存储远程变化，刷新交易数据")
+            self?.fetchTransactions()
+        }
+        
         // 监听应用从后台返回前台的通知
         NotificationCenter.default.addObserver(
             forName: UIApplication.willEnterForegroundNotification,

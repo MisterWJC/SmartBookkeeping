@@ -36,6 +36,25 @@ struct AlertItem: Identifiable {
     let id = UUID()
     let title: String
     let message: String
+    let type: AlertType
+    let primaryAction: (() -> Void)?
+    let secondaryAction: (() -> Void)?
+    
+    init(title: String, message: String, type: AlertType = .info, primaryAction: (() -> Void)? = nil, secondaryAction: (() -> Void)? = nil) {
+        self.title = title
+        self.message = message
+        self.type = type
+        self.primaryAction = primaryAction
+        self.secondaryAction = secondaryAction
+    }
+}
+
+/// Enum to define different types of alerts
+enum AlertType {
+    case info           // 普通信息提示
+    case confirmation   // 需要确认的操作
+    case error          // 错误提示
+    case processing     // 处理中状态
 }
 
 // MARK: - TransactionFormViewModel
@@ -85,6 +104,47 @@ final class TransactionFormViewModel: ObservableObject {
         setupSpeechRecognitionSinks()
     }
     
+    // MARK: - URL Data Handling
+    
+    func populateFromURLData(_ data: [String: String]) {
+        // 解析并填充表单数据
+        if let amountStr = data["amount"], let amount = Double(amountStr) {
+            formData.amount = String(format: "%.2f", amount)
+        }
+        
+        if let dateStr = data["date"] {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+            if let date = dateFormatter.date(from: dateStr) {
+                formData.date = date
+            }
+        }
+        
+        if let description = data["description"] {
+            formData.description = description
+        }
+        
+        if let category = data["category"] {
+            formData.category = category
+        }
+        
+        if let typeStr = data["type"], let type = Transaction.TransactionType(rawValue: typeStr) {
+            formData.type = type
+            // 更新分类以匹配新的类型
+            updateCategoryForType(type)
+        }
+        
+        if let paymentMethod = data["paymentMethod"] {
+            formData.paymentMethod = paymentMethod
+        }
+        
+        if let note = data["note"] {
+            formData.note = note
+        }
+        
+        print("表单数据已从 URL 参数填充: \(data)")
+    }
+    
     // MARK: - Computed Properties for View
     
     var categoriesForSelectedType: [String] {
@@ -121,12 +181,23 @@ final class TransactionFormViewModel: ObservableObject {
         activeSheet = sheet
     }
     
+    func showImageConfirmation(for image: UIImage, onConfirm: @escaping () -> Void, onCancel: @escaping () -> Void) {
+        alertItem = AlertItem(
+            title: "确认使用此图片？",
+            message: "请确认是否使用选择的图片进行识别",
+            type: .confirmation,
+            primaryAction: onConfirm,
+            secondaryAction: onCancel
+        )
+    }
+    
     func handleImageSelected(_ image: UIImage?) {
         guard let image = image else { return }
         
         // 检查是否正在处理AI请求，防止重复调用
         if isProcessingAI {
-            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...")
+            print("AI正在处理中，显示警告")
+            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...", type: .processing)
             return
         }
         
@@ -145,9 +216,9 @@ final class TransactionFormViewModel: ObservableObject {
                 self.isProcessingAI = false  // 重置AI处理状态
                 if let transaction = ocrTransaction {
                     self.updateForm(with: transaction)
-                    self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。")
-                } else {
-                    self.alertItem = AlertItem(title: "识别失败", message: "无法识别图片内容，请手动输入。")
+                    self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。", type: .info)
+            } else {
+                self.alertItem = AlertItem(title: "识别失败", message: "无法识别图片内容，请手动输入。", type: .error)
                 }
             }
         }
@@ -155,13 +226,13 @@ final class TransactionFormViewModel: ObservableObject {
     
     func processQuickInput() {
         guard !quickInputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            alertItem = AlertItem(title: "输入为空", message: "请输入账单信息")
+            alertItem = AlertItem(title: "输入为空", message: "请输入账单信息", type: .error)
             return
         }
         
         // 检查是否正在处理AI请求，防止重复调用
         if isProcessingAI {
-            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...")
+            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...", type: .processing)
             return
         }
         
@@ -178,7 +249,7 @@ final class TransactionFormViewModel: ObservableObject {
                     if let transaction = BillProcessingService.shared.processAIResponse(response) {
                         // 更新表单
                         self.updateForm(with: transaction)
-                        self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。")
+                        self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。", type: .info)
                     } else {
                         // AI 响应处理失败，创建一个基本的 Transaction 对象
                         let transaction = Transaction(
@@ -191,7 +262,7 @@ final class TransactionFormViewModel: ObservableObject {
                             note: ""
                         )
                         self.updateForm(with: transaction)
-                        self.alertItem = AlertItem(title: "识别失败", message: "AI 响应处理失败，请手动填写。")
+                        self.alertItem = AlertItem(title: "识别失败", message: "AI 响应处理失败，请手动填写。", type: .error)
                     }
                 } else {
                     // 识别失败，创建一个基本的 Transaction 对象
@@ -205,7 +276,7 @@ final class TransactionFormViewModel: ObservableObject {
                         note: ""
                     )
                     self.updateForm(with: transaction)
-                    self.alertItem = AlertItem(title: "识别失败", message: "无法识别账单信息，请手动填写。")
+                    self.alertItem = AlertItem(title: "识别失败", message: "无法识别账单信息，请手动填写。", type: .error)
                 }
                 
                 // 不再自动关闭手动输入页面，让用户决定何时关闭
@@ -218,7 +289,7 @@ final class TransactionFormViewModel: ObservableObject {
 
     func saveTransaction() {
         guard let amountValue = Double(formData.amount), amountValue != 0 else {
-            alertItem = AlertItem(title: "错误", message: "请输入有效的金额。")
+            alertItem = AlertItem(title: "错误", message: "请输入有效的金额。", type: .error)
             return
         }
         
@@ -248,14 +319,14 @@ final class TransactionFormViewModel: ObservableObject {
             try context.save()
             print("Transaction saved successfully: \(newTransaction.description) - \(newTransaction.amount)")
             resetForm()
-            alertItem = AlertItem(title: "成功", message: "账单已保存。")
+            alertItem = AlertItem(title: "成功", message: "账单已保存。", type: .info)
             // Notify that transaction was saved
             onTransactionSaved?()
         } catch {
             // Handle the error appropriately
             let nsError = error as NSError
             print("Error saving transaction: \(nsError), \(nsError.userInfo)")
-            alertItem = AlertItem(title: "保存失败", message: "保存账单时发生错误: \(nsError.localizedDescription)")
+            alertItem = AlertItem(title: "保存失败", message: "保存账单时发生错误: \(nsError.localizedDescription)", type: .error)
         }
     }
     
@@ -273,7 +344,7 @@ final class TransactionFormViewModel: ObservableObject {
 
         speechService.$error
             .compactMap { $0 }
-            .map { AlertItem(title: "语音识别错误", message: $0) }
+            .map { AlertItem(title: "语音识别错误", message: $0, type: .error) }
             .assign(to: &$alertItem)
     }
     
@@ -283,7 +354,7 @@ final class TransactionFormViewModel: ObservableObject {
             isRecording = true
             try speechService.startRecording()
         } catch {
-            alertItem = AlertItem(title: "录音错误", message: error.localizedDescription)
+            alertItem = AlertItem(title: "录音错误", message: error.localizedDescription, type: .error)
             isRecording = false
             recordingStartTime = nil
         }

@@ -16,7 +16,6 @@ class OCRService {
     static let incomeCategories = CategoryDataManager.shared.incomeCategories
     static let paymentMethods = CategoryDataManager.shared.paymentMethods
 
-
     func recognizeText(from image: UIImage, completion: @escaping (Transaction?) -> Void) {
         // 预处理图片以提高 OCR 识别准确率
         let processedImage = preprocessImage(image)
@@ -81,6 +80,62 @@ class OCRService {
         } catch {
             print("执行识别请求失败：\(error.localizedDescription)")
             // 确保在主线程调用回调
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+        }
+    }
+    
+    /// 仅进行 OCR 识别，返回识别的文本内容
+    func recognizeTextOnly(from image: UIImage, completion: @escaping (String?) -> Void) {
+        // 预处理图片以提高 OCR 识别准确率
+        let processedImage = preprocessImage(image)
+        
+        guard let cgImage = processedImage.cgImage else {
+            DispatchQueue.main.async {
+                completion(nil)
+            }
+            return
+        }
+        
+        let requestHandler = VNImageRequestHandler(cgImage: cgImage)
+        let request = VNRecognizeTextRequest { (request, error) in
+            guard error == nil else {
+                print("OCR识别错误：\(error!.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
+            }
+            
+            guard let observations = request.results as? [VNRecognizedTextObservation] else {
+                print("无法获取OCR识别结果")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
+            }
+            
+            // 提取所有识别的文本
+            var recognizedText = ""
+            for observation in observations {
+                guard let topCandidate = observation.topCandidates(1).first else { continue }
+                recognizedText += topCandidate.string + "\n"
+            }
+            
+            DispatchQueue.main.async {
+                completion(recognizedText.isEmpty ? nil : recognizedText.trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+        }
+        
+        request.recognitionLevel = .accurate
+        request.recognitionLanguages = ["zh-Hans", "en-US"]
+        request.usesLanguageCorrection = true
+        
+        do {
+            try requestHandler.perform([request])
+        } catch {
+            print("执行OCR识别请求失败：\(error.localizedDescription)")
             DispatchQueue.main.async {
                 completion(nil)
             }
@@ -297,11 +352,8 @@ class OCRService {
             determinedCategory = "未分类" // 如果匹配不上，则默认为"未分类"
         }
 
-
         return BillDetails(amount: finalAmount, date: finalDate, merchant: finalMerchant, category: determinedCategory, paymentMethod: finalPaymentMethod, description: recognizedText /* or a summary */) 
     }
-
-
     
     // 辅助函数：找到数组中出现次数最多的元素
     private func mostFrequentElement<T: Hashable>(from array: [T]) -> T? {
@@ -309,8 +361,6 @@ class OCRService {
         array.forEach { counts[$0, default: 0] += 1 }
         return counts.max(by: { $0.value < $1.value })?.key
     }
-
-
 }
 
 struct BillDetails { // Example structure 

@@ -139,16 +139,10 @@ class SpeechRecognitionService: ObservableObject {
                                 print("DEBUG: SpeechRecognitionService - recognitionTask completion: Error 1110 (No Speech Detected) occurred, but isRecording is false. Silently ignoring as likely due to quick stop. Will still check for final result.")
                                 currentError = nil // Effectively silence this error for subsequent checks
                             } else if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1101 {
-                                self.error = "未检测到语音 (1101)。请重试。"
-                                print("DEBUG: No speech detected (Error 1101). Checking if still recording before stopping.")
-                                // 只有在isRecording为true且不是由external_public_api_delayed触发的情况下才停止录音
-                                // 这样可以避免在用户已经手动停止录音后再次调用stopRecordingInternal
-                                if self.isRecording && self.recognitionTask != nil {
-                                    print("DEBUG: Still recording with Error 1101, stopping recording.")
-                                    self.stopRecordingInternal(caller: "recognitionTask_error_1101")
-                                } else {
-                                    print("DEBUG: Error 1101 occurred but recording already stopped or task nil. Not calling stopRecordingInternal again.")
-                                }
+                                print("DEBUG: No speech detected (Error 1101). Silently ignoring to prevent infinite loop.")
+                                // 不设置error，避免触发无限循环
+                                // 静默处理1101错误，让任务自然结束
+                                currentError = nil // 静默处理此错误
                             } else if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1110 {
                                 self.error = "未检测到语音 (1110)。请重试。"
                                 print("DEBUG: No speech detected (Error 1110) - (isRecording was likely true or different error). Calling stopRecordingInternal if recording.")
@@ -299,27 +293,30 @@ class SpeechRecognitionService: ObservableObject {
         }
 
         if caller == "external_public_api" || caller == "external_public_api_delayed" {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Not cancelling/nilling recognitionTask here to allow it to finish.")
-            // For external calls, we've called endAudio(). The task's own callback will handle its nilling and further cleanup if needed.
+            // 对于外部调用，我们需要取消任务以避免潜在的回调问题
+            if let task = recognitionTask {
+                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Cancelling recognitionTask to prevent callback issues. Current state: \(task.state.rawValue)")
+                task.cancel()
+                recognitionTask = nil
+            } else {
+                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask was already nil.")
+            }
         } else if recognitionTask != nil {
             // For internal calls (errors, final cleanup from task itself, or startup issues)
             print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Cancelling recognitionTask. Current state: \(recognitionTask?.state.rawValue ?? -1)")
             recognitionTask?.cancel()
             recognitionTask = nil
             print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask cancelled and set to nil.")
-            // If task is nilled by internal cleanup, request should also be nilled.
-            // This is now handled by the general recognitionRequest nilling logic below, specific to non-external calls.
         } else { 
             print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask was already nil.")
         }
         
-        // If the call is NOT from external_public_api or external_public_api_delayed, it's an internal cleanup, so nil out the request.
-        // If it IS from external_public_api or external_public_api_delayed, we leave recognitionRequest for the task's callback to handle.
-        if caller != "external_public_api" && caller != "external_public_api_delayed" {
+        // 统一清理recognitionRequest，避免资源泄漏
+        if recognitionRequest != nil {
             recognitionRequest = nil
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller) (internal): recognitionRequest set to nil.")
+            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionRequest set to nil.")
         } else {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller) (external): recognitionRequest NOT nilled here.")
+            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionRequest was already nil.")
         }
 
         do {

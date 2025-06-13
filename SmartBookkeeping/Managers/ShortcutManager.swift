@@ -6,6 +6,8 @@ class ShortcutManager: ObservableObject {
     @Published var isProcessing = false
     @Published var processedData: Transaction?
     @Published var error: String?
+    @Published var shouldShowEditForm = false
+    @Published var editFormData: [String: String] = [:]
     
     func handleShortcutImage(_ imageData: Data) {
         isProcessing = true
@@ -64,9 +66,19 @@ class ShortcutManager: ObservableObject {
         }
     }
     
+    func handleEditURLData(_ data: [String: String]) {
+        DispatchQueue.main.async {
+            self.editFormData = data
+            self.shouldShowEditForm = true
+            print("接收到编辑数据: \(data)")
+        }
+    }
+    
     func reset() {
         isProcessing = false
         processedData = nil
         error = nil
+        shouldShowEditForm = false
+        editFormData = [:]
     }
 }

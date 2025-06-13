@@ -25,11 +25,23 @@ struct SmartBookkeeping_App: App {
     }
     
     private func handleURL(_ url: URL) {
+        print("=== 主应用 URL 处理调试信息 ===")
         print("收到 URL: \(url)")
+        print("URL scheme: \(url.scheme ?? "无")")
+        print("URL path: \(url.path)")
+        print("URL absoluteString: \(url.absoluteString)")
         
         // 处理从分享扩展传入的 URL
         if url.absoluteString.hasPrefix("smartbookkeeping://fromShareExtension") {
+            print("处理分享扩展 URL")
             handleShareExtensionURL()
+            return
+        }
+        
+        // 处理编辑页面 URL
+        if url.absoluteString.hasPrefix("smartbookkeeping://") && url.path == "/edit" {
+            print("处理编辑页面 URL")
+            handleEditURL(url)
             return
         }
         
@@ -53,6 +65,32 @@ struct SmartBookkeeping_App: App {
             let fileURL = containerURL.appendingPathComponent("shared_image.png")
             handleImageURL(fileURL)
         }
+    }
+    
+    private func handleEditURL(_ url: URL) {
+        print("=== 编辑 URL 处理调试信息 ===")
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let queryItems = components.queryItems else {
+            print("无法解析编辑 URL 参数")
+            return
+        }
+        
+        print("URL 组件解析成功，查询项数量: \(queryItems.count)")
+        
+        // 解析 URL 参数
+        var transactionData: [String: String] = [:]
+        for item in queryItems {
+            if let value = item.value {
+                transactionData[item.name] = value
+                print("参数: \(item.name) = \(value)")
+            }
+        }
+        
+        print("解析的交易数据: \(transactionData)")
+        
+        // 将数据传递给 ShortcutManager
+        shortcutManager.handleEditURLData(transactionData)
+        print("数据已传递给 ShortcutManager")
     }
     
     private func handleImageURL(_ fileURL: URL) {

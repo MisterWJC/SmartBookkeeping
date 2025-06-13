@@ -18,6 +18,7 @@ struct TransactionFormView: View {
     
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focusedField: FormField?
+    @EnvironmentObject var shortcutManager: ShortcutManager
     
     // Add TransactionViewModel to refresh data after saving
     let transactionViewModel: TransactionViewModel?
@@ -54,6 +55,17 @@ struct TransactionFormView: View {
                     transactionViewModel?.fetchTransactions()
                 }
             }
+            .onChange(of: shortcutManager.shouldShowEditForm) { shouldShow in
+                if shouldShow && !shortcutManager.editFormData.isEmpty {
+                    // 填充表单数据
+                    viewModel.populateFromURLData(shortcutManager.editFormData)
+                    // 重置 ShortcutManager 状态
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        shortcutManager.shouldShowEditForm = false
+                        shortcutManager.editFormData = [:]
+                    }
+                }
+            }
             // 移除onChange监听器，因为图片处理现在通过确认对话框处理
             // Add other handlers like .onOpenURL that call viewModel methods.
         }
@@ -64,28 +76,26 @@ struct TransactionFormView: View {
     // MARK: - View Modifier for Sheets and Alerts
     private struct SheetAndAlertModifier: ViewModifier {
         @ObservedObject var viewModel: TransactionFormViewModel
-        @State private var showImageConfirmation: Bool = false
         @State private var pendingImage: UIImage? = nil
 
         func body(content: Content) -> some View {
             content
                 .onChange(of: pendingImage) { newImage in
-                    if newImage != nil {
-                        // 当有新图片时，显示确认对话框
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            showImageConfirmation = true
-                        }
+                    if let image = newImage {
+                        viewModel.showImageConfirmation(
+                            for: image,
+                            onConfirm: {
+                                viewModel.formData.image = image
+                                viewModel.handleImageSelected(image)
+                                pendingImage = nil
+                            },
+                            onCancel: {
+                                pendingImage = nil
+                            }
+                        )
                     }
                 }
-                .sheet(item: $viewModel.activeSheet, onDismiss: {
-                    // 确保在相册或相机关闭后，如果有选择图片，显示确认对话框
-                    if pendingImage != nil {
-                        // 在主线程更新UI，并添加延迟以确保sheet已完全关闭
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showImageConfirmation = true
-                        }
-                    }
-                }) { sheet in
+                .sheet(item: $viewModel.activeSheet) { sheet in
                     switch sheet {
                     case .imagePicker: ImagePicker(image: $pendingImage)
                     case .camera: CameraView(image: $pendingImage)
@@ -95,21 +105,32 @@ struct TransactionFormView: View {
                         }, viewModel: viewModel)
                     }
                 }
-                .alert("确认使用此图片？", isPresented: $showImageConfirmation) {
-                    Button("确认") {
-                        if let image = pendingImage {
-                            // 先设置图片到formData，然后调用处理方法
-                            viewModel.formData.image = image
-                            viewModel.handleImageSelected(image)
-                            pendingImage = nil
-                        }
+                .alert(item: $viewModel.alertItem) { alertItem in
+                    switch alertItem.type {
+                    case .confirmation:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            primaryButton: .default(Text("确认")) {
+                                alertItem.primaryAction?()
+                            },
+                            secondaryButton: .cancel(Text("取消")) {
+                                alertItem.secondaryAction?()
+                            }
+                        )
+                    case .processing:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            dismissButton: .default(Text("确定"))
+                        )
+                    case .info, .error:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            dismissButton: .default(Text("确定"))
+                        )
                     }
-                    Button("取消", role: .cancel) {
-                        pendingImage = nil
-                    }
-                }
-                .alert(item: $viewModel.alertItem) { item in
-                    Alert(title: Text(item.title), message: Text(item.message), dismissButton: .default(Text("确定")))
                 }
         }
     }

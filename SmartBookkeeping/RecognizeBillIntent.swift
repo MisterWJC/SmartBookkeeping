@@ -77,11 +77,7 @@ struct RecognizeBillIntent: AppIntent {
         
         do {
             try context.save()
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            let formattedDate = dateFormatter.string(from: recognizedTransaction.date)
-            
-            let resultMessage = "识别成功！\n金额：¥\(recognizedTransaction.amount)\n日期：\(formattedDate)\n描述：\(recognizedTransaction.description)\n分类：\(recognizedTransaction.category)\n收支：\(recognizedTransaction.type.rawValue)\n收/支方式：\(recognizedTransaction.paymentMethod)\n备注：\(recognizedTransaction.note)"
+            let resultMessage = formatTransactionResult(recognizedTransaction)
             return .result(value: resultMessage)
         } catch {
             return .result(value: "保存失败：\(error.localizedDescription)")
@@ -136,4 +132,22 @@ struct RecognizeBillIntent: AppIntent {
             print("保存 OCR 交易失败: \(error)")
         }
     }
+    
+    private func formatTransactionResult(_ transaction: Transaction) -> String {
+        var result = "✅ 账单识别成功！\n\n"
+        result += "💰 金额：¥\(String(format: "%.2f", transaction.amount))\n"
+        result += "📅 日期：\(DateFormatter.localizedString(from: transaction.date, dateStyle: .medium, timeStyle: .none))\n"
+        result += "📝 描述：\(transaction.description)\n"
+        result += "🏷️ 类别：\(transaction.category)\n"
+        result += "💳 支付方式：\(transaction.paymentMethod)\n"
+        result += "📋 类型：\(transaction.type.rawValue)\n"
+        
+        if !transaction.note.isEmpty {
+            result += "📄 备注：\(transaction.note)\n"
+        }
+        
+        result += "\n✨ 已自动保存到记账本"
+        return result
+    }
+ 
 }
