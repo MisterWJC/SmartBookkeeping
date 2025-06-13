@@ -15,8 +15,14 @@ struct ImagePicker: UIViewControllerRepresentable {
         var config = PHPickerConfiguration()
         config.filter = .images // 只选择图片
         config.selectionLimit = 1 // 最多选择一张图片
+        config.preferredAssetRepresentationMode = .current // 使用当前表示模式
+        
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
+        
+        // 禁用辅助功能相关的自动化功能来避免AX Lookup错误
+        picker.modalPresentationStyle = .fullScreen
+        
         return picker
     }
 
@@ -36,21 +42,21 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            // 首先检查是否有选择结果
-            let hasResults = !results.isEmpty
+            // 立即关闭选择器
+            picker.dismiss(animated: true)
             
-            // 先关闭选择器，并在完成后处理结果
-            picker.dismiss(animated: true) { [weak self] in
-                guard let self = self, hasResults else { return }
-                
-                guard let provider = results.first?.itemProvider else { return }
-                
-                if provider.canLoadObject(ofClass: UIImage.self) {
-                    provider.loadObject(ofClass: UIImage.self) { [weak self] image, _ in
-                        // 确保在主线程更新UI，并添加延迟以避免视图控制器冲突
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            self?.parent.image = image as? UIImage
-                        }
+            // 检查是否有选择结果
+            guard !results.isEmpty,
+                  let provider = results.first?.itemProvider,
+                  provider.canLoadObject(ofClass: UIImage.self) else {
+                return
+            }
+            
+            // 异步加载图片
+            provider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                DispatchQueue.main.async {
+                    if let image = image as? UIImage {
+                        self?.parent.image = image
                     }
                 }
             }

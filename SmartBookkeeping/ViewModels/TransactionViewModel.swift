@@ -9,29 +9,10 @@ import Foundation
 import SwiftUI
 import Combine
 import CoreData
+import UIKit
 
 class TransactionViewModel: ObservableObject {
-    // 静态列表数据
-    let expenseCategories = ["请选择分类", "未分类", "数码电器", "餐饮美食", "自我提升", "服装饰品", "日用百货", "车辆交通", "娱乐休闲", "医疗健康", "家庭支出", "充值缴费", "其他", "总计"]
-    let incomeCategories = ["请选择分类", "未分类", "副业收入", "投资理财", "主业收入", "红包礼金", "合计"]
-    let paymentMethods = ["请选择", "现金", "招商银行卡", "中信银行卡", "交通银行卡", "建设银行卡", "微信", "支付宝", "招商信用卡"]
-    
     @Published var rawInput: String = "" // Add this line
-
-    // 根据交易类型动态返回分类列表
-    func categories(for type: Transaction.TransactionType) -> [String] {
-        switch type {
-        case .expense, .transfer://, .investment: // TODO:转账和投资也可能需要从支出分类中选择
-            return expenseCategories
-        case .income:
-            return incomeCategories
-        }
-    }
-    
-    // 付款/收款方式列表（目前收入和支出场景相同）
-    func paymentMethods(for type: Transaction.TransactionType) -> [String] {
-        return paymentMethods // 简单返回，如果后续有不同再调整
-    }
     @Published var transactions: [Transaction] = []
     @Published var currentMonthIncome: Double = 0.0
     @Published var currentMonthExpense: Double = 0.0
@@ -50,7 +31,46 @@ class TransactionViewModel: ObservableObject {
             }
             .store(in: &cancellables)
         
+        // 监听Core Data上下文变化，以便在快捷指令添加数据后自动刷新
+        setupCoreDataNotifications()
+        
         fetchTransactions() // 初始化时获取一次数据
+    }
+    
+    deinit {
+        // 移除通知观察者
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    private func setupCoreDataNotifications() {
+        // 监听Core Data保存通知
+        NotificationCenter.default.addObserver(
+            forName: .NSManagedObjectContextDidSave,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let self = self else { return }
+            
+            // 检查通知是否来自其他上下文（如快捷指令）
+            if let context = notification.object as? NSManagedObjectContext,
+               context != self.viewContext {
+                print("检测到外部上下文数据变化，刷新交易数据")
+                // 合并变化到当前上下文
+                self.viewContext.mergeChanges(fromContextDidSave: notification)
+                // 重新获取数据
+                self.fetchTransactions()
+            }
+        }
+        
+        // 监听应用从后台返回前台的通知
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            print("应用返回前台，刷新交易数据")
+            self?.fetchTransactions()
+        }
     }
     
     func updateStatistics(with transactions: [Transaction]) {

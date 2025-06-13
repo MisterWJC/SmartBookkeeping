@@ -11,9 +11,10 @@ import Vision
 import NaturalLanguage
 
 class OCRService {
-    static let expenseCategories = ["数码电器", "餐饮美食", "自我提升", "服装饰品", "日用百货", "车辆交通", "娱乐休闲", "医疗健康", "家庭支出", "充值缴费", "其他"]
-    static let incomeCategories = ["副业收入", "投资理财", "主业收入", "红包礼金"]
-    static let paymentMethods = ["现金", "招商银行卡", "中信银行卡", "微信", "支付宝", "招商信用卡", "交通信用卡"]
+    // 使用统一的数据管理器
+    static let expenseCategories = CategoryDataManager.shared.expenseCategories
+    static let incomeCategories = CategoryDataManager.shared.incomeCategories
+    static let paymentMethods = CategoryDataManager.shared.paymentMethods
 
 
     func recognizeText(from image: UIImage, completion: @escaping (Transaction?) -> Void) {
@@ -108,7 +109,7 @@ class OCRService {
         } else {
             // 如果 BillProcessingService 也失败了，创建一个基本的 Transaction
             let basicTransaction = Transaction(
-                amount: billDetails.amount ?? 0.0,
+                amount: abs(billDetails.amount ?? 0.0),
                 date: billDetails.date ?? Date(),
                 category: "未分类",
                 description: billDetails.merchant ?? billDetails.description,

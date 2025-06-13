@@ -17,9 +17,9 @@ struct TransactionFormData {
     var amount: String = ""
     var date: Date = Date()
     var description: String = ""
-    var category: String = OCRService.expenseCategories[0]
+    var category: String = CategoryDataManager.shared.expenseCategories.first ?? "其他"
     var type: Transaction.TransactionType = .expense
-    var paymentMethod: String = OCRService.paymentMethods[0]
+    var paymentMethod: String = CategoryDataManager.shared.paymentMethods.first ?? "现金"
     var note: String = ""
     var image: UIImage? = nil
 }
@@ -59,6 +59,7 @@ final class TransactionFormViewModel: ObservableObject {
     // Processing state
     @Published var isProcessing: Bool = false
     @Published var isRecording: Bool = false
+    @Published var isProcessingAI: Bool = false  // 新增：跟踪AI处理状态
     var recordingStartTime: Date? = nil
     
     // Dependencies
@@ -87,11 +88,11 @@ final class TransactionFormViewModel: ObservableObject {
     // MARK: - Computed Properties for View
     
     var categoriesForSelectedType: [String] {
-        return formData.type == .expense ? OCRService.expenseCategories : OCRService.incomeCategories
+        return CategoryDataManager.shared.categories(for: formData.type)
     }
     
     var paymentMethodsForSelectedType: [String] {
-        return OCRService.paymentMethods
+        return CategoryDataManager.shared.paymentMethods
     }
     
     // MARK: - Intents (User Actions)
@@ -100,6 +101,13 @@ final class TransactionFormViewModel: ObservableObject {
         inputMode = mode
         if mode == .voice {
             quickInputText = ""
+        }
+    }
+    
+    func updateCategoryForType(_ type: Transaction.TransactionType) {
+        let categories = CategoryDataManager.shared.categories(for: type)
+        if let firstCategory = categories.first {
+            formData.category = firstCategory
         }
     }
     
@@ -115,8 +123,16 @@ final class TransactionFormViewModel: ObservableObject {
     
     func handleImageSelected(_ image: UIImage?) {
         guard let image = image else { return }
+        
+        // 检查是否正在处理AI请求，防止重复调用
+        if isProcessingAI {
+            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...")
+            return
+        }
+        
         formData.image = image
         isProcessing = true
+        isProcessingAI = true  // 设置AI处理状态
         
         // Encapsulate OCR and AI processing
         ocrService.recognizeText(from: image) { [weak self] ocrTransaction in
@@ -126,6 +142,7 @@ final class TransactionFormViewModel: ObservableObject {
             // AI processing logic would be called here.
             DispatchQueue.main.async {
                 self.isProcessing = false
+                self.isProcessingAI = false  // 重置AI处理状态
                 if let transaction = ocrTransaction {
                     self.updateForm(with: transaction)
                     self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。")
@@ -137,7 +154,19 @@ final class TransactionFormViewModel: ObservableObject {
     }
     
     func processQuickInput() {
+        guard !quickInputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            alertItem = AlertItem(title: "输入为空", message: "请输入账单信息")
+            return
+        }
+        
+        // 检查是否正在处理AI请求，防止重复调用
+        if isProcessingAI {
+            alertItem = AlertItem(title: "处理中", message: "正在处理中，请稍候...")
+            return
+        }
+        
         isProcessing = true
+        isProcessingAI = true  // 设置AI处理状态
         
         // 调用 AIService 处理手动输入的文本
         AIService.shared.processText(quickInputText) { [weak self] aiResponse in
@@ -181,13 +210,14 @@ final class TransactionFormViewModel: ObservableObject {
                 
                 // 不再自动关闭手动输入页面，让用户决定何时关闭
                 self.isProcessing = false
+                self.isProcessingAI = false  // 重置AI处理状态
                 // 保留输入文本，方便用户进一步编辑
             }
         }
     }
 
     func saveTransaction() {
-        guard let amountValue = Double(formData.amount), amountValue > 0 else {
+        guard let amountValue = Double(formData.amount), amountValue != 0 else {
             alertItem = AlertItem(title: "错误", message: "请输入有效的金额。")
             return
         }
@@ -231,9 +261,7 @@ final class TransactionFormViewModel: ObservableObject {
     
     func resetForm() {
         formData = TransactionFormData()
-        // Ensure default category/payment method are valid after reset
-        formData.category = categoriesForSelectedType.first ?? "未分类"
-        formData.paymentMethod = paymentMethodsForSelectedType.first ?? "未知"
+        // TransactionFormData已经设置了正确的默认值，无需额外设置
     }
     
     // MARK: - Voice Input Handling

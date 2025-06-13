@@ -12,10 +12,8 @@ import UIKit
 class BillProcessingService {
     static let shared = BillProcessingService()
     
-    // 从 OCRService 复制过来的预定义类别和支付方式
-    private let expenseCategories = OCRService.expenseCategories
-    private let incomeCategories = OCRService.incomeCategories
-    private let paymentMethods = OCRService.paymentMethods
+    // 使用统一的数据管理器
+    private let categoryManager = CategoryDataManager.shared
     
     private init() {}
     
@@ -32,15 +30,15 @@ class BillProcessingService {
         let transactionDate = parseTransactionDate(from: response.transaction_time)
         
         // 根据交易类型选择合适的类别列表
-        let categoryList = transactionType == .income ? incomeCategories : expenseCategories
+        let categoryList = categoryManager.categories(for: transactionType)
         
         // 处理类别和支付方式，使用相似度匹配
         let category = findBestMatch(for: response.category, from: categoryList) ?? "未分类"
-        let paymentMethod = findBestMatch(for: response.payment_method, from: paymentMethods) ?? "未知"
+        let paymentMethod = findBestMatch(for: response.payment_method, from: categoryManager.paymentMethods) ?? "未知"
         
         // 创建 Transaction 对象
         return Transaction(
-            amount: response.amount ?? 0.0,
+            amount: abs(response.amount ?? 0.0),
             date: transactionDate,
             category: category,
             description: response.item_description ?? "",
@@ -60,9 +58,9 @@ class BillProcessingService {
         
         // 处理类别和支付方式，使用相似度匹配
         let transactionType = determineTransactionType(from: response.transaction_type)
-        let categoryList = transactionType == .income ? incomeCategories : expenseCategories
+        let categoryList = categoryManager.categories(for: transactionType)
         let category = findBestMatch(for: response.category, from: categoryList) ?? "未分类"
-        let paymentMethod = findBestMatch(for: response.payment_method, from: paymentMethods) ?? "未知"
+        let paymentMethod = findBestMatch(for: response.payment_method, from: categoryManager.paymentMethods) ?? "未知"
         
         return """
         金额：¥\(response.amount?.description ?? "未识别")
@@ -171,7 +169,7 @@ class BillProcessingService {
         let bChars = Array(b)
         
         // 计算匹配窗口大小
-        let matchDistance = max(aChars.count, bChars.count) / 2 - 1
+        let matchDistance = max(0, max(aChars.count, bChars.count) / 2 - 1)
         
         // 初始化匹配标记数组
         var aMatches = Array(repeating: false, count: aChars.count)
@@ -182,6 +180,9 @@ class BillProcessingService {
         for i in 0..<aChars.count {
             let start = max(0, i - matchDistance)
             let end = min(i + matchDistance + 1, bChars.count)
+            
+            // 确保范围有效
+            guard start < end else { continue }
             
             for j in start..<end {
                 if !bMatches[j] && aChars[i] == bChars[j] {
@@ -201,8 +202,8 @@ class BillProcessingService {
         var j = 0
         for i in 0..<aChars.count {
             if aMatches[i] {
-                while !bMatches[j] { j += 1 }
-                if aChars[i] != bChars[j] { transpositions += 1 }
+                while j < bMatches.count && !bMatches[j] { j += 1 }
+                if j < bMatches.count && aChars[i] != bChars[j] { transpositions += 1 }
                 j += 1
             }
         }

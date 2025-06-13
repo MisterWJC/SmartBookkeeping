@@ -77,7 +77,11 @@ struct RecognizeBillIntent: AppIntent {
         
         do {
             try context.save()
-            let resultMessage = "识别成功！\n金额：¥\(recognizedTransaction.amount)\n类别：\(recognizedTransaction.category)\n描述：\(recognizedTransaction.description)"
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+            let formattedDate = dateFormatter.string(from: recognizedTransaction.date)
+            
+            let resultMessage = "识别成功！\n金额：¥\(recognizedTransaction.amount)\n日期：\(formattedDate)\n描述：\(recognizedTransaction.description)\n分类：\(recognizedTransaction.category)\n收支：\(recognizedTransaction.type.rawValue)\n收/支方式：\(recognizedTransaction.paymentMethod)\n备注：\(recognizedTransaction.note)"
             return .result(value: resultMessage)
         } catch {
             return .result(value: "保存失败：\(error.localizedDescription)")
