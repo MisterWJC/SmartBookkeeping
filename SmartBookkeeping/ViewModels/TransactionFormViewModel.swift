@@ -17,7 +17,7 @@ struct TransactionFormData {
     var amount: String = ""
     var date: Date = Date()
     var description: String = ""
-    var category: String = CategoryDataManager.shared.expenseCategories.first ?? "其他"
+    var category: String = CategoryDataManager.shared.categories(for: .expense).first ?? "其他"
     var type: Transaction.TransactionType = .expense
     var paymentMethod: String = CategoryDataManager.shared.paymentMethods.first ?? "现金"
     var note: String = ""
@@ -397,7 +397,7 @@ final class TransactionFormViewModel: ObservableObject {
                             category: "未分类",
                             description: self.quickInputText,
                             type: .expense,
-                            paymentMethod: "未知",
+                            paymentMethod: "其他",
                             note: ""
                         )
                         self.updateForm(with: transaction)
@@ -411,7 +411,7 @@ final class TransactionFormViewModel: ObservableObject {
                         category: "未分类",
                         description: self.quickInputText,
                         type: .expense,
-                        paymentMethod: "未知",
+                        paymentMethod: "其他",
                         note: ""
                     )
                     self.updateForm(with: transaction)
@@ -574,7 +574,7 @@ final class TransactionFormViewModel: ObservableObject {
         if methods.contains(data.paymentMethod) {
             formData.paymentMethod = data.paymentMethod
         } else {
-            formData.paymentMethod = methods.first ?? "未知"
+            formData.paymentMethod = methods.first ?? "其他"
         }
     }
 

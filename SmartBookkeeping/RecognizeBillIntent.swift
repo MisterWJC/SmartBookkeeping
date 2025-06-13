@@ -148,8 +148,8 @@ struct RecognizeBillIntent: AppIntent {
         }
         
         result += "\n✨ 已自动保存到记账本\n"
-        result += "\n❓ 信息是否准确？如需修改请选择编辑修改\n"
-        result += "\n🔗 编辑链接：smartbookkeeping://edit?transactionId=\(transactionId.uuidString)&action=quickEdit"
+        result += "\n❓ 请检查信息是否准确？需要编辑就点击完成进入下一步。\n"
+        // result += "\n🔗 编辑链接：smartbookkeeping://edit?transactionId=\(transactionId.uuidString)&action=quickEdit"
         return result
     }
  

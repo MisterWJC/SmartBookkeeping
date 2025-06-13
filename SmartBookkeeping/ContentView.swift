@@ -12,6 +12,9 @@ struct ContentView: View {
     @StateObject var transactionViewModel: TransactionViewModel
     @EnvironmentObject var shortcutManager: ShortcutManager
     @State private var selectedTab = 0
+    @State private var showingInitialSetup = false
+    
+    private let categoryManager = CategoryDataManager.shared
 
     init() {
         // Initialize transactionViewModel in init. 
@@ -52,6 +55,19 @@ struct ContentView: View {
                 // 切换到记账页面
                 selectedTab = 0
             }
+        }
+        .onAppear {
+            checkInitialSetup()
+        }
+        .sheet(isPresented: $showingInitialSetup) {
+            InitialSetupView()
+                .interactiveDismissDisabled(true) // 防止用户手动关闭
+        }
+    }
+    
+    private func checkInitialSetup() {
+        if !categoryManager.hasCompletedInitialSetup() {
+            showingInitialSetup = true
         }
     }
 }

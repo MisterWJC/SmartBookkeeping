@@ -12,10 +12,26 @@ struct ProfileView: View {
     // @State private var showingShareSheet = false // Removed
     // @State private var documentURL: URL? // This will now drive the sheet presentation - Replaced by shareableUrl
     @State private var shareableUrl: ShareableURL? // Wrapper to make URL Identifiable
+    @State private var showingCategoryManagement = false
 
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                Button(action: {
+                    showingCategoryManagement = true
+                }) {
+                    HStack {
+                        Image(systemName: "gear")
+                        Text("分类与付款方式管理")
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
                 Button(action: {
                     exportTransactions()
                 }) {
@@ -36,6 +52,9 @@ struct ProfileView: View {
             .navigationTitle("我的")
             .sheet(item: $shareableUrl) { identifiableUrl in
                 ShareSheet(activityItems: [identifiableUrl.url])
+            }
+            .sheet(isPresented: $showingCategoryManagement) {
+                CategoryManagementView()
             }
         }
     }

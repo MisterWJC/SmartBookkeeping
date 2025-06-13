@@ -12,9 +12,20 @@ import NaturalLanguage
 
 class OCRService {
     // 使用统一的数据管理器
-    static let expenseCategories = CategoryDataManager.shared.expenseCategories
-    static let incomeCategories = CategoryDataManager.shared.incomeCategories
-    static let paymentMethods = CategoryDataManager.shared.paymentMethods
+    private let categoryManager = CategoryDataManager.shared
+    
+    // 获取分类的计算属性
+    private var expenseCategories: [String] {
+        return categoryManager.categories(for: .expense)
+    }
+    
+    private var incomeCategories: [String] {
+        return categoryManager.categories(for: .income)
+    }
+    
+    private var paymentMethods: [String] {
+        return categoryManager.paymentMethods
+    }
 
     func recognizeText(from image: UIImage, completion: @escaping (Transaction?) -> Void) {
         // 预处理图片以提高 OCR 识别准确率
@@ -169,7 +180,7 @@ class OCRService {
                 category: "未分类",
                 description: billDetails.merchant ?? billDetails.description,
                 type: .expense,
-                paymentMethod: "未知",
+                paymentMethod: "其他",
                 note: ""
             )
             
