@@ -10,6 +10,7 @@ import SwiftUI
 struct TransactionRowView: View {
     let transaction: Transaction
     @State private var showingEditView = false
+    @EnvironmentObject var viewModel: TransactionViewModel
 
     var body: some View {
         HStack {
@@ -44,7 +45,7 @@ struct TransactionRowView: View {
             showingEditView = true
         }
         .sheet(isPresented: $showingEditView) {
-            TransactionEditView(transaction: transaction)
+            TransactionEditView(transaction: transaction, viewModel: viewModel)
         }
     }
 

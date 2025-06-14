@@ -20,6 +20,10 @@ struct CategoryManagementView: View {
     @State private var showingAddPaymentMethodAlert = false
     @State private var showingDeleteAlert = false
     @State private var itemToDelete: String = ""
+    @State private var showingAccountEdit = false
+    
+    @StateObject private var accountViewModel = AccountViewModel()
+    @StateObject private var transactionViewModel: TransactionViewModel
     
     @FetchRequest private var categories: FetchedResults<CategoryItem>
     @FetchRequest private var paymentMethods: FetchedResults<PaymentMethodItem>
@@ -37,6 +41,22 @@ struct CategoryManagementView: View {
         self._paymentMethods = FetchRequest<PaymentMethodItem>(
             sortDescriptors: [NSSortDescriptor(keyPath: \PaymentMethodItem.sortOrder, ascending: true)]
         )
+        
+        // 初始化TransactionViewModel
+        self._transactionViewModel = StateObject(wrappedValue: TransactionViewModel(context: PersistenceController.shared.container.viewContext))
+    }
+    
+    // 获取TransactionItem数据的辅助方法
+    private func getTransactionItems() -> [TransactionItem] {
+        let request: NSFetchRequest<TransactionItem> = TransactionItem.fetchRequest()
+        request.sortDescriptors = [NSSortDescriptor(keyPath: \TransactionItem.date, ascending: false)]
+        
+        do {
+            return try transactionViewModel.managedObjectContext.fetch(request)
+        } catch {
+            print("获取TransactionItem数据失败: \(error.localizedDescription)")
+            return []
+        }
     }
     
     var body: some View {
@@ -45,7 +65,7 @@ struct CategoryManagementView: View {
                 // 顶部分段控制器
                 Picker("管理类型", selection: $selectedSegment) {
                     Text("分类管理").tag(0)
-                    Text("付款方式").tag(1)
+                    Text("收/付款方式").tag(1)
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
@@ -56,7 +76,7 @@ struct CategoryManagementView: View {
                     paymentMethodManagementView
                 }
             }
-            .navigationTitle("数据管理")
+            .navigationTitle("自定义交易分类和账户")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -66,11 +86,9 @@ struct CategoryManagementView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("添加") {
-                        if selectedSegment == 0 {
+                    if selectedSegment == 0 {
+                        Button("添加") {
                             showingAddCategoryAlert = true
-                        } else {
-                            showingAddPaymentMethodAlert = true
                         }
                     }
                 }
@@ -108,6 +126,14 @@ struct CategoryManagementView: View {
         }
         .onChange(of: selectedTransactionType) { _ in
             updateCategoriesFetchRequest()
+        }
+        .sheet(isPresented: $showingAccountEdit) {
+            NavigationView {
+                AccountEditView(
+                    account: nil,
+                    transactionViewModel: transactionViewModel
+                )
+            }
         }
     }
     
@@ -156,31 +182,57 @@ struct CategoryManagementView: View {
     
     // 付款方式管理视图
     private var paymentMethodManagementView: some View {
-        List {
-            ForEach(paymentMethods, id: \.id) { method in
+        VStack {
+            // 添加账户按钮
+            Button(action: {
+                showingAccountEdit = true
+            }) {
                 HStack {
-                    Text(method.name ?? "未知付款方式")
-                    
-                    Spacer()
-                    
-                    HStack(spacing: 8) {
-                        if method.isDefault {
-                            Text("默认")
+                    Image(systemName: "plus.circle.fill")
+                    Text("添加新账户")
+                }
+                .foregroundColor(.blue)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+            }
+            .padding(.horizontal)
+            
+            // 收/付款方式列表（显示所有账户）
+            List {
+                ForEach(accountViewModel.accounts, id: \.id) { account in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(account.name ?? "未知账户")
+                                .font(.body)
+                            Text(String(format: "余额: %.2f", accountViewModel.calculateCurrentBalance(for: account, transactions: getTransactionItems())))
                                 .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color.blue.opacity(0.2))
-                                .foregroundColor(.blue)
-                                .cornerRadius(4)
+                                .foregroundColor(.secondary)
                         }
                         
-                        Button("删除") {
-                            itemToDelete = method.name ?? ""
-                            showingDeleteAlert = true
+                        Spacer()
+                        
+                        HStack(spacing: 8) {
+                            if account.isDefault {
+                                Text("默认")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color.blue.opacity(0.2))
+                                    .foregroundColor(.blue)
+                                    .cornerRadius(4)
+                            }
+                            
+                            Button("删除") {
+                                itemToDelete = account.name ?? ""
+                                showingDeleteAlert = true
+                            }
+                            .foregroundColor(.red)
+                            .font(.caption)
                         }
-                        .foregroundColor(.red)
-                        .font(.caption)
                     }
+                    .padding(.vertical, 4)
                 }
             }
         }
@@ -209,7 +261,7 @@ struct CategoryManagementView: View {
         if selectedSegment == 0 {
             deleteCategory(itemToDelete)
         } else {
-            deletePaymentMethod(itemToDelete)
+            deleteAccount(itemToDelete)
         }
         itemToDelete = ""
     }
@@ -234,24 +286,9 @@ struct CategoryManagementView: View {
         }
     }
     
-    // 删除付款方式
-    private func deletePaymentMethod(_ name: String) {
-        let request: NSFetchRequest<PaymentMethodItem> = PaymentMethodItem.fetchRequest()
-        request.predicate = NSPredicate(format: "name == %@", name)
-        
-        do {
-            let items = try viewContext.fetch(request)
-            for item in items {
-                viewContext.delete(item)
-            }
-            try viewContext.save()
-            // 通知数据变化
-            DispatchQueue.main.async {
-                CategoryDataManager.shared.paymentMethodsDidChange.toggle()
-            }
-        } catch {
-            print("删除付款方式失败: \(error)")
-        }
+    // 删除账户
+    private func deleteAccount(_ name: String) {
+        accountViewModel.deleteAccount(name: name)
     }
     
     // 更新分类的 FetchRequest

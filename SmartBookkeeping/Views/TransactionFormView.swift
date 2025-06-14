@@ -15,6 +15,7 @@ enum FormField: Hashable {
 struct TransactionFormView: View {
     // ViewModel is now the single source of truth for the view's state and logic.
     @StateObject private var viewModel: TransactionFormViewModel
+    @StateObject private var accountViewModel = AccountViewModel()
     
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focusedField: FormField?
@@ -53,6 +54,16 @@ struct TransactionFormView: View {
                 // Set up callback to refresh transaction data when saved
                 viewModel.onTransactionSaved = {
                     transactionViewModel?.fetchTransactions()
+                }
+                // 初始化时获取账户数据
+                accountViewModel.fetchAccounts()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccountDeleted"))) { _ in
+                // 当收到账户删除通知时，刷新账户列表
+                accountViewModel.fetchAccounts()
+                // 如果当前选中的账户被删除，重置选择
+                if !accountViewModel.accounts.contains(where: { $0.name == viewModel.formData.account }) {
+                    viewModel.formData.account = ""
                 }
             }
             .onChange(of: shortcutManager.shouldShowEditForm) { shouldShow in
@@ -177,11 +188,21 @@ struct TransactionFormView: View {
 
             Section(header: Text("付款/收款方式")) {
                 Picker("请选择收/付款方式", selection: $viewModel.formData.paymentMethod) {
-                    ForEach(viewModel.paymentMethodsForSelectedType, id: \.self) { method in
+                    // 显示现有账户
+                    ForEach(accountViewModel.accounts, id: \.id) { account in
+                        Text(account.name ?? "未知账户").tag(account.name ?? "")
+                    }
+                    
+                    // 显示传统支付方式（向后兼容）
+                    ForEach(viewModel.paymentMethodsForSelectedType.filter { method in
+                        !accountViewModel.accounts.contains { $0.name == method }
+                    }, id: \.self) { method in
                         Text(method).tag(method)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                
+
             }
 
             Section("备注") {

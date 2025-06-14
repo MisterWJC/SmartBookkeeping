@@ -93,7 +93,7 @@ struct DailyTransactionListView: View {
         .cornerRadius(10)
         .padding(.horizontal)
         .sheet(item: $transactionToEdit) { transaction in
-            TransactionEditView(transaction: transaction)
+            TransactionEditView(transaction: transaction, viewModel: viewModel)
         }
     }
     

@@ -16,6 +16,7 @@ struct Transaction: Identifiable, Codable {
     var type: TransactionType
     var paymentMethod: String
     var note: String
+    var account: String = ""
     
     enum TransactionType: String, Codable, CaseIterable {
         case income = "收入"

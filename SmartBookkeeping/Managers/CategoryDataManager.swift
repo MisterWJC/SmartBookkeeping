@@ -28,7 +28,16 @@ class CategoryDataManager: ObservableObject {
     private let defaultIncomeCategories = ["副业收入", "投资理财", "主业收入", "红包礼金", "其他收入"]
     
     // 默认支付方式
-    private let defaultPaymentMethods = ["现金", "招商银行卡", "中信银行卡", "交通银行卡", "建设银行卡", "微信", "支付宝", "招商信用卡", "其他支付"]
+    private let defaultAccounts = [
+        ("现金", "资产", "现金", 0.0),
+        ("招商银行卡", "资产", "储蓄", 0.0),
+        ("中信银行卡", "资产", "储蓄", 0.0),
+        ("交通银行卡", "资产", "储蓄", 0.0),
+        ("建设银行卡", "资产", "储蓄", 0.0),
+        ("微信", "资产", "虚拟", 0.0),
+        ("支付宝", "资产", "虚拟", 0.0),
+        ("招商信用卡", "负债", "信用", 0.0)
+    ]
     
     // 检查是否需要初始化默认数据
     private func initializeDefaultDataIfNeeded() {
@@ -39,7 +48,7 @@ class CategoryDataManager: ObservableObject {
             if userSettings.isEmpty {
                 // 首次启动，创建默认数据
                 createDefaultCategories()
-                createDefaultPaymentMethods()
+                createDefaultAccounts()
                 createUserSettings()
                 try context.save()
             }
@@ -71,15 +80,20 @@ class CategoryDataManager: ObservableObject {
         }
     }
     
-    // 创建默认支付方式
-    private func createDefaultPaymentMethods() {
-        for (index, method) in defaultPaymentMethods.enumerated() {
-            let paymentMethodItem = PaymentMethodItem(context: context)
-            paymentMethodItem.id = UUID()
-            paymentMethodItem.name = method
-            paymentMethodItem.type = "general" // 通用支付方式
-            paymentMethodItem.isDefault = true
-            paymentMethodItem.sortOrder = Int32(index)
+    // 创建默认账户
+    private func createDefaultAccounts() {
+        for (index, accountData) in defaultAccounts.enumerated() {
+            let accountItem = AccountItem(context: context)
+            accountItem.id = UUID()
+            accountItem.name = accountData.0
+            accountItem.accountType = accountData.1
+            accountItem.accountCategory = accountData.2
+            accountItem.initialBalance = accountData.3
+            accountItem.balanceDate = Date()
+            accountItem.includeInAssets = true
+            accountItem.isDefault = true
+            accountItem.note = ""
+            accountItem.sortOrder = Int32(index)
         }
     }
     
@@ -107,19 +121,24 @@ class CategoryDataManager: ObservableObject {
         }
     }
     
-    // 返回支付方式列表
+    // 返回支付方式列表（现在返回账户列表）
     func paymentMethods(for type: Transaction.TransactionType) -> [String] {
-        let request: NSFetchRequest<PaymentMethodItem> = PaymentMethodItem.fetchRequest()
+        let request: NSFetchRequest<AccountItem> = AccountItem.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "sortOrder", ascending: true)]
         
         do {
-            let paymentMethodItems = try context.fetch(request)
-            return paymentMethodItems.compactMap { $0.name }
+            let accountItems = try context.fetch(request)
+            return accountItems.compactMap { $0.name }
         } catch {
-            print("获取支付方式失败: \(error)")
-            // 如果获取失败，返回默认支付方式
-            return defaultPaymentMethods
+            print("获取账户失败: \(error)")
+            // 如果获取失败，返回默认账户名称
+            return defaultAccounts.map { $0.0 }
         }
+    }
+    
+    // 返回默认账户数据
+    var defaultAccountsData: [(String, String, String, Double)] {
+        return defaultAccounts
     }
     
     // 返回所有支付方式（用于兼容性）

@@ -22,6 +22,11 @@ class TransactionViewModel: ObservableObject {
     
     private var viewContext: NSManagedObjectContext
     
+    // 公开viewContext的访问方法
+    var managedObjectContext: NSManagedObjectContext {
+        return viewContext
+    }
+    
     init(context: NSManagedObjectContext) {
         self.viewContext = context
         // 监听交易数据变化，更新统计信息
@@ -116,6 +121,7 @@ class TransactionViewModel: ObservableObject {
         newTransaction.type = transaction.type.rawValue
         newTransaction.paymentMethod = transaction.paymentMethod
         newTransaction.note = transaction.note
+        newTransaction.timestamp = Date() // 设置创建时间戳
         
         saveContext()
         // 将新创建的 Transaction 对象添加到 transactions 数组的开头，以便立即在UI上反映
@@ -169,6 +175,7 @@ class TransactionViewModel: ObservableObject {
                 entityToUpdate.type = transaction.type.rawValue
                 entityToUpdate.paymentMethod = transaction.paymentMethod
                 entityToUpdate.note = transaction.note
+                // 注意：不更新timestamp，保持原始创建时间用于余额计算
                 
                 saveContext()
                 fetchTransactions() // 更新后刷新列表

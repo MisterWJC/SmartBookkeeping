@@ -180,7 +180,7 @@ class OCRService {
                 category: "未分类",
                 description: billDetails.merchant ?? billDetails.description,
                 type: .expense,
-                paymentMethod: "其他支付",
+                paymentMethod: "现金",
                 note: ""
             )
             
@@ -380,8 +380,8 @@ class OCRService {
             "云闪付": "云闪付", "银联云闪付": "云闪付", "UnionPay": "云闪付",
             
             // 其他支付方式
-            "京东支付": "其他支付", "美团支付": "其他支付", "滴滴支付": "其他支付",
-            "PayPal": "其他支付", "贝宝": "其他支付", "QQ钱包": "其他支付",
+        "京东支付": "现金", "美团支付": "现金", "滴滴支付": "现金",
+        "PayPal": "现金", "贝宝": "现金", "QQ钱包": "现金",
             "数字人民币": "数字人民币", "DCEP": "数字人民币", "e-CNY": "数字人民币",
             "转账": "银行转账", "网银": "网银转账", "手机银行": "手机银行"
         ]

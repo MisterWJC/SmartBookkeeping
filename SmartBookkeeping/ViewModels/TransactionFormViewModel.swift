@@ -22,6 +22,7 @@ struct TransactionFormData {
     var type: Transaction.TransactionType = .expense
     var paymentMethod: String = CategoryDataManager.shared.paymentMethods.first ?? "现金"
     var note: String = ""
+    var account: String = ""
     var image: UIImage? = nil
 }
 
@@ -73,7 +74,7 @@ final class TransactionFormViewModel: ObservableObject {
     
     // Input module state
     @Published var quickInputText: String = ""
-    @Published var inputMode: TransactionFormView.InputMode = .text
+    @Published var inputMode: TransactionFormView.InputMode = .voice
     @Published var showExtraButtons: Bool = false
     
     // Processing state
@@ -420,7 +421,7 @@ final class TransactionFormViewModel: ObservableObject {
                             category: "未分类",
                             description: self.quickInputText,
                             type: .expense,
-                            paymentMethod: "其他支付",
+                            paymentMethod: "现金",
                             note: ""
                         )
                         self.updateForm(with: transaction)
@@ -434,7 +435,7 @@ final class TransactionFormViewModel: ObservableObject {
                         category: "未分类",
                         description: self.quickInputText,
                         type: .expense,
-                        paymentMethod: "其他支付",
+                        paymentMethod: "现金",
                         note: ""
                     )
                     self.updateForm(with: transaction)
@@ -597,7 +598,7 @@ final class TransactionFormViewModel: ObservableObject {
         if methods.contains(data.paymentMethod) {
             formData.paymentMethod = data.paymentMethod
         } else {
-            formData.paymentMethod = methods.first ?? "其他支付"
+            formData.paymentMethod = methods.first ?? "现金"
         }
     }
 

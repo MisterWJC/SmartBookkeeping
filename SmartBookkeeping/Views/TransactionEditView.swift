@@ -9,8 +9,10 @@ import SwiftUI
 import Combine
 
 struct TransactionEditView: View {
+    @ObservedObject var viewModel: TransactionViewModel
+    @StateObject private var accountViewModel = AccountViewModel()
+    private let categoryManager = CategoryDataManager.shared
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject var viewModel: TransactionViewModel
     
     let transaction: Transaction
     
@@ -21,12 +23,29 @@ struct TransactionEditView: View {
     @State private var type: Transaction.TransactionType
     @State private var paymentMethod: String
     @State private var note: String
+    @State private var selectedAccount: String = ""
+    @State private var selectedCategory: String = ""
+    @State private var selectedPaymentMethod: String = ""
+    @State private var transactionType: TransactionType = .expense
     
     @State private var showingDeleteAlert = false
     @State private var refreshTrigger = false
     
-    init(transaction: Transaction) {
+    enum TransactionType: String, CaseIterable {
+        case expense = "expense"
+        case income = "income"
+        
+        var displayName: String {
+            switch self {
+            case .expense: return "支出"
+            case .income: return "收入"
+            }
+        }
+    }
+    
+    init(transaction: Transaction, viewModel: TransactionViewModel) {
         self.transaction = transaction
+        self.viewModel = viewModel
         _amount = State(initialValue: String(format: "%.2f", transaction.amount))
         _date = State(initialValue: transaction.date)
         _category = State(initialValue: transaction.category)
@@ -34,6 +53,10 @@ struct TransactionEditView: View {
         _type = State(initialValue: transaction.type)
         _paymentMethod = State(initialValue: transaction.paymentMethod)
         _note = State(initialValue: transaction.note)
+        _selectedAccount = State(initialValue: transaction.account)
+        _selectedCategory = State(initialValue: transaction.category)
+        _selectedPaymentMethod = State(initialValue: transaction.paymentMethod)
+        _transactionType = State(initialValue: transaction.type == .expense ? .expense : .income)
     }
     
     var body: some View {
@@ -42,96 +65,10 @@ struct TransactionEditView: View {
                 ScrollView {
                     LazyVStack(spacing: 0) {
                         VStack(spacing: 20) {
-                        // 基本信息部分
-                        VStack(alignment: .leading, spacing: 0) {
-                            HStack {
-                                Text("基本信息")
-                                    .font(.headline)
-                                    .foregroundColor(.primary)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color(.systemGroupedBackground))
-                            
-                            VStack(spacing: 0) {
-                                HStack {
-                                    Text("金额")
-                                    Spacer()
-                                    TextField("0.00", text: $amount)
-                                        .keyboardType(.decimalPad)
-                                        .multilineTextAlignment(.trailing)
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(Color(.systemBackground))
-                                
-                                Divider()
-                                    .padding(.leading, 16)
-                                
-                                DatePicker("日期", selection: $date, displayedComponents: [.date, .hourAndMinute])
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 12)
-                                    .background(Color(.systemBackground))
-                                
-                                Divider()
-                                    .padding(.leading, 16)
-                                
-                                HStack {
-                                    Text("交易类型")
-                                    Spacer()
-                                    Picker("交易类型", selection: $type) {
-                                        ForEach(Transaction.TransactionType.allCases, id: \.self) { transactionType in
-                                            Text(transactionType.rawValue).tag(transactionType)
-                                        }
-                                    }
-                                    .pickerStyle(MenuPickerStyle())
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(Color(.systemBackground))
-                                .onChange(of: type) { newType in
-                                    updateCategoryForType(newType)
-                                }
-                                
-                                Divider()
-                                    .padding(.leading, 16)
-                                
-                                HStack {
-                                    Text("交易分类")
-                                    Spacer()
-                                    Picker("交易分类", selection: $category) {
-                                        ForEach(categoriesForSelectedType, id: \.self) { category in
-                                            Text(category).tag(category)
-                                        }
-                                    }
-                                    .pickerStyle(MenuPickerStyle())
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(Color(.systemBackground))
-                                
-                                Divider()
-                                    .padding(.leading, 16)
-                                
-                                HStack {
-                                    Text("收/付款方式")
-                                    Spacer()
-                                    Picker("付款方式", selection: $paymentMethod) {
-                                        ForEach(CategoryDataManager.shared.paymentMethods, id: \.self) { method in
-                                            Text(method).tag(method)
-                                        }
-                                    }
-                                    .pickerStyle(MenuPickerStyle())
-                                }
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 12)
-                                .background(Color(.systemBackground))
-                            }
-                            .background(Color(.systemBackground))
-                            .cornerRadius(10)
-                            .padding(.horizontal, 16)
+                            // 基本信息部分
+                            basicInfoSection
                         }
+
                         
                         // 商品明细部分
                         VStack(alignment: .leading, spacing: 0) {
@@ -192,6 +129,26 @@ struct TransactionEditView: View {
             .onReceive(CategoryDataManager.shared.$paymentMethodsDidChange) { _ in
                 refreshTrigger.toggle()
             }
+            .onAppear {
+                accountViewModel.fetchAccounts()
+                
+                // 初始化表单数据
+                amount = String(transaction.amount)
+                selectedAccount = transaction.account ?? ""
+                selectedCategory = transaction.category ?? ""
+                selectedPaymentMethod = transaction.paymentMethod ?? ""
+                note = transaction.note ?? ""
+                date = transaction.date ?? Date()
+                transactionType = TransactionType(rawValue: transaction.type.rawValue) ?? .expense
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccountDeleted"))) { _ in
+                // 当收到账户删除通知时，刷新账户列表
+                accountViewModel.fetchAccounts()
+                // 如果当前选中的账户被删除，重置选择
+                if !accountViewModel.accounts.contains(where: { $0.name == selectedAccount }) {
+                    selectedAccount = ""
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("返回") {
@@ -234,10 +191,114 @@ struct TransactionEditView: View {
             Text("确定要删除这条交易记录吗？此操作无法撤销。")
         }
     }
-}
+
     
     private var categoriesForSelectedType: [String] {
         CategoryDataManager.shared.categories(for: type)
+    }
+    
+    private var basicInfoSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("基本信息")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color(.systemGroupedBackground))
+            
+            basicInfoFields
+        }
+    }
+    
+    private var basicInfoFields: some View {
+        VStack(spacing: 0) {
+            amountField
+            Divider().padding(.leading, 16)
+            dateField
+            Divider().padding(.leading, 16)
+            typeField
+            Divider().padding(.leading, 16)
+            categoryField
+            Divider().padding(.leading, 16)
+            paymentMethodField
+        }
+        .background(Color(.systemBackground))
+        .cornerRadius(10)
+        .padding(.horizontal, 16)
+    }
+    
+    private var amountField: some View {
+        HStack {
+            Text("金额")
+            Spacer()
+            TextField("0.00", text: $amount)
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+    }
+    
+    private var dateField: some View {
+        DatePicker("日期", selection: $date, displayedComponents: [.date, .hourAndMinute])
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.systemBackground))
+    }
+    
+    private var typeField: some View {
+        HStack {
+            Text("交易类型")
+            Spacer()
+            Picker("交易类型", selection: $type) {
+                ForEach(Transaction.TransactionType.allCases, id: \.self) { transactionType in
+                    Text(transactionType.rawValue).tag(transactionType)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+        .onChange(of: type) { newType in
+            updateCategoryForType(newType)
+        }
+    }
+    
+    private var categoryField: some View {
+        HStack {
+            Text("交易分类")
+            Spacer()
+            Picker("交易分类", selection: $category) {
+                ForEach(categoriesForSelectedType, id: \.self) { category in
+                    Text(category).tag(category)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
+    }
+    
+    private var paymentMethodField: some View {
+        HStack {
+            Text("收/付款方式")
+            Spacer()
+            Picker("付款方式", selection: $paymentMethod) {
+                ForEach(CategoryDataManager.shared.paymentMethods, id: \.self) { method in
+                    Text(method).tag(method)
+                }
+            }
+            .pickerStyle(MenuPickerStyle())
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(Color(.systemBackground))
     }
     
     private var isValidInput: Bool {
@@ -325,6 +386,5 @@ extension Publishers {
         note: "和同事一起吃饭"
     )
     
-    return TransactionEditView(transaction: sampleTransaction)
-        .environmentObject(TransactionViewModel(context: PersistenceController.preview.container.viewContext))
+    TransactionEditView(transaction: sampleTransaction, viewModel: TransactionViewModel(context: PersistenceController.preview.container.viewContext))
 }

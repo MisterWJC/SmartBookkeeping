@@ -33,7 +33,7 @@ struct ContentView: View {
                 }
                 .tag(0)
             
-            TransactionHistoryView(viewModel: transactionViewModel)
+            DetailTabView(viewModel: transactionViewModel)
                 .tabItem {
                     Label("明细", systemImage: "list.bullet")
                 }
@@ -73,11 +73,6 @@ struct ContentView: View {
     private func checkInitialSetup() {
         if !categoryManager.hasCompletedInitialSetup() {
             showingInitialSetup = true
-        } else if !configManager.isAPIConfigured {
-            // 延迟显示API设置，避免与初始设置冲突
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                showingAPISetup = true
-            }
         }
     }
 }

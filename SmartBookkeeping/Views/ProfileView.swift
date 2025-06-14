@@ -23,7 +23,7 @@ struct ProfileView: View {
                 }) {
                     HStack {
                         Image(systemName: "gear")
-                        Text("分类与付款方式管理")
+                        Text("交易分类与账户管理")
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
