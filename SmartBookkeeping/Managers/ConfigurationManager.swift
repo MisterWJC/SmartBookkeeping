@@ -33,7 +33,7 @@ class ConfigurationManager {
             userDefaults.set(DefaultValues.aiModelName, forKey: ConfigKeys.aiModelName)
         }
         if userDefaults.string(forKey: ConfigKeys.aiAPIKey) == nil {
-            userDefaults.set("6478f55ce43641d99966ed79355c0e6f.OKofLW4z3kFSXGkw", forKey: ConfigKeys.aiAPIKey)
+            userDefaults.set("${Zhipu API Key}", forKey: ConfigKeys.aiAPIKey)
         }
         // 初始化免费使用次数（只在第一次启动时设置）
         if userDefaults.object(forKey: ConfigKeys.freeUsesRemaining) == nil {
