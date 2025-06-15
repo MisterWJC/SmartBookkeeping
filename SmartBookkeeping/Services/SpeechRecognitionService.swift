@@ -18,13 +18,22 @@ class SpeechRecognitionService: ObservableObject {
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
     private var startRecordingTime: Date?
+    private var hasTapInstalled = false // 跟踪tap是否已安装
+    private var isStoppingRecording = false // 防止重复停止操作
+    private var audioSessionActive = false // 跟踪音频会话状态
+    private let audioSessionQueue = DispatchQueue(label: "audioSession", qos: .userInitiated) // 专用音频会话队列
+    private var isAudioEnginePreheated = false // 跟踪音频引擎是否已预热
     
     @Published var isRecording = false
     @Published var recognizedText = ""
     @Published var error: String?
+    @Published var audioLevel: Float = 0.0 // 音频级别，范围 -160.0 到 0.0 (dB)
     
     init() {
         requestAuthorization()
+        // 预配置音频会话
+        AudioSessionManager.shared.preconfigureAudioSession()
+        // 注意：音频引擎预热需要在用户交互后进行，不能在初始化时调用
     }
     
     private func requestAuthorization() {
@@ -47,21 +56,20 @@ class SpeechRecognitionService: ObservableObject {
     }
     
     func startRecording() throws {
-        do {
         print("DEBUG: SpeechRecognitionService - Attempting to start recording...")
-        startRecordingTime = Date() // 设置录音开始时间
-
-        // Aggressively clean up any existing task and request BEFORE calling stopRecordingInternal
-        if let task = recognitionTask, task.state == .running || task.state == .starting {
-            print("DEBUG: SpeechRecognitionService - startRecording: Cancelling existing recognitionTask.")
-            task.cancel()
+        
+        // 防止重复启动
+        guard !isRecording && !isStoppingRecording else {
+            print("DEBUG: SpeechRecognitionService - Already recording or stopping, ignoring start request")
+            return
         }
-        recognitionTask = nil
-        recognitionRequest = nil
-        // audioEngine.inputNode.removeTap(onBus: 0) // This might be needed if tap persists across stop/start
-        // audioEngine.stop() // Ensure engine is stopped before re-preparing
-
-        stopRecordingInternal(caller: "startRecording_initial_cleanup") // Clean up any existing session before starting a new one
+        
+        startRecordingTime = Date()
+        
+        // 彻底清理之前的状态
+        cleanupAudioResources()
+        
+        do {
 
         guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
             print("ERROR: SpeechRecognitionService - Speech recognition not authorized.")
@@ -73,11 +81,19 @@ class SpeechRecognitionService: ObservableObject {
             throw SpeechRecognitionError.recognizerNotAvailable
         }
 
-        // Configure audio session
+        // Configure audio session (use preconfig if available)
         print("DEBUG: SpeechRecognitionService - Configuring audio session...")
-        let audioSession = AVAudioSession.sharedInstance() // Define audioSession
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        if !AudioSessionManager.shared.isAudioSessionConfigured {
+            print("DEBUG: SpeechRecognitionService - Audio session not preconfigured, configuring now")
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
-            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } else {
+            print("DEBUG: SpeechRecognitionService - Using preconfigured audio session")
+        }
+        
+        try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        audioSessionActive = true // 标记音频会话为活跃状态
 
             // Create recognition request
             recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
@@ -94,12 +110,19 @@ class SpeechRecognitionService: ObservableObject {
             // IMPORTANT: Access inputNode AFTER audio session is configured and active.
             let inputNode = audioEngine.inputNode
             
+            // 确保没有已安装的tap
+            if hasTapInstalled {
+                inputNode.removeTap(onBus: 0)
+                hasTapInstalled = false
+                print("DEBUG: SpeechRecognitionService - Removed existing tap")
+            }
+            
             // Use the input node's output format for the tap, but ensure it's valid.
             let recordingFormat = inputNode.outputFormat(forBus: 0)
             guard recordingFormat.sampleRate > 0 && recordingFormat.channelCount > 0 else {
                 self.error = "无效的录音格式 (采样率或声道数为0)。请检查麦克风权限或模拟器设置。"
                 print("ERROR: Invalid recording format from inputNode. SampleRate: \(recordingFormat.sampleRate), Channels: \(recordingFormat.channelCount)")
-                self.stopRecording()
+                self.cleanupAudioResources()
                 return
             }
             print("DEBUG: SpeechRecognitionService - Recording format: \(recordingFormat)")
@@ -107,14 +130,18 @@ class SpeechRecognitionService: ObservableObject {
             // Install a tap on the input node to receive audio buffers.
             inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
                 self.recognitionRequest?.append(buffer)
+                
+                // 计算音频级别
+                self.calculateAudioLevel(from: buffer)
             }
+            hasTapInstalled = true
             print("DEBUG: SpeechRecognitionService - Tap installed.")
 
             // Start recognition task.
             guard let recognizer = speechRecognizer else { // Safely unwrap speechRecognizer
                 self.error = "Speech recognizer not initialized."
                 print("ERROR: Speech recognizer is nil before starting task.")
-                self.stopRecordingInternal(caller: "recognitionTask_recognizer_nil")
+                self.stopRecordingInternal(isExternal: false)
                 return
             }
             recognitionTask = recognizer.recognitionTask(with: recognitionRequest) { [weak self] result, error in
@@ -139,23 +166,36 @@ class SpeechRecognitionService: ObservableObject {
                                 print("DEBUG: SpeechRecognitionService - recognitionTask completion: Error 1110 (No Speech Detected) occurred, but isRecording is false. Silently ignoring as likely due to quick stop. Will still check for final result.")
                                 currentError = nil // Effectively silence this error for subsequent checks
                             } else if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1101 {
-                                print("DEBUG: No speech detected (Error 1101). Silently ignoring to prevent infinite loop.")
-                                // 不设置error，避免触发无限循环
-                                // 静默处理1101错误，让任务自然结束
+                                print("DEBUG: Speech service access error (1101). This usually indicates audio session conflicts.")
+                                // 1101错误通常表示音频会话冲突，需要重置音频会话
                                 currentError = nil // 静默处理此错误
+                                // 异步重置音频会话以避免冲突
+                                DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 0.1) {
+                                    self.forceResetAudioSession()
+                                }
                             } else if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1110 {
-                                self.error = "未检测到语音 (1110)。请重试。"
-                                print("DEBUG: No speech detected (Error 1110) - (isRecording was likely true or different error). Calling stopRecordingInternal if recording.")
-                                if self.isRecording { // Only stop if still actively recording
-                                   self.stopRecordingInternal(caller: "recognitionTask_error_1110_active")
+                                // 如果不在录音状态或者已经有识别文本，静默处理这个错误
+                                if !self.isRecording || !self.recognizedText.isEmpty {
+                                    currentError = nil
+                                } else {
+                                    self.error = "未检测到语音 (1110)。请重试。"
+                                    print("DEBUG: No speech detected (Error 1110) - (isRecording was likely true or different error). Calling stopRecordingInternal if recording.")
+                                    if self.isRecording { // Only stop if still actively recording
+                                       self.stopRecordingInternal(isExternal: false)
+                                    }
                                 }
                             } else if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 1107 {
-                                 self.error = "语音识别超时。请重试。"
-                                 print("DEBUG: Speech recognition timed out (Error 1107).")
-                                 // Consider stopping if it's a timeout and still recording
-                                 if self.isRecording {
-                                     self.stopRecordingInternal(caller: "recognitionTask_error_1107_timeout")
-                                 }
+                                // 超时错误，如果有部分识别文本则不报错
+                                if !self.isRecording || !self.recognizedText.isEmpty {
+                                    currentError = nil
+                                } else {
+                                    self.error = "语音识别超时。请重试。"
+                                    print("DEBUG: Speech recognition timed out (Error 1107).")
+                                    // Consider stopping if it's a timeout and still recording
+                                    if self.isRecording {
+                                        self.stopRecordingInternal(isExternal: false)
+                                    }
+                                }
                             } else if nsError.domain == "kLSRErrorDomain" && nsError.code == 301 && !self.isRecording {
                                 // "Recognition request was canceled" error when not recording - ignore it
                                 print("DEBUG: SpeechRecognitionService - recognitionTask completion: Error 301 (Recognition request was canceled) occurred, but isRecording is false. Silently ignoring as likely due to normal stop.")
@@ -166,7 +206,7 @@ class SpeechRecognitionService: ObservableObject {
                                 print("DEBUG: Speech recognition error localizedDescription: \(unwrappedError.localizedDescription)")
                                 // For other errors, stop if still recording
                                 if self.isRecording {
-                                    self.stopRecordingInternal(caller: "recognitionTask_other_error")
+                                    self.stopRecordingInternal(isExternal: false)
                                 }
                             }
                         }
@@ -180,28 +220,28 @@ class SpeechRecognitionService: ObservableObject {
                                     // self.error = "未检测到语音。" // Removed this line
                                     // Ensure recording stops if it hasn't already been stopped by user action
                                     if self.isRecording {
-                                        self.stopRecordingInternal(caller: "recognitionTask_final_empty_result_still_recording")
+                                        self.stopRecordingInternal(isExternal: false)
                                     }
                                 } else {
                                     // Final, no active error, and text is present - success!
                                     print("DEBUG: Final recognition result received with text: \(self.recognizedText)")
                                     // Ensure recording stops if it hasn't already been stopped by user action
                                     if self.isRecording {
-                                        self.stopRecordingInternal(caller: "recognitionTask_final_cleanup_still_recording")
+                                        self.stopRecordingInternal(isExternal: false)
                                     }
                                 }
                             } else {
                                 // isFinal is true, but there's an active (non-silenced) error
                                 print("DEBUG: SpeechRecognitionService - recognitionTask completion: isFinal true, but an error occurred. Calling stop for error cleanup if recording.")
                                 if self.isRecording {
-                                    self.stopRecordingInternal(caller: "recognitionTask_error_with_final_still_recording")
+                                    self.stopRecordingInternal(isExternal: false)
                                 }
                             }
                         } else if currentError != nil {
                             // Not final, but an active error occurred (e.g., a non-1110 error, or 1110 when isRecording was true)
                             print("DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.")
                             if self.isRecording {
-                                self.stopRecordingInternal(caller: "recognitionTask_error_not_final_still_recording")
+                                self.stopRecordingInternal(isExternal: false)
                             }
                         }
                         // If not isFinal and currentError is nil, it's a partial result, do nothing here regarding stopping.
@@ -215,26 +255,24 @@ class SpeechRecognitionService: ObservableObject {
             print("DEBUG: SpeechRecognitionService - Audio engine prepared.")
             
             // Start the audio engine.
-            try audioEngine.start() // This line was problematic, it should be a call followed by a block if it's async with completion, or just the call.
-                                  // Assuming it's a synchronous call or its completion is handled elsewhere/implicitly based on typical AVAudioEngine usage.
-                                  // If it were meant to have a completion handler like `try audioEngine.start { ... }`, that block was missing.
-                                  // For now, treating it as a direct call.
-            
+            try audioEngine.start()
             print("DEBUG: SpeechRecognitionService - Audio engine started.")
 
             DispatchQueue.main.async {
                 self.isRecording = true
             }
             print("DEBUG: SpeechRecognitionService started recording successfully.")
+            
         } catch {
+            print("DEBUG: SpeechRecognitionService - Audio session/engine setup FAILED: \(error.localizedDescription)")
             DispatchQueue.main.async {
-                print("DEBUG: SpeechRecognitionService - Audio session/engine setup FAILED: \(error.localizedDescription)")
                 self.error = error.localizedDescription
-                // Attempt to stop everything cleanly if setup fails
-                self.stopRecordingInternal(caller: "startRecordingCatch_error_handling")
             }
-        } // This closes the do-catch block for startRecording
-   }
+            // 清理资源
+            cleanupAudioResources()
+            throw error
+        }
+    }
 
     func stopRecording() {
         // 添加一个小延迟，确保录音至少持续一段时间
@@ -245,95 +283,232 @@ class SpeechRecognitionService: ObservableObject {
         if recordingDuration < minimumRecordingDuration {
             // 如果录音时间太短，延迟停止录音
             DispatchQueue.main.asyncAfter(deadline: .now() + (minimumRecordingDuration - recordingDuration)) { [weak self] in
-                self?.stopRecordingInternal(caller: "external_public_api_delayed")
+                self?.stopRecordingInternal(isExternal: true)
             }
         } else {
-            stopRecordingInternal(caller: "external_public_api")
+            stopRecordingInternal(isExternal: true)
         }
     }
 
-    private func stopRecordingInternal(caller: String) {
-        print("DEBUG: SpeechRecognitionService - stopRecordingInternal() called by \(caller). audioEngine.isRunning: \(audioEngine.isRunning), recognitionTask state: \(recognitionTask?.state.rawValue ?? -1), recognitionRequest isNil: \(recognitionRequest == nil)")
+    // MARK: - Private Methods
+    
+    private func calculateAudioLevel(from buffer: AVAudioPCMBuffer) {
+        guard let channelData = buffer.floatChannelData?[0] else { return }
         
-        // 重置录音开始时间
-        startRecordingTime = nil
+        let channelDataValue = channelData
+        let channelDataValueArray = stride(from: 0, to: Int(buffer.frameLength), by: buffer.stride).map { channelDataValue[$0] }
         
-        // Check if already stopped or in the process of stopping to avoid redundant calls or race conditions
-        // Allow proceeding if called from error handling in startRecording or recognitionTask, as resources might be partially initialized/active.
-        if !audioEngine.isRunning && recognitionTask == nil && recognitionRequest == nil && caller != "startRecordingCatch_error_handling" && caller != "recognitionTask_error" {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() called by \(caller), but already seems stopped. No action taken.")
-            return
-        }
-
-        if audioEngine.isRunning {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Stopping audioEngine.")
-            audioEngine.stop()
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Removing tap on inputNode.")
-            audioEngine.inputNode.removeTap(onBus: 0)
-        } else {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): audioEngine was not running. Attempting to remove tap if inputNode is available.")
-            if audioEngine.inputNode.outputFormat(forBus: 0).channelCount > 0 { 
-                 audioEngine.inputNode.removeTap(onBus: 0)
-                 print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Tap removed (engine was not running).")
-            } else {
-                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Tap not removed as inputNode seems unconfigured (engine was not running).")
-            }
-        }
-
-        // We will now always attempt to call endAudio() to allow any buffered audio to be processed,
-        // even if the task was .starting and stopped externally.
-        // The error handling in the recognitionTask callback will be adjusted to ignore
-        // a potential 1110 error if the task was already nilled by an external stop.
-        if recognitionRequest != nil {
-                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Ending audio on recognitionRequest.")
-                recognitionRequest?.endAudio()
-
-        } else {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionRequest was already nil, cannot end audio.")
-        }
-
-        if caller == "external_public_api" || caller == "external_public_api_delayed" {
-            // 对于外部调用，我们需要取消任务以避免潜在的回调问题
-            if let task = recognitionTask {
-                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Cancelling recognitionTask to prevent callback issues. Current state: \(task.state.rawValue)")
-                task.cancel()
-                recognitionTask = nil
-            } else {
-                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask was already nil.")
-            }
-        } else if recognitionTask != nil {
-            // For internal calls (errors, final cleanup from task itself, or startup issues)
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Cancelling recognitionTask. Current state: \(recognitionTask?.state.rawValue ?? -1)")
-            recognitionTask?.cancel()
-            recognitionTask = nil
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask cancelled and set to nil.")
-        } else { 
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionTask was already nil.")
-        }
+        let rms = sqrt(channelDataValueArray.map { $0 * $0 }.reduce(0, +) / Float(channelDataValueArray.count))
+        let avgPower = 20 * log10(rms)
+        let normalizedPower = max(-160.0, avgPower) // 限制最小值为 -160dB
         
-        // 统一清理recognitionRequest，避免资源泄漏
-        if recognitionRequest != nil {
-            recognitionRequest = nil
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionRequest set to nil.")
-        } else {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): recognitionRequest was already nil.")
-        }
-
-        do {
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Attempting to deactivate audio session.")
-            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-            print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): Audio session deactivated.")
-        } catch {
-            print("ERROR: SpeechRecognitionService - stopRecordingInternal() by \(caller): Failed to deactivate audio session: \(error.localizedDescription)")
-        }
-
         DispatchQueue.main.async {
-            if self.isRecording { 
-                self.isRecording = false
-                print("DEBUG: SpeechRecognitionService - stopRecordingInternal() by \(caller): isRecording set to false on main thread.")
-            }
+            self.audioLevel = normalizedPower
         }
-        print("DEBUG: SpeechRecognitionService - Finished stopRecordingInternal() called by \(caller).")
     }
     
+    private func stopRecordingInternal(isExternal: Bool = false) {
+        print("[SpeechRecognitionService] stopRecordingInternal called, isExternal: \(isExternal)")
+        
+        // 防止重复停止操作
+        guard !isStoppingRecording else {
+            print("[SpeechRecognitionService] Already stopping, skipping")
+            return
+        }
+        
+        // 添加状态检查，避免重复操作
+        guard isRecording else {
+            print("[SpeechRecognitionService] Already stopped, skipping")
+            return
+        }
+        
+        isStoppingRecording = true
+        
+        // 立即更新状态，防止重复调用
+        DispatchQueue.main.async {
+            self.isRecording = false
+        }
+        
+        // 在后台队列执行音频操作
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            // 停止音频引擎和移除tap
+            if self.audioEngine.isRunning {
+                self.audioEngine.stop()
+                print("[SpeechRecognitionService] Audio engine stopped")
+            }
+            
+            if self.hasTapInstalled {
+                self.audioEngine.inputNode.removeTap(onBus: 0)
+                self.hasTapInstalled = false
+                print("[SpeechRecognitionService] Audio tap removed")
+            }
+            
+            // 结束识别请求
+            self.recognitionRequest?.endAudio()
+            
+            // 如果是外部调用（用户主动停止），立即取消任务
+            if isExternal {
+                self.recognitionTask?.cancel()
+                self.recognitionTask = nil
+                self.recognitionRequest = nil
+                print("[SpeechRecognitionService] External call - task cancelled immediately")
+            }
+            
+            // 安全地停用音频会话
+            self.deactivateAudioSessionSafely()
+            
+            // 重置停止标志
+            DispatchQueue.main.async {
+                self.isStoppingRecording = false
+            }
+        }
+        
+        print("[SpeechRecognitionService] stopRecordingInternal completed")
+    }
+    
+    func forceResetAudioSession() {
+        print("[SpeechRecognitionService] Force resetting audio session...")
+        
+        // 在专用音频会话队列执行重置
+        audioSessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            self.cleanupAudioResources()
+            
+            // 重置音频会话
+            let audioSession = AVAudioSession.sharedInstance()
+            do {
+                // 如果会话当前是活跃的，先停用
+                if self.audioSessionActive {
+                    try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+                    self.audioSessionActive = false
+                    print("[SpeechRecognitionService] Audio session deactivated during force reset")
+                }
+                
+                // 等待更长时间确保系统完全清理
+                usleep(200000) // 200ms
+                
+                // 重新配置音频会话
+                try audioSession.setCategory(.playAndRecord, mode: .measurement, options: [.duckOthers])
+                
+                DispatchQueue.main.async {
+                    print("[SpeechRecognitionService] Audio session force reset completed")
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    print("[SpeechRecognitionService] Error during force reset: \(error)")
+                }
+            }
+        }
+    }
+    
+    // 新增：统一的资源清理方法
+    private func cleanupAudioResources() {
+        // 停止音频引擎
+        if audioEngine.isRunning {
+            audioEngine.stop()
+        }
+        
+        // 移除tap
+        if hasTapInstalled {
+            audioEngine.inputNode.removeTap(onBus: 0)
+            hasTapInstalled = false
+        }
+        
+        // 取消识别任务
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        
+        // 清理识别请求
+        recognitionRequest?.endAudio()
+        recognitionRequest = nil
+        
+        // 重置状态
+        isStoppingRecording = false
+        
+        print("[SpeechRecognitionService] Audio resources cleaned up")
+    }
+    
+    // 新增：安全的音频会话停用方法
+    private func deactivateAudioSessionSafely() {
+        audioSessionQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // 只有在会话活跃时才尝试停用
+            guard self.audioSessionActive else {
+                print("[SpeechRecognitionService] Audio session already inactive, skipping deactivation")
+                return
+            }
+            
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                self.audioSessionActive = false
+                print("[SpeechRecognitionService] Audio session deactivated safely")
+            } catch let error as NSError {
+                // 特殊处理560030580错误（会话停用失败）
+                if error.code == 560030580 {
+                    print("[SpeechRecognitionService] Audio session deactivation failed (560030580), but continuing...")
+                    self.audioSessionActive = false // 强制重置状态
+                } else {
+                    print("[SpeechRecognitionService] Failed to deactivate audio session: \(error)")
+                }
+            }
+        }
+    }
+    
+    // MARK: - 音频引擎预热
+    private func preheatAudioEngine() {
+        guard !isAudioEnginePreheated else {
+            print("DEBUG: SpeechRecognitionService - Audio engine already preheated, skipping")
+            return
+        }
+        
+        print("DEBUG: SpeechRecognitionService - Preheating audio engine")
+        
+        do {
+            // 确保音频会话已配置
+            let audioSession = AVAudioSession.sharedInstance()
+            
+            // 如果音频会话未配置，先配置
+            if !AudioSessionManager.shared.isAudioSessionConfigured {
+                try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            }
+            
+            // 激活音频会话
+            if !audioSession.isOtherAudioPlaying {
+                try audioSession.setActive(true)
+            }
+            
+            // 确保输入节点存在并有效
+            let inputNode = audioEngine.inputNode
+            let recordingFormat = inputNode.outputFormat(forBus: 0)
+            
+            // 验证录音格式是否有效
+            guard recordingFormat.sampleRate > 0 && recordingFormat.channelCount > 0 else {
+                print("DEBUG: SpeechRecognitionService - Invalid recording format during preheat, skipping")
+                return
+            }
+            
+            // 预热音频引擎但不启动
+            audioEngine.prepare()
+            isAudioEnginePreheated = true
+            print("DEBUG: SpeechRecognitionService - Audio engine preheated successfully")
+        } catch {
+            print("DEBUG: SpeechRecognitionService - Audio engine preheat failed: \(error)")
+            // 预热失败时重置状态
+            isAudioEnginePreheated = false
+        }
+    }
+    
+    func resetPreheat() {
+        isAudioEnginePreheated = false
+        print("DEBUG: SpeechRecognitionService - Preheat status reset")
+    }
+    
+    // MARK: - 公开的预热方法
+    public func preheatAudioEngineIfNeeded() {
+        preheatAudioEngine()
+    }
 }

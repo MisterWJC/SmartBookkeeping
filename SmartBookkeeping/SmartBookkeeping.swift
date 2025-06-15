@@ -16,6 +16,9 @@ struct SmartBookkeeping_App: App {
     init() {
         // 注册 App Shortcuts
         SmartBookkeepingShortcuts.updateAppShortcutParameters()
+        
+        // 初始化应用核心服务
+        AppInitializer.shared.initialize()
     }
 
     var body: some Scene {

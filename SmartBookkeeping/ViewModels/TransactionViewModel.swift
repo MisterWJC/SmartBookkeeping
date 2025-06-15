@@ -68,9 +68,10 @@ class TransactionViewModel: ObservableObject {
         }
         
         // 监听持久化存储远程变化通知
+        // 注意：只监听特定的持久化存储协调器，避免重复触发
         NotificationCenter.default.addObserver(
             forName: .NSPersistentStoreRemoteChange,
-            object: nil,
+            object: viewContext.persistentStoreCoordinator,
             queue: .main
         ) { [weak self] _ in
             print("检测到持久化存储远程变化，刷新交易数据")
@@ -270,6 +271,28 @@ class TransactionViewModel: ObservableObject {
         return ["全部月份"] + Array(months).sorted().reversed() // reversed() 使最近的月份在前
     }
     
+    func getAllQuarters() -> [String] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy年"
+        dateFormatter.locale = Locale(identifier: "zh_CN")
+        
+        let quarters = Set(transactions.compactMap { transaction in
+            let year = dateFormatter.string(from: transaction.date)
+            let quarter = Calendar.current.component(.quarter, from: transaction.date)
+            return "\(year)第\(quarter)季度"
+        })
+        return ["全部季度"] + Array(quarters).sorted().reversed()
+    }
+    
+    func getAllYears() -> [String] {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy年"
+        dateFormatter.locale = Locale(identifier: "zh_CN")
+        
+        let years = Set(transactions.map { dateFormatter.string(from: $0.date) })
+        return ["全部年份"] + Array(years).sorted().reversed()
+    }
+    
     func getMonthlyIncome(forMonth: String) -> Double {
         let filteredTransactions: [Transaction]
         if forMonth != "全部月份" {
@@ -306,5 +329,261 @@ class TransactionViewModel: ObservableObject {
         return filteredTransactions
             .filter { $0.type == .expense }
             .reduce(0) { $0 + $1.amount }
+    }
+    
+    // 获取按分类的支出统计数据
+    func getCategoryExpenseDistribution(forMonth: String) -> [String: Double] {
+        let filteredTransactions: [Transaction]
+        if forMonth != "全部月份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年MM月"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == forMonth
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        
+        // 只统计支出类型的交易
+        let expenseTransactions = filteredTransactions.filter { $0.type == .expense }
+        
+        // 按分类汇总支出金额
+        var categoryExpenses: [String: Double] = [:]
+        for transaction in expenseTransactions {
+            let category = transaction.category
+            categoryExpenses[category, default: 0] += transaction.amount
+        }
+        
+        // 按金额降序排序，返回前10个分类
+        let sortedCategories = categoryExpenses.sorted { $0.value > $1.value }
+        let topCategories = Array(sortedCategories.prefix(10))
+        
+        return Dictionary(uniqueKeysWithValues: topCategories)
+    }
+    
+    // 获取按分类的收入统计数据
+    func getCategoryIncomeDistribution(forMonth: String) -> [String: Double] {
+        let filteredTransactions: [Transaction]
+        if forMonth != "全部月份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年MM月"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == forMonth
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        
+        // 只统计收入类型的交易
+        let incomeTransactions = filteredTransactions.filter { $0.type == .income }
+        
+        // 按分类汇总收入金额
+        var categoryIncomes: [String: Double] = [:]
+        for transaction in incomeTransactions {
+            let category = transaction.category
+            categoryIncomes[category, default: 0] += transaction.amount
+        }
+        
+        // 按金额降序排序，返回前10个分类
+        let sortedCategories = categoryIncomes.sorted { $0.value > $1.value }
+        let topCategories = Array(sortedCategories.prefix(10))
+        
+        return Dictionary(uniqueKeysWithValues: topCategories)
+    }
+    
+    // MARK: - 新增的时间筛选方法
+    
+    // 按天筛选的方法
+    func getTransactionTypeDistribution(forDay day: Date) -> [String: Double] {
+        let calendar = Calendar.current
+        let filteredTransactions = transactions.filter {
+            calendar.isDate($0.date, inSameDayAs: day)
+        }
+        return getDistributionFromTransactions(filteredTransactions)
+    }
+    
+    func getDayIncome(forDay day: Date) -> Double {
+        let calendar = Calendar.current
+        return transactions
+            .filter { calendar.isDate($0.date, inSameDayAs: day) && $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getDayExpense(forDay day: Date) -> Double {
+        let calendar = Calendar.current
+        return transactions
+            .filter { calendar.isDate($0.date, inSameDayAs: day) && $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    // 按周筛选的方法
+    func getTransactionTypeDistribution(forWeek week: Date) -> [String: Double] {
+        let calendar = Calendar.current
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: week) else {
+            return [:]
+        }
+        let filteredTransactions = transactions.filter {
+            weekInterval.contains($0.date)
+        }
+        return getDistributionFromTransactions(filteredTransactions)
+    }
+    
+    func getWeekIncome(forWeek week: Date) -> Double {
+        let calendar = Calendar.current
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: week) else {
+            return 0
+        }
+        return transactions
+            .filter { weekInterval.contains($0.date) && $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getWeekExpense(forWeek week: Date) -> Double {
+        let calendar = Calendar.current
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: week) else {
+            return 0
+        }
+        return transactions
+            .filter { weekInterval.contains($0.date) && $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    // 按季度筛选的方法
+    func getTransactionTypeDistribution(forQuarter quarter: String) -> [String: Double] {
+        let filteredTransactions: [Transaction]
+        if quarter != "全部季度" {
+            filteredTransactions = transactions.filter {
+                getQuarterString(from: $0.date) == quarter
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return getDistributionFromTransactions(filteredTransactions)
+    }
+    
+    func getQuarterIncome(forQuarter quarter: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if quarter != "全部季度" {
+            filteredTransactions = transactions.filter {
+                getQuarterString(from: $0.date) == quarter
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return filteredTransactions
+            .filter { $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getQuarterExpense(forQuarter quarter: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if quarter != "全部季度" {
+            filteredTransactions = transactions.filter {
+                getQuarterString(from: $0.date) == quarter
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return filteredTransactions
+            .filter { $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    // 按年筛选的方法
+    func getTransactionTypeDistribution(forYear year: String) -> [String: Double] {
+        let filteredTransactions: [Transaction]
+        if year != "全部年份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == year
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return getDistributionFromTransactions(filteredTransactions)
+    }
+    
+    func getYearIncome(forYear year: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if year != "全部年份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == year
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return filteredTransactions
+            .filter { $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getYearExpense(forYear year: String) -> Double {
+        let filteredTransactions: [Transaction]
+        if year != "全部年份" {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy年"
+            dateFormatter.locale = Locale(identifier: "zh_CN")
+            
+            filteredTransactions = transactions.filter {
+                dateFormatter.string(from: $0.date) == year
+            }
+        } else {
+            filteredTransactions = transactions
+        }
+        return filteredTransactions
+            .filter { $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    // 自定义时间范围筛选的方法
+    func getTransactionTypeDistribution(from startDate: Date, to endDate: Date) -> [String: Double] {
+        let filteredTransactions = transactions.filter {
+            $0.date >= startDate && $0.date <= endDate
+        }
+        return getDistributionFromTransactions(filteredTransactions)
+    }
+    
+    func getCustomRangeIncome(from startDate: Date, to endDate: Date) -> Double {
+        return transactions
+            .filter { $0.date >= startDate && $0.date <= endDate && $0.type == .income }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    func getCustomRangeExpense(from startDate: Date, to endDate: Date) -> Double {
+        return transactions
+            .filter { $0.date >= startDate && $0.date <= endDate && $0.type == .expense }
+            .reduce(0) { $0 + $1.amount }
+    }
+    
+    // MARK: - 辅助方法
+    
+    private func getDistributionFromTransactions(_ transactions: [Transaction]) -> [String: Double] {
+        var distribution: [String: Double] = [:]
+        for transaction in transactions {
+            let typeKey = transaction.type == .income ? "收入" : "支出"
+            distribution[typeKey, default: 0] += transaction.amount
+        }
+        return distribution
+    }
+    
+    private func getQuarterString(from date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy年"
+        dateFormatter.locale = Locale(identifier: "zh_CN")
+        
+        let year = dateFormatter.string(from: date)
+        let quarter = Calendar.current.component(.quarter, from: date)
+        return "\(year)第\(quarter)季度"
     }
 }

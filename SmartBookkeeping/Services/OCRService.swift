@@ -10,7 +10,7 @@ import UIKit
 import Vision
 import NaturalLanguage
 
-class OCRService {
+class OCRService: ObservableObject {
     // 使用统一的数据管理器
     private let categoryManager = CategoryDataManager.shared
     
@@ -61,28 +61,40 @@ class OCRService {
             
             // 解析账单详情
             let billDetails = self.parseBillDetails(from: observations)
+            print("DEBUG: OCRService - Parsed bill details: \(billDetails.description)")
             
             // 使用 AI 服务处理识别出的文本
-            AIService.shared.processText(billDetails.description) { aiResponse in
-                if let response = aiResponse {
+            Task {
+                do {
+                    print("DEBUG: OCRService - Calling AI service with text: \(billDetails.description)")
+                    let aiResponse = try await AIService.shared.processText(billDetails.description)
+                    print("DEBUG: OCRService - AI service response: \(aiResponse)")
+                    
                     // 使用 BillProcessingService 处理 AI 响应
-                    if let transaction = BillProcessingService.shared.processAIResponse(response) {
+                    if let transaction = BillProcessingService.shared.processAIResponse(aiResponse) {
+                        print("DEBUG: OCRService - Successfully processed AI response to transaction")
                         // 确保在主线程调用回调
-                        DispatchQueue.main.async {
+                        await MainActor.run {
                             completion(transaction)
                         }
                     } else {
+                        print("WARNING: OCRService - AI response processing failed, falling back to local processing")
                         // AI 响应处理失败，使用本地解析结果
+                        await MainActor.run {
+                            self.fallbackToLocalProcessing(billDetails, completion: completion)
+                        }
+                    }
+                } catch {
+                    print("ERROR: OCRService - AI service failed: \(error), falling back to local processing")
+                    // AI 服务失败，使用本地解析结果
+                    await MainActor.run {
                         self.fallbackToLocalProcessing(billDetails, completion: completion)
                     }
-                } else {
-                    // AI 服务失败，使用本地解析结果
-                    self.fallbackToLocalProcessing(billDetails, completion: completion)
                 }
             }
         }
         
-        request.recognitionLevel = .accurate
+        request.recognitionLevel = VNRequestTextRecognitionLevel.accurate
         request.recognitionLanguages = ["zh-Hans", "en-US"]
         request.usesLanguageCorrection = true
         
@@ -155,8 +167,8 @@ class OCRService {
     
     /// 当 AI 服务失败时，使用本地解析结果
     private func fallbackToLocalProcessing(_ billDetails: BillDetails, completion: @escaping (Transaction?) -> Void) {
-        // 创建一个简单的 ZhipuAIResponse 对象，用于 BillProcessingService 处理
-        let fallbackResponse = ZhipuAIResponse(
+        // 创建一个简单的 AIResponse 对象，用于 BillProcessingService 处理
+        let fallbackResponse = AIResponse(
             amount: billDetails.amount,
             transaction_time: nil,
             item_description: billDetails.merchant ?? billDetails.description,
@@ -392,13 +404,19 @@ class OCRService {
             recognizedText += text + "\n" // For debugging or simpler description
 
             // --- Amount Extraction (Regex Example) --- 
-            let amountRegex = try! NSRegularExpression(pattern: "\\b(?:\\$|€|£|¥)?(\\d{1,3}(?:,\\d{3})*(\\.\\d{2})?)\\b|\\b(\\d+(\\.\\d{2})?)(?:元|円)\\b") // Simplified
+            // 匹配多种金额格式：¥24.50, -24.50, 24.50元等
+            let amountRegex = try! NSRegularExpression(pattern: "(?:¥|\\$|€|£)?(-?\\d{1,3}(?:,\\d{3})*(?:\\.\\d{2})?)|(-?\\d+(?:\\.\\d{2})?)(?:元|円)")
             let amountMatches = amountRegex.matches(in: text, range: NSRange(text.startIndex..., in: text))
             for match in amountMatches {
-                if let range = Range(match.range(at: 1), in: text) ?? Range(match.range(at: 3), in: text) {
+                // 尝试匹配第一个捕获组（带货币符号的）或第二个捕获组（带单位的）
+                let range1 = Range(match.range(at: 1), in: text)
+                let range2 = Range(match.range(at: 2), in: text)
+                
+                if let range = range1 ?? range2 {
                     let amountString = String(text[range]).replacingOccurrences(of: ",", with: "")
                     if let amount = Double(amountString) {
                         potentialAmounts.append(amount)
+                        print("DEBUG: OCRService - Found potential amount: \(amount) from text: \(text)")
                     }
                 }
             }
@@ -442,7 +460,25 @@ class OCRService {
         }
 
         // --- Logic to select the best candidates --- 
-        let finalAmount = potentialAmounts.max() // Often the largest amount is the total 
+        // 优先选择负数金额（支出），或者选择最小的正数金额（通常是实际交易金额）
+        let finalAmount: Double? = {
+            print("DEBUG: OCRService - All potential amounts: \(potentialAmounts)")
+            
+            // 如果有负数金额，优先选择（支出交易）
+            let negativeAmounts = potentialAmounts.filter { $0 < 0 }
+            if !negativeAmounts.isEmpty {
+                return negativeAmounts.max() // 选择最大的负数（绝对值最小）
+            }
+            
+            // 如果没有负数，选择最小的正数金额（排除明显的错误值如86）
+            let positiveAmounts = potentialAmounts.filter { $0 > 0 && $0 < 1000 } // 过滤掉过大的金额
+            if !positiveAmounts.isEmpty {
+                return positiveAmounts.min() // 选择最小的正数金额
+            }
+            
+            // 如果都没有，返回第一个找到的金额
+            return potentialAmounts.first
+        }() 
         let finalDate = potentialDates.first // Or most recent/relevant 
         let finalMerchant = potentialMerchants.first // Needs more sophisticated logic
         let finalCategory = mostFrequentElement(from: potentialCategories) // 选择最常出现的分类

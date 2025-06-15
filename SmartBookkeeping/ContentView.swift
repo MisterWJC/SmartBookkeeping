@@ -13,7 +13,6 @@ struct ContentView: View {
     @EnvironmentObject var shortcutManager: ShortcutManager
     @State private var selectedTab = 0
     @State private var showingInitialSetup = false
-    @State private var showingAPISetup = false
     
     private let categoryManager = CategoryDataManager.shared
     private let configManager = ConfigurationManager.shared
@@ -61,12 +60,22 @@ struct ContentView: View {
         .onAppear {
             checkInitialSetup()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowAIGuide"))) { _ in
+            showingInitialSetup = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToDetailTab"))) { _ in
+            selectedTab = 1 // 切换到明细页面
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("SwitchToFormTab"))) { _ in
+            selectedTab = 0 // 切换到记账页面
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowEmptyStateGuide"))) { _ in
+            // 切换到明细页面显示空状态引导
+            selectedTab = 1
+        }
         .sheet(isPresented: $showingInitialSetup) {
             InitialSetupView()
-                .interactiveDismissDisabled(true) // 防止用户手动关闭
-        }
-        .sheet(isPresented: $showingAPISetup) {
-            APISetupView(isPresented: $showingAPISetup)
+                .interactiveDismissDisabled(false) // 允许用户手动关闭
         }
     }
     

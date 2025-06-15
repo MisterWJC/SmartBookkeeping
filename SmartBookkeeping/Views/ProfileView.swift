@@ -14,6 +14,9 @@ struct ProfileView: View {
     @State private var shareableUrl: ShareableURL? // Wrapper to make URL Identifiable
     @State private var showingCategoryManagement = false
     @State private var showingAPIConfiguration = false
+    @State private var isAPIConfigured = false
+    
+    private let configManager = ConfigurationManager.shared
 
     var body: some View {
         NavigationView {
@@ -43,7 +46,7 @@ struct ProfileView: View {
                         }
                         
                         HStack(spacing: 4) {
-                            if ConfigurationManager.shared.isAPIConfigured {
+                            if isAPIConfigured {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundColor(.green)
                                 Text("已配置")
@@ -90,6 +93,12 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingAPIConfiguration) {
                 APIConfigurationView()
+                    .onDisappear {
+                        updateAPIConfigurationStatus()
+                    }
+            }
+            .onAppear {
+                updateAPIConfigurationStatus()
             }
         }
     }
@@ -157,6 +166,10 @@ struct ProfileView: View {
             return "\"\(escapedField)\""
         }
         return field // 如果没有特殊字符，直接返回原字段
+    }
+    
+    private func updateAPIConfigurationStatus() {
+        isAPIConfigured = configManager.isAPIConfigured
     }
 }
 

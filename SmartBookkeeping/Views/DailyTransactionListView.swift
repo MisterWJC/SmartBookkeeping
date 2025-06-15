@@ -130,33 +130,30 @@ struct DailyTransactionListView: View {
             formatter.dateFormat = "yyyy年MM月dd日"
             return formatter.string(from: date)
         case .week:
-            // 显示周的起始日期，例如 "yyyy年MM月dd日 开始的一周"
-            // 或者显示为 "yyyy年 第ww周"
-            let year = calendar.component(.yearForWeekOfYear, from: date)
-            let weekOfYear = calendar.component(.weekOfYear, from: date)
+            // 统一显示格式：显示周的起始日期
+            formatter.dateFormat = "yyyy年MM月dd日"
+            let startDateString = formatter.string(from: date)
+            
             // 获取周的结束日期
             guard let endDateOfWeek = calendar.date(byAdding: .day, value: 6, to: date) else {
-                return "\(year)年 第\(weekOfYear)周"
+                return startDateString
             }
-//            let endDay = calendar.component(.day, from: endDateOfWeek)
-//            let endMonth = calendar.component(.month, from: endDateOfWeek)
             
-            let startDateFormatter = DateFormatter()
-            startDateFormatter.locale = Locale(identifier: "zh_CN")
-            startDateFormatter.dateFormat = "yyyy年MM月dd日"
-            let startDateString = startDateFormatter.string(from: date)
-            
-            let endDateFormatter = DateFormatter()
-            endDateFormatter.locale = Locale(identifier: "zh_CN")
-
-            // 如果周的开始和结束在同一个月
+            // 如果周的开始和结束在同一个月和年
             if calendar.isDate(date, equalTo: endDateOfWeek, toGranularity: .month) {
-                 endDateFormatter.dateFormat = "d日"
-                 let endDateString = endDateFormatter.string(from: endDateOfWeek)
-                 return "\(startDateString) - \(endDateString)"
+                let endDay = calendar.component(.day, from: endDateOfWeek)
+                return "\(startDateString) - \(endDay)日"
+            } else if calendar.isDate(date, equalTo: endDateOfWeek, toGranularity: .year) {
+                let endFormatter = DateFormatter()
+                endFormatter.locale = Locale(identifier: "zh_CN")
+                endFormatter.dateFormat = "MM月dd日"
+                let endDateString = endFormatter.string(from: endDateOfWeek)
+                return "\(startDateString) - \(endDateString)"
             } else {
-                endDateFormatter.dateFormat = "MM月dd日"
-                let endDateString = endDateFormatter.string(from: endDateOfWeek)
+                let endFormatter = DateFormatter()
+                endFormatter.locale = Locale(identifier: "zh_CN")
+                endFormatter.dateFormat = "yyyy年MM月dd日"
+                let endDateString = endFormatter.string(from: endDateOfWeek)
                 return "\(startDateString) - \(endDateString)"
             }
 
@@ -169,6 +166,10 @@ struct DailyTransactionListView: View {
             return "\(year)年 第\(quarter)季度"
         case .year:
             formatter.dateFormat = "yyyy年"
+            return formatter.string(from: date)
+        case .custom:
+            // 对于自定义时间范围，显示具体日期
+            formatter.dateFormat = "yyyy年MM月dd日"
             return formatter.string(from: date)
         }
     }

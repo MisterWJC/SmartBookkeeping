@@ -220,6 +220,9 @@ struct AccountSectionView: View {
     let accounts: [AccountSummary]
     let totalAmount: Double
     @ObservedObject var viewModel: TransactionViewModel
+    @ObservedObject var accountViewModel: AccountViewModel
+    @Binding var selectedDetailType: DetailTabView.DetailType
+    @Binding var selectedAccount: String
     
     var body: some View {
         VStack(spacing: 0) {
@@ -241,7 +244,13 @@ struct AccountSectionView: View {
             
             // 账户列表
             ForEach(accounts, id: \.accountName) { account in
-                AccountRowView(account: account, viewModel: viewModel)
+                AccountRowView(
+                    account: account, 
+                    viewModel: viewModel,
+                    accountViewModel: accountViewModel,
+                    selectedDetailType: $selectedDetailType,
+                    selectedAccount: $selectedAccount
+                )
             }
         }
     }
@@ -260,7 +269,7 @@ struct AccountSectionListView: View {
     var body: some View {
         Section {
             ForEach(accounts, id: \.accountName) { account in
-                AccountRowListView(
+                AccountRowView(
                     account: account, 
                     viewModel: viewModel,
                     accountViewModel: accountViewModel,
@@ -288,68 +297,13 @@ struct AccountSectionListView: View {
     }
 }
 
-// 单个账户行视图
-struct AccountRowView: View {
-    let account: AccountSummary
-    @ObservedObject var viewModel: TransactionViewModel
-    @State private var showingEditSheet = false
-    @State private var navigateToTransactions = false
-    
-    var body: some View {
-        HStack {
-            // 账户图标
-            Image(systemName: getAccountIcon(for: account.accountType))
-                .foregroundColor(getAccountColor(for: account.accountType))
-                .frame(width: 24, height: 24)
-            
-            // 账户名称
-            Text(account.accountName)
-                .font(.body)
-                .foregroundColor(.primary)
-            
-            Spacer()
-            
-            // 余额
-            Text(String(format: "%.2f", account.balance))
-                .font(.body)
-                .fontWeight(.medium)
-                .foregroundColor(account.balance >= 0 ? .primary : .red)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .background(Color(UIColor.systemBackground))
-        .contentShape(Rectangle())
-        .onTapGesture {
-            navigateToTransactions = true
-        }
-        .swipeActions(edge: .trailing) {
-            Button("编辑") {
-                showingEditSheet = true
-            }
-            .tint(.blue)
-        }
-        .sheet(isPresented: $showingEditSheet) {
-            AccountEditView(account: account, transactionViewModel: viewModel)
-        }
-        .background(
-            NavigationLink(
-                destination: FilteredTransactionView(accountName: account.accountName)
-                    .environmentObject(viewModel),
-                isActive: $navigateToTransactions
-            ) {
-                EmptyView()
-            }
-            .hidden()
-        )
-    }
-}
-
 // 适用于List的单个账户行视图
-struct AccountRowListView: View {
+struct AccountRowView: View {
     let account: AccountSummary
     @ObservedObject var viewModel: TransactionViewModel
     @ObservedObject var accountViewModel: AccountViewModel
     @State private var showingEditSheet = false
+    @State private var showingNavigationAlert = false
     @Binding var selectedDetailType: DetailTabView.DetailType
     @Binding var selectedAccount: String
     
@@ -391,9 +345,17 @@ struct AccountRowListView: View {
         .background(Color(UIColor.systemBackground))
         .contentShape(Rectangle())
         .onTapGesture {
-            // 切换到账单明细页面并设置账户筛选
-            selectedDetailType = .transactions
-            selectedAccount = account.accountName
+            // 检查该账户是否有交易记录
+            let hasTransactions = viewModel.transactions.contains { $0.paymentMethod == account.accountName }
+            
+            if hasTransactions {
+                // 有交易记录，直接跳转
+                selectedDetailType = .transactions
+                selectedAccount = account.accountName
+            } else {
+                // 没有交易记录，显示确认提示
+                showingNavigationAlert = true
+            }
         }
         .swipeActions(edge: .trailing) {
             Button("编辑") {
@@ -403,6 +365,15 @@ struct AccountRowListView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             AccountEditView(account: account, transactionViewModel: viewModel)
+        }
+        .alert("跳转确认", isPresented: $showingNavigationAlert) {
+            Button("取消", role: .cancel) { }
+            Button("确认跳转") {
+                selectedDetailType = .transactions
+                selectedAccount = account.accountName
+            }
+        } message: {
+            Text("该账户暂无交易记录，是否仍要跳转到账单明细页面？")
         }
      }
      

@@ -24,6 +24,10 @@ struct TransactionFormView: View {
     // Add TransactionViewModel to refresh data after saving
     let transactionViewModel: TransactionViewModel?
     
+    // 呼吸灯效果状态
+    @State private var shouldShowBreathingEffect = false
+    @State private var breathingScale: CGFloat = 1.0
+    
     // Enum for input modes, kept in the View as it's a pure UI concern.
     enum InputMode {
         case text, voice
@@ -45,6 +49,20 @@ struct TransactionFormView: View {
             .navigationTitle("智能记账助手")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("体验AI引导") {
+                        // 发送通知给ContentView显示引导界面
+                        NotificationCenter.default.post(name: NSNotification.Name("ShowAIGuide"), object: nil)
+                    }
+                    .font(.caption)
+                    .foregroundColor(shouldShowBreathingEffect ? .white : .blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(aiGuideButtonBackground)
+                    .scaleEffect(shouldShowBreathingEffect ? breathingScale : 1.0)
+                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: breathingScale)
+                }
+                
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("完成") { focusedField = nil }
@@ -57,6 +75,16 @@ struct TransactionFormView: View {
                 }
                 // 初始化时获取账户数据
                 accountViewModel.fetchAccounts()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowEmptyStateGuide"))) { _ in
+                // 显示呼吸灯效果
+                shouldShowBreathingEffect = true
+                breathingScale = 1.15
+                // 8秒后停止呼吸灯效果
+                DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
+                    shouldShowBreathingEffect = false
+                    breathingScale = 1.0
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccountDeleted"))) { _ in
                 // 当收到账户删除通知时，刷新账户列表
@@ -146,6 +174,18 @@ struct TransactionFormView: View {
         }
     }
     
+    // MARK: - Computed Properties
+    
+    private var aiGuideButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(shouldShowBreathingEffect ? 
+                LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing) : 
+                LinearGradient(colors: [.clear], startPoint: .leading, endPoint: .trailing)
+            )
+            .scaleEffect(shouldShowBreathingEffect ? breathingScale : 1.0)
+            .shadow(color: shouldShowBreathingEffect ? .purple.opacity(0.6) : .clear, radius: shouldShowBreathingEffect ? 8 : 0)
+    }
+    
     // MARK: - Subviews
     
     private var formSections: some View {
@@ -158,15 +198,19 @@ struct TransactionFormView: View {
             
             Section(header: Text("交易日期")) {
                 DatePicker("", selection: $viewModel.formData.date, displayedComponents: [.date, .hourAndMinute])
+                .datePickerStyle(CompactDatePickerStyle())
+                .labelsHidden()
+                .environment(\.locale, Locale(identifier: "zh_CN"))
             }
             
+            
             Section(header: Text("收/支类型")) {
-                Picker("请选择", selection: $viewModel.formData.type) {
+                Picker("收/支类型", selection: $viewModel.formData.type) {
                     ForEach(Transaction.TransactionType.allCases, id: \.self) { type in
                         Text(type.rawValue).tag(type)
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .pickerStyle(MenuPickerStyle())
                 .onChange(of: viewModel.formData.type) { newType in
                     viewModel.updateCategoryForType(newType)
                 }
@@ -263,13 +307,16 @@ struct TransactionFormView: View {
                 Image(systemName: "plus.circle.fill").font(.title2)
             }
             
-            Text("一句话记录～")
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(10)
-                .onTapGesture { viewModel.presentSheet(.manualInput) }
+            HStack {
+                Text("一句话记录～")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+            }
+            .padding(8)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(10)
+            .onTapGesture { viewModel.presentSheet(.manualInput) }
 
             Button(action: { viewModel.changeInputMode(to: .voice) }) {
                 Image(systemName: "mic.fill").foregroundColor(.blue)
@@ -286,25 +333,28 @@ struct TransactionFormView: View {
                 Image(systemName: "plus.circle.fill").font(.title2)
             }
             
-            Text(viewModel.isRecording ? "正在录音..." : "长按说话，快速记录")
-                .foregroundColor(viewModel.isRecording ? .red : .secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(10)
-                .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    if !viewModel.isRecording {
-                                        viewModel.startVoiceRecording()
-                                    }
+            HStack {
+                Text(viewModel.isRecording ? "正在录音..." : "长按说话，快速记录")
+                    .foregroundColor(viewModel.isRecording ? .red : .secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+            }
+            .padding(8)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(10)
+            .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !viewModel.isRecording {
+                                    viewModel.startVoiceRecording()
                                 }
-                                .onEnded { _ in
-                                    if viewModel.isRecording {
-                                        viewModel.stopVoiceRecordingAndProcess()
-                                    }
+                            }
+                            .onEnded { _ in
+                                if viewModel.isRecording {
+                                    viewModel.stopVoiceRecordingAndProcess()
                                 }
-                        )
+                            }
+                    )
 
             Button(action: { viewModel.changeInputMode(to: .text) }) {
                 Image(systemName: "keyboard").foregroundColor(.blue)

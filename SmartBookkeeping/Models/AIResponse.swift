@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ZhipuAIResponse: Codable {
+public struct AIResponse: Codable {
     public let amount: Double?
     public let transaction_time: String?
     public let item_description: String?
@@ -24,4 +24,4 @@ public struct ZhipuAIResponse: Codable {
         self.payment_method = payment_method
         self.notes = notes
     }
-} 
+}

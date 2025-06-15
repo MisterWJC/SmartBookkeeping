@@ -403,13 +403,13 @@ final class TransactionFormViewModel: ObservableObject {
         isProcessingAI = true  // 设置AI处理状态
         
         // 调用 AIService 处理手动输入的文本
-        AIService.shared.processText(quickInputText) { [weak self] aiResponse in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                if let response = aiResponse {
+        Task {
+            do {
+                let aiResponse = try await AIService.shared.processText(quickInputText)
+                
+                await MainActor.run {
                     // 使用 BillProcessingService 处理 AI 响应
-                    if let transaction = BillProcessingService.shared.processAIResponse(response) {
+                    if let transaction = BillProcessingService.shared.processAIResponse(aiResponse) {
                         // 更新表单
                         self.updateForm(with: transaction)
                         self.alertItem = AlertItem(title: "识别成功", message: "已自动识别，请核对后保存。", type: .info)
@@ -427,7 +427,14 @@ final class TransactionFormViewModel: ObservableObject {
                         self.updateForm(with: transaction)
                         self.alertItem = AlertItem(title: "识别失败", message: "AI 响应处理失败，请手动填写。", type: .error)
                     }
-                } else {
+                    
+                    // 不再自动关闭手动输入页面，让用户决定何时关闭
+                    self.isProcessing = false
+                    self.isProcessingAI = false  // 重置AI处理状态
+                    // 保留输入文本，方便用户进一步编辑
+                }
+            } catch {
+                await MainActor.run {
                     // 识别失败，创建一个基本的 Transaction 对象
                     let transaction = Transaction(
                         amount: 0.0,
@@ -440,12 +447,10 @@ final class TransactionFormViewModel: ObservableObject {
                     )
                     self.updateForm(with: transaction)
                     self.alertItem = AlertItem(title: "识别失败", message: "无法识别账单信息，请手动填写。", type: .error)
+                    
+                    self.isProcessing = false
+                    self.isProcessingAI = false  // 重置AI处理状态
                 }
-                
-                // 不再自动关闭手动输入页面，让用户决定何时关闭
-                self.isProcessing = false
-                self.isProcessingAI = false  // 重置AI处理状态
-                // 保留输入文本，方便用户进一步编辑
             }
         }
     }

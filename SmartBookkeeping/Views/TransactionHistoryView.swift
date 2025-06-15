@@ -11,6 +11,9 @@ struct TransactionHistoryView: View {
     @ObservedObject var viewModel: TransactionViewModel // 从外部传入
     @State private var selectedTimeRange: TimeRange = .month // 默认按月分组
     @State private var selectedAccount: String = "全部账户"
+    @State private var customStartDate: Date = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+    @State private var customEndDate: Date = Date()
+    @State private var showingCustomDatePicker = false
 
     private var allAccounts: [String] {
         ["全部账户"] + Array(Set(viewModel.transactions.map { $0.paymentMethod }.filter { !$0.isEmpty })).sorted()
@@ -22,6 +25,7 @@ struct TransactionHistoryView: View {
         case month = "月"
         case quarter = "季度"
         case year = "年"
+        case custom = "自定义"
         var id: String { self.rawValue }
     }
 
@@ -66,12 +70,25 @@ struct TransactionHistoryView: View {
                 return calendar.date(from: DateComponents(year: year, month: firstMonthOfQuarter, day: 1))!
             case .year:
                 return calendar.date(from: calendar.dateComponents([.year], from: date))!
+            case .custom:
+                // 对于自定义时间范围，按天分组
+                return calendar.startOfDay(for: date)
             }
         }
         
         // 首先根据账户筛选
-        let accountFilteredTransactions = viewModel.transactions.filter {
+        var accountFilteredTransactions = viewModel.transactions.filter {
             selectedAccount == "全部账户" || $0.paymentMethod == selectedAccount
+        }
+        
+        // 如果是自定义时间范围，进一步按日期筛选
+        if selectedTimeRange == .custom {
+            accountFilteredTransactions = accountFilteredTransactions.filter { transaction in
+                let transactionDate = Calendar.current.startOfDay(for: transaction.date)
+                let startDate = Calendar.current.startOfDay(for: customStartDate)
+                let endDate = Calendar.current.startOfDay(for: customEndDate)
+                return transactionDate >= startDate && transactionDate <= endDate
+            }
         }
         
         // 然后对筛选后的交易进行分组
@@ -108,6 +125,22 @@ struct TransactionHistoryView: View {
                             }
                         }
                         .pickerStyle(.menu)
+                        .onChange(of: selectedTimeRange) { newValue in
+                            if newValue == .custom {
+                                showingCustomDatePicker = true
+                            }
+                        }
+                        
+                        // 如果是自定义时间范围，显示选择的日期范围
+                        if selectedTimeRange == .custom {
+                            Button(action: {
+                                showingCustomDatePicker = true
+                            }) {
+                                Text("\(formatDate(customStartDate)) - \(formatDate(customEndDate))")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
+                        }
 
                         Picker("账户", selection: $selectedAccount) {
                             ForEach(allAccounts, id: \.self) { account in
@@ -191,10 +224,24 @@ struct TransactionHistoryView: View {
         .onAppear {
             // 可以在这里加载初始数据或执行其他设置
         }
+        .sheet(isPresented: $showingCustomDatePicker) {
+            CustomDateRangePickerView(
+                startDate: $customStartDate,
+                endDate: $customEndDate,
+                isPresented: $showingCustomDatePicker
+            )
+        }
         // 在NavigationView的顶层注入ViewModel，使其对所有子视图可用
         // 如果DailyTransactionListView是唯一需要它的地方，则在上面直接注入也可以
         // 但通常在父视图或根视图注入更常见
         // .environmentObject(viewModel) // 考虑是否在此处注入，或者在SmartBookkeepingApp中注入
+    }
+    
+    // 格式化日期显示
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd"
+        return formatter.string(from: date)
     }
 }
 

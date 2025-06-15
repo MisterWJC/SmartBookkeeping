@@ -3,6 +3,7 @@ import SwiftUI
 struct APIConfigurationView: View {
     @State private var apiKey: String = ""
     @State private var baseURL: String = ""
+    @State private var modelName: String = ""
     @State private var showAlert = false
     @State private var alertMessage = ""
     @Environment(\.dismiss) private var dismiss
@@ -12,14 +13,14 @@ struct APIConfigurationView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("智谱AI配置")) {
+                Section(header: Text("AI服务配置")) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("API密钥")
                             .font(.headline)
-                        SecureField("请输入智谱AI API密钥", text: $apiKey)
+                        SecureField("请输入AI服务API密钥", text: $apiKey)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         
-                        Text("获取API密钥：访问 https://open.bigmodel.cn")
+                        Text("🔔 关注公众号显示领取早鸟免费密钥使用权！")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -34,13 +35,24 @@ struct APIConfigurationView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("模型名称")
+                            .font(.headline)
+                        TextField("AI模型名称", text: $modelName)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                        
+                        Text("智谱AI默认模型：glm-4-air-250414")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                 }
                 
                 Section {
                     Button("保存配置") {
                         saveConfiguration()
                     }
-                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || modelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     
                     Button("重置配置", role: .destructive) {
                         resetConfiguration()
@@ -77,16 +89,24 @@ struct APIConfigurationView: View {
     }
     
     private func loadCurrentConfiguration() {
-        apiKey = configManager.zhipuAPIKey ?? ""
-        baseURL = configManager.zhipuBaseURL
+        apiKey = configManager.aiAPIKey ?? ""
+        baseURL = configManager.aiBaseURL
+        modelName = configManager.aiModelName
     }
     
     private func saveConfiguration() {
         let trimmedAPIKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedBaseURL = baseURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedModelName = modelName.trimmingCharacters(in: .whitespacesAndNewlines)
         
         guard !trimmedAPIKey.isEmpty else {
             alertMessage = "请输入API密钥"
+            showAlert = true
+            return
+        }
+        
+        guard !trimmedModelName.isEmpty else {
+            alertMessage = "请输入模型名称"
             showAlert = true
             return
         }
@@ -102,7 +122,8 @@ struct APIConfigurationView: View {
         
         configManager.setAPIConfiguration(
             apiKey: trimmedAPIKey,
-            baseURL: trimmedBaseURL.isEmpty ? nil : trimmedBaseURL
+            baseURL: trimmedBaseURL.isEmpty ? nil : trimmedBaseURL,
+            modelName: trimmedModelName
         )
         
         alertMessage = "配置保存成功"

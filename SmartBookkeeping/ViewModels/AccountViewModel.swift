@@ -46,6 +46,9 @@ class AccountViewModel: ObservableObject {
         
         saveContext()
         fetchAccounts()
+        
+        // 发送账户创建通知
+        NotificationCenter.default.post(name: NSNotification.Name("AccountCreated"), object: nil)
     }
     
     // MARK: - Update Account

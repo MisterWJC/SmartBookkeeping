@@ -59,6 +59,9 @@ struct TransactionHistoryContentView: View {
     @State private var selectedTimeRange: TimeRange = .month
     @Binding var selectedAccount: String
     @State private var selectedCategory: String = "全部类别"
+    @State private var customStartDate: Date = Calendar.current.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+    @State private var customEndDate: Date = Date()
+    @State private var showingCustomDatePicker = false
 
     private var allAccounts: [String] {
         ["全部账户"] + Array(Set(viewModel.transactions.map { $0.paymentMethod }.filter { !$0.isEmpty })).sorted()
@@ -74,6 +77,7 @@ struct TransactionHistoryContentView: View {
         case month = "月"
         case quarter = "季度"
         case year = "年"
+        case custom = "自定义"
         var id: String { self.rawValue }
     }
 
@@ -98,6 +102,8 @@ struct TransactionHistoryContentView: View {
                 return calendar.date(from: DateComponents(year: year, month: firstMonthOfQuarter, day: 1))!
             case .year:
                 return calendar.date(from: calendar.dateComponents([.year], from: date))!
+            case .custom:
+                return calendar.startOfDay(for: date)
             }
         }
         
@@ -106,7 +112,20 @@ struct TransactionHistoryContentView: View {
             (selectedCategory == "全部类别" || $0.category == selectedCategory)
         }
         
-        return Dictionary(grouping: accountFilteredTransactions) { transaction in
+        // 如果是自定义时间范围，进一步按日期筛选
+        let finalFilteredTransactions: [Transaction]
+        if selectedTimeRange == .custom {
+            finalFilteredTransactions = accountFilteredTransactions.filter { transaction in
+                let transactionDate = Calendar.current.startOfDay(for: transaction.date)
+                let startDate = Calendar.current.startOfDay(for: customStartDate)
+                let endDate = Calendar.current.startOfDay(for: customEndDate)
+                return transactionDate >= startDate && transactionDate <= endDate
+            }
+        } else {
+            finalFilteredTransactions = accountFilteredTransactions
+        }
+        
+        return Dictionary(grouping: finalFilteredTransactions) { transaction in
             groupKey(for: transaction, by: selectedTimeRange)
         }
     }
@@ -140,6 +159,8 @@ struct TransactionHistoryContentView: View {
             return .quarter
         case .year:
             return .year
+        case .custom:
+            return .custom
         }
     }
 
@@ -147,13 +168,32 @@ struct TransactionHistoryContentView: View {
         VStack(spacing: 0) {
             // 顶部概览区域
             VStack {
-                HStack {
-                    Picker("时间范围", selection: $selectedTimeRange) {
-                        ForEach(TimeRange.allCases) { range in
-                            Text(range.rawValue).tag(range)
+                HStack(spacing: 8) {
+                    VStack {
+                        Picker("时间范围", selection: $selectedTimeRange) {
+                            ForEach(TimeRange.allCases) { range in
+                                Text(range.rawValue).tag(range)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .onChange(of: selectedTimeRange) { newValue in
+                            if newValue == .custom {
+                                showingCustomDatePicker = true
+                            }
+                        }
+                        
+                        // 如果是自定义时间范围，显示选择的日期范围
+                        if selectedTimeRange == .custom {
+                            Button(action: {
+                                showingCustomDatePicker = true
+                            }) {
+                                Text("\(formatDate(customStartDate)) - \(formatDate(customEndDate))")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
+                            }
                         }
                     }
-                    .pickerStyle(.menu)
+                    .frame(maxWidth: .infinity)
 
                     Picker("账户", selection: $selectedAccount) {
                         ForEach(allAccounts, id: \.self) { account in
@@ -161,6 +201,7 @@ struct TransactionHistoryContentView: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .frame(maxWidth: .infinity)
                     
                     Picker("类别", selection: $selectedCategory) {
                         ForEach(allCategories, id: \.self) { category in
@@ -168,8 +209,7 @@ struct TransactionHistoryContentView: View {
                         }
                     }
                     .pickerStyle(.menu)
-
-                    Spacer()
+                    .frame(maxWidth: .infinity)
                 }
                 .padding()
 
@@ -220,8 +260,7 @@ struct TransactionHistoryContentView: View {
             // 交易列表
             ScrollView {
                 if sortedDates.isEmpty {
-                    Text("当前时间范围无交易记录")
-                        .foregroundColor(.secondary)
+                    EmptyStateView()
                         .padding(.top, 50)
                 } else {
                     LazyVStack(spacing: 16) {
@@ -236,6 +275,99 @@ struct TransactionHistoryContentView: View {
                 }
             }
             .background(Color(UIColor.secondarySystemBackground))
+        }
+        .sheet(isPresented: $showingCustomDatePicker) {
+            CustomDateRangePickerView(
+                startDate: $customStartDate,
+                endDate: $customEndDate,
+                isPresented: $showingCustomDatePicker
+            )
+        }
+    }
+    
+    // 格式化日期显示
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MM/dd"
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - 空状态引导视图
+struct EmptyStateView: View {
+    @State private var showingAIGuide = false
+    @State private var pulseAnimation = false
+    
+    var body: some View {
+        VStack(spacing: 24) {
+            // 空状态图标
+            ZStack {
+                Circle()
+                    .fill(Color.blue.opacity(0.1))
+                    .frame(width: 100, height: 100)
+                
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 50))
+                    .foregroundColor(.blue)
+                    .scaleEffect(pulseAnimation ? 1.2 : 1.0)
+                    .opacity(pulseAnimation ? 1.0 : 0.7)
+                    .animation(.easeInOut(duration: 1.0).repeatForever(autoreverses: true), value: pulseAnimation)
+                    .shadow(color: .blue.opacity(0.5), radius: pulseAnimation ? 10 : 5)
+            }
+            
+            VStack(spacing: 12) {
+                Text("欢迎使用智能记账助手！")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                
+                Text("点击下方按钮开始您的第一笔记账")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            
+            VStack(spacing: 12) {
+                Button(action: { // 按钮要执行的操作
+                    showingAIGuide = true
+                }) { // 自定义按钮的外观 (Label)
+                    Text("体验AI记账")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity) // 将修饰符应用在 Text 上
+                        .padding(.vertical, 14)    // 而不是 Button 上
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.blue, Color.purple]),
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                } // Button 的 Label 定义结束
+
+                // --- 手动记账按钮 ---
+                Button(action: {
+                    // 切换到记账页面
+                    NotificationCenter.default.post(name: NSNotification.Name("SwitchToFormTab"), object: nil)
+                }) {
+                    Text("手动记账")
+                        .font(.subheadline)
+                        .foregroundColor(.blue)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.blue.opacity(0.1))
+                        .cornerRadius(12)
+                }
+            }
+            .padding(.horizontal, 40)
+        }
+        .onAppear {
+            pulseAnimation = true
+        }
+        .sheet(isPresented: $showingAIGuide) {
+            InitialSetupView()
+                .interactiveDismissDisabled(false)
         }
     }
 }

@@ -84,12 +84,6 @@ struct AccountEditView: View {
                         .keyboardType(.decimalPad)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                     
-                    Picker("账户类型", selection: $accountType) {
-                        Text("资产账户").tag(AccountType.asset)
-                        Text("负债账户").tag(AccountType.liability)
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
-                    
                     Picker("账户分类", selection: $accountCategory) {
                         ForEach(AccountCategory.allCases, id: \.self) { category in
                             HStack {
@@ -101,6 +95,19 @@ struct AccountEditView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .onChange(of: accountCategory) { newCategory in
+                        // 根据账户分类自动设置账户类型
+                        accountType = (newCategory == .credit) ? .liability : .asset
+                        includeInAssets = (accountType == .asset)
+                    }
+                    
+                    // 显示自动匹配的账户类型（只读）
+                    HStack {
+                        Text("账户类型")
+                        Spacer()
+                        Text(accountType.displayName)
+                            .foregroundColor(.secondary)
+                    }
                     
                     Toggle("计入总资产", isOn: $includeInAssets)
                 }
