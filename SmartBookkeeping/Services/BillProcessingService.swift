@@ -12,35 +12,42 @@ import UIKit
 class BillProcessingService {
     static let shared = BillProcessingService()
     
-    // 从 OCRService 复制过来的预定义类别和支付方式
-    private let expenseCategories = OCRService.expenseCategories
-    private let incomeCategories = OCRService.incomeCategories
-    private let paymentMethods = OCRService.paymentMethods
+    // 使用统一的数据管理器
+    private let categoryManager = CategoryDataManager.shared
     
     private init() {}
     
     /// 处理 AI 服务返回的账单信息，转换为 Transaction 对象
     /// - Parameter aiResponse: AI 服务返回的账单信息
     /// - Returns: 处理后的 Transaction 对象，如果处理失败则返回 nil
-    func processAIResponse(_ aiResponse: ZhipuAIResponse?) -> Transaction? {
-        guard let response = aiResponse else { return nil }
+    func processAIResponse(_ aiResponse: AIResponse?) -> Transaction? {
+        print("DEBUG: BillProcessingService - Processing AI response: \(String(describing: aiResponse))")
+        
+        guard let response = aiResponse else { 
+            print("ERROR: BillProcessingService - AI response is nil")
+            return nil 
+        }
         
         // 解析交易类型
         let transactionType = determineTransactionType(from: response.transaction_type)
+        print("DEBUG: BillProcessingService - Determined transaction type: \(transactionType)")
         
         // 解析日期
         let transactionDate = parseTransactionDate(from: response.transaction_time)
+        print("DEBUG: BillProcessingService - Parsed transaction date: \(transactionDate)")
         
         // 根据交易类型选择合适的类别列表
-        let categoryList = transactionType == .income ? incomeCategories : expenseCategories
+        let categoryList = categoryManager.categories(for: transactionType)
         
         // 处理类别和支付方式，使用相似度匹配
         let category = findBestMatch(for: response.category, from: categoryList) ?? "未分类"
-        let paymentMethod = findBestMatch(for: response.payment_method, from: paymentMethods) ?? "未知"
+        let paymentMethod = findBestMatch(for: response.payment_method, from: categoryManager.paymentMethods) ?? "未知"
+        
+        print("DEBUG: BillProcessingService - Matched category: \(category), payment method: \(paymentMethod)")
         
         // 创建 Transaction 对象
-        return Transaction(
-            amount: response.amount ?? 0.0,
+        let transaction = Transaction(
+            amount: abs(response.amount ?? 0.0),
             date: transactionDate,
             category: category,
             description: response.item_description ?? "",
@@ -48,21 +55,24 @@ class BillProcessingService {
             paymentMethod: paymentMethod,
             note: response.notes ?? ""
         )
+        
+        print("DEBUG: BillProcessingService - Created transaction: \(transaction)")
+        return transaction
     }
     
     /// 将 AI 响应格式化为可读文本
     /// - Parameter aiResponse: AI 服务返回的账单信息
     /// - Returns: 格式化后的文本
-    func formatAIResponseToText(_ aiResponse: ZhipuAIResponse?) -> String {
+    func formatAIResponseToText(_ aiResponse: AIResponse?) -> String {
         guard let response = aiResponse else { 
             return "无法识别账单信息，请重试或手动输入。" 
         }
         
         // 处理类别和支付方式，使用相似度匹配
         let transactionType = determineTransactionType(from: response.transaction_type)
-        let categoryList = transactionType == .income ? incomeCategories : expenseCategories
+        let categoryList = categoryManager.categories(for: transactionType)
         let category = findBestMatch(for: response.category, from: categoryList) ?? "未分类"
-        let paymentMethod = findBestMatch(for: response.payment_method, from: paymentMethods) ?? "未知"
+        let paymentMethod = findBestMatch(for: response.payment_method, from: categoryManager.paymentMethods) ?? "未知"
         
         return """
         金额：¥\(response.amount?.description ?? "未识别")
@@ -85,8 +95,6 @@ class BillProcessingService {
         
         if typeString.contains("收入") {
             return .income
-        } else if typeString.contains("转账") {
-            return .transfer
         } else {
             return .expense
         }
@@ -102,6 +110,10 @@ class BillProcessingService {
         dateFormatter.dateFormat = "yyyy年MM月dd日 HH:mm:ss"
         
         if let date = dateFormatter.date(from: dateString) {
+            // 检查是否为默认的 1970-01-01 日期，如果是则返回当前日期
+            if isDefaultDate(date) {
+                return Date()
+            }
             return date
         }
         
@@ -117,11 +129,24 @@ class BillProcessingService {
         for format in possibleFormats {
             dateFormatter.dateFormat = format
             if let date = dateFormatter.date(from: dateString) {
+                // 检查是否为默认的 1970-01-01 日期，如果是则返回当前日期
+                if isDefaultDate(date) {
+                    return Date()
+                }
                 return date
             }
         }
         
         return Date()
+    }
+    
+    /// 检查是否为默认的 1970-01-01 日期
+    /// - Parameter date: 要检查的日期
+    /// - Returns: 如果是 1970-01-01 则返回 true
+    private func isDefaultDate(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day], from: date)
+        return components.year == 1970 && components.month == 1 && components.day == 1
     }
     
     /// 计算两个字符串之间的 Levenshtein 距离
@@ -171,7 +196,7 @@ class BillProcessingService {
         let bChars = Array(b)
         
         // 计算匹配窗口大小
-        let matchDistance = max(aChars.count, bChars.count) / 2 - 1
+        let matchDistance = max(0, max(aChars.count, bChars.count) / 2 - 1)
         
         // 初始化匹配标记数组
         var aMatches = Array(repeating: false, count: aChars.count)
@@ -182,6 +207,9 @@ class BillProcessingService {
         for i in 0..<aChars.count {
             let start = max(0, i - matchDistance)
             let end = min(i + matchDistance + 1, bChars.count)
+            
+            // 确保范围有效
+            guard start < end else { continue }
             
             for j in start..<end {
                 if !bMatches[j] && aChars[i] == bChars[j] {
@@ -201,8 +229,8 @@ class BillProcessingService {
         var j = 0
         for i in 0..<aChars.count {
             if aMatches[i] {
-                while !bMatches[j] { j += 1 }
-                if aChars[i] != bChars[j] { transpositions += 1 }
+                while j < bMatches.count && !bMatches[j] { j += 1 }
+                if j < bMatches.count && aChars[i] != bChars[j] { transpositions += 1 }
                 j += 1
             }
         }
@@ -236,17 +264,30 @@ class BillProcessingService {
     private func findBestMatch(for input: String?, from list: [String]) -> String? {
         guard let input = input, !input.isEmpty, !list.isEmpty else { return nil }
         
-        // 完全匹配优先
-        if list.contains(input) {
-            return input
+        let lowercaseInput = input.lowercased()
+        
+        // 1. 完全匹配优先（忽略大小写）
+        for item in list {
+            if item.lowercased() == lowercaseInput {
+                return item
+            }
         }
         
+        // 2. 包含匹配（输入包含在列表项中，或列表项包含在输入中）
+        for item in list {
+            let lowercaseItem = item.lowercased()
+            if lowercaseInput.contains(lowercaseItem) || lowercaseItem.contains(lowercaseInput) {
+                return item
+            }
+        }
+        
+        // 3. 使用相似度算法进行模糊匹配
         var bestMatch: String? = nil
         var maxSimilarity = 0.0
         
         for item in list {
             // 使用 Jaro-Winkler 相似度算法
-            let similarity = jaroWinklerSimilarity(a: input, b: item)
+            let similarity = jaroWinklerSimilarity(a: lowercaseInput, b: item.lowercased())
             
             // 如果找到更相似的匹配
             if similarity > maxSimilarity {
@@ -255,30 +296,42 @@ class BillProcessingService {
             }
         }
         
-        // 设置相似度阈值，如果最大相似度低于阈值，则认为没有好的匹配
-        if maxSimilarity < 0.6 {
-            // 尝试使用 Levenshtein 距离作为备选方法
-            var minDistance = Int.max
-            var levenshteinBestMatch: String? = nil
-            
-            for item in list {
-                let distance = levenshteinDistance(a: input, b: item)
-                if distance < minDistance {
-                    minDistance = distance
-                    levenshteinBestMatch = item
-                }
-            }
-            
-            // 如果 Levenshtein 距离足够小，使用它的结果
-            if let match = levenshteinBestMatch, minDistance <= (input.count / 2) + 2 {
-                return match
-            }
-            
-            // 如果两种方法都没有找到好的匹配，返回 nil
-            return nil
+        // 降低相似度阈值到 0.4，提高匹配成功率
+        if maxSimilarity >= 0.4 {
+            return bestMatch
         }
         
-        return bestMatch
+        // 4. 使用 Levenshtein 距离作为备选方法
+        var minDistance = Int.max
+        var levenshteinBestMatch: String? = nil
+        
+        for item in list {
+            let distance = levenshteinDistance(a: lowercaseInput, b: item.lowercased())
+            if distance < minDistance {
+                minDistance = distance
+                levenshteinBestMatch = item
+            }
+        }
+        
+        // 如果 Levenshtein 距离足够小，使用它的结果
+        let maxAllowedDistance = max(2, min(lowercaseInput.count, 4) / 2)
+        if let match = levenshteinBestMatch, minDistance <= maxAllowedDistance {
+            return match
+        }
+        
+        // 5. 最后尝试部分匹配（检查是否有任何字符重叠）
+        for item in list {
+            let lowercaseItem = item.lowercased()
+            let commonChars = Set(lowercaseInput).intersection(Set(lowercaseItem))
+            let overlapRatio = Double(commonChars.count) / Double(max(lowercaseInput.count, lowercaseItem.count))
+            
+            if overlapRatio >= 0.5 {
+                return item
+            }
+        }
+        
+        // 如果所有方法都没有找到好的匹配，返回 nil
+        return nil
     }
     
     /// 包含关键词检查
@@ -289,5 +342,142 @@ class BillProcessingService {
     private func containsAnyKeyword(_ input: String, keywords: [String]) -> Bool {
         let lowercaseInput = input.lowercased()
         return keywords.contains { lowercaseInput.contains($0.lowercased()) }
+    }
+
+    // 在 BillProcessingService.swift 中添加
+    private func validateConfidenceScores(_ response: AIResponse) -> ConfidenceScores {
+        let learningService = ConfidenceLearningService.shared
+        let cacheService = ConfidenceCacheService.shared
+        
+        var scores = ConfidenceScores()
+        
+        // 使用学习服务和缓存服务计算置信度
+        scores.amount = cacheService.getOrCalculateConfidence(
+            for: "amount",
+            value: "\(response.amount ?? 0.0)",
+            context: ["hasAmount": response.amount != nil]
+        ) {
+            learningService.getSuggestedConfidence(
+                for: "amount",
+                value: response.amount != nil ? "\(response.amount!)" : nil
+            )
+        }
+        
+        scores.category = cacheService.getOrCalculateConfidence(
+            for: "category",
+            value: response.category ?? "未分类"
+        ) {
+            learningService.getSuggestedConfidence(
+                for: "category",
+                value: response.category
+            )
+        }
+        
+        scores.account = cacheService.getOrCalculateConfidence(
+             for: "account",
+             value: response.payment_method ?? "未知"
+         ) {
+             learningService.getSuggestedConfidence(
+                 for: "account",
+                 value: response.payment_method
+             )
+         }
+         
+         scores.description = cacheService.getOrCalculateConfidence(
+             for: "description",
+             value: response.item_description ?? "未识别"
+         ) {
+             learningService.getSuggestedConfidence(
+                 for: "description",
+                 value: response.item_description
+             )
+         }
+        
+        scores.date = cacheService.getOrCalculateConfidence(
+            for: "date",
+            value: response.transaction_time ?? "1970-01-01"
+        ) {
+            learningService.getSuggestedConfidence(
+                for: "date",
+                value: response.transaction_time
+            )
+        }
+        
+        scores.notes = cacheService.getOrCalculateConfidence(
+            for: "notes",
+            value: response.notes ?? "无"
+        ) {
+            learningService.getSuggestedConfidence(
+                for: "notes",
+                value: response.notes
+            )
+        }
+        
+        return scores
+    }
+    
+    /// 记录用户对AI识别结果的反馈
+    /// - Parameters:
+    ///   - originalResponse: 原始AI响应
+    ///   - correctedTransaction: 用户修正后的交易
+    func recordUserFeedback(originalResponse: AIResponse, correctedTransaction: Transaction) {
+        let learningService = ConfidenceLearningService.shared
+        let cacheService = ConfidenceCacheService.shared
+        
+        // 记录金额反馈
+        if let originalAmount = originalResponse.amount {
+            let wasCorrect = abs(originalAmount - correctedTransaction.amount) < 0.01
+            learningService.recordUserFeedback(
+                field: "amount",
+                originalValue: "\(originalAmount)",
+                correctedValue: wasCorrect ? nil : "\(correctedTransaction.amount)",
+                wasCorrect: wasCorrect,
+                originalConfidence: ConfidenceConfig.Defaults.amount
+            )
+        }
+        
+        // 记录类别反馈
+        if let originalCategory = originalResponse.category {
+            let wasCorrect = originalCategory == correctedTransaction.category
+            learningService.recordUserFeedback(
+                field: "category",
+                originalValue: originalCategory,
+                correctedValue: wasCorrect ? nil : correctedTransaction.category,
+                wasCorrect: wasCorrect,
+                originalConfidence: ConfidenceConfig.Defaults.category
+            )
+        }
+        
+        // 记录账户反馈
+         if let originalAccount = originalResponse.payment_method {
+             let wasCorrect = originalAccount == correctedTransaction.paymentMethod
+             learningService.recordUserFeedback(
+                 field: "account",
+                 originalValue: originalAccount,
+                 correctedValue: wasCorrect ? nil : correctedTransaction.paymentMethod,
+                 wasCorrect: wasCorrect,
+                 originalConfidence: ConfidenceConfig.Defaults.account
+             )
+         }
+         
+         // 记录描述反馈
+         if let originalDescription = originalResponse.item_description {
+             let wasCorrect = originalDescription == correctedTransaction.description
+             learningService.recordUserFeedback(
+                 field: "description",
+                 originalValue: originalDescription,
+                 correctedValue: wasCorrect ? nil : correctedTransaction.description,
+                 wasCorrect: wasCorrect,
+                 originalConfidence: ConfidenceConfig.Defaults.description
+             )
+         }
+        
+        // 清除相关缓存，确保下次使用最新的学习结果
+        cacheService.clearCache(for: "amount")
+        cacheService.clearCache(for: "category")
+        cacheService.clearCache(for: "account")
+        cacheService.clearCache(for: "description")
+        
+        print("DEBUG: BillProcessingService - Recorded user feedback for AI learning")
     }
 }

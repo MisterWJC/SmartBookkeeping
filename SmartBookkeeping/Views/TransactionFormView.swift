@@ -15,12 +15,18 @@ enum FormField: Hashable {
 struct TransactionFormView: View {
     // ViewModel is now the single source of truth for the view's state and logic.
     @StateObject private var viewModel: TransactionFormViewModel
+    @StateObject private var accountViewModel = AccountViewModel()
     
     @Environment(\.dismiss) private var dismiss
     @FocusState private var focusedField: FormField?
+    @EnvironmentObject var shortcutManager: ShortcutManager
     
     // Add TransactionViewModel to refresh data after saving
     let transactionViewModel: TransactionViewModel?
+    
+    // 呼吸灯效果状态
+    @State private var shouldShowBreathingEffect = false
+    @State private var breathingScale: CGFloat = 1.0
     
     // Enum for input modes, kept in the View as it's a pure UI concern.
     enum InputMode {
@@ -43,6 +49,20 @@ struct TransactionFormView: View {
             .navigationTitle("智能记账助手")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("体验AI引导") {
+                        // 发送通知给ContentView显示引导界面
+                        NotificationCenter.default.post(name: NSNotification.Name("ShowAIGuide"), object: nil)
+                    }
+                    .font(.caption)
+                    .foregroundColor(shouldShowBreathingEffect ? .white : .blue)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(aiGuideButtonBackground)
+                    .scaleEffect(shouldShowBreathingEffect ? breathingScale : 1.0)
+                    .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: breathingScale)
+                }
+                
                 ToolbarItemGroup(placement: .keyboard) {
                     Spacer()
                     Button("完成") { focusedField = nil }
@@ -53,14 +73,39 @@ struct TransactionFormView: View {
                 viewModel.onTransactionSaved = {
                     transactionViewModel?.fetchTransactions()
                 }
+                // 初始化时获取账户数据
+                accountViewModel.fetchAccounts()
             }
-            // 移除重复的 sheet 定义，使用 SheetAndAlertModifier 中的统一管理
-            .alert(item: $viewModel.alertItem) { item in
-                Alert(title: Text(item.title), message: Text(item.message), dismissButton: .default(Text("确定")))
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowEmptyStateGuide"))) { _ in
+                // 显示呼吸灯效果
+                shouldShowBreathingEffect = true
+                breathingScale = 1.15
+                // 8秒后停止呼吸灯效果
+                DispatchQueue.main.asyncAfter(deadline: .now() + 8.0) {
+                    shouldShowBreathingEffect = false
+                    breathingScale = 1.0
+                }
             }
-            .onChange(of: viewModel.formData.image) { _, newImage in
-                viewModel.handleImageSelected(newImage)
+            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AccountDeleted"))) { _ in
+                // 当收到账户删除通知时，刷新账户列表
+                accountViewModel.fetchAccounts()
+                // 如果当前选中的账户被删除，重置选择
+                if !accountViewModel.accounts.contains(where: { $0.name == viewModel.formData.account }) {
+                    viewModel.formData.account = ""
+                }
             }
+            .onChange(of: shortcutManager.shouldShowEditForm) { shouldShow in
+                if shouldShow && !shortcutManager.editFormData.isEmpty {
+                    // 填充表单数据
+                    viewModel.populateFromURLData(shortcutManager.editFormData)
+                    // 重置 ShortcutManager 状态
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        shortcutManager.shouldShowEditForm = false
+                        shortcutManager.editFormData = [:]
+                    }
+                }
+            }
+            // 移除onChange监听器，因为图片处理现在通过确认对话框处理
             // Add other handlers like .onOpenURL that call viewModel methods.
         }
         .modifier(SheetAndAlertModifier(viewModel: viewModel))
@@ -70,44 +115,75 @@ struct TransactionFormView: View {
     // MARK: - View Modifier for Sheets and Alerts
     private struct SheetAndAlertModifier: ViewModifier {
         @ObservedObject var viewModel: TransactionFormViewModel
-        @State private var showImageConfirmation: Bool = false
         @State private var pendingImage: UIImage? = nil
 
         func body(content: Content) -> some View {
             content
-                .sheet(item: $viewModel.activeSheet, onDismiss: {
-                    // 确保在相册或相机关闭后，如果有选择图片，显示确认对话框
-                    if pendingImage != nil {
-                        // 在主线程更新UI，并添加延迟以确保sheet已完全关闭
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                            showImageConfirmation = true
-                        }
+                .onChange(of: pendingImage) { newImage in
+                    if let image = newImage {
+                        viewModel.showImageConfirmation(
+                            for: image,
+                            onConfirm: {
+                                viewModel.formData.image = image
+                                viewModel.handleImageSelected(image)
+                                pendingImage = nil
+                            },
+                            onCancel: {
+                                pendingImage = nil
+                            }
+                        )
                     }
-                }) { sheet in
+                }
+                .sheet(item: $viewModel.activeSheet) { sheet in
                     switch sheet {
                     case .imagePicker: ImagePicker(image: $pendingImage)
                     case .camera: CameraView(image: $pendingImage)
                     case .csvImport: CSVImportView(viewModel: TransactionViewModel(context: self.viewModel.context))
-                    case .manualInput: ManualInputView(inputText: $viewModel.quickInputText) {
+                    case .manualInput: ManualInputView(inputText: $viewModel.quickInputText, onProcess: {
                             viewModel.processQuickInput()
-                        }
+                        }, viewModel: viewModel)
                     }
                 }
-                .alert(item: $viewModel.alertItem) { item in
-                    Alert(title: Text(item.title), message: Text(item.message), dismissButton: .default(Text("确定")))
-                }
-                .alert("确认使用此图片？", isPresented: $showImageConfirmation) {
-                    Button("确认") {
-                        if let image = pendingImage {
-                            viewModel.formData.image = image
-                            pendingImage = nil
-                        }
-                    }
-                    Button("取消", role: .cancel) {
-                        pendingImage = nil
+                .alert(item: $viewModel.alertItem) { alertItem in
+                    switch alertItem.type {
+                    case .confirmation:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            primaryButton: .default(Text("确认")) {
+                                alertItem.primaryAction?()
+                            },
+                            secondaryButton: .cancel(Text("取消")) {
+                                alertItem.secondaryAction?()
+                            }
+                        )
+                    case .processing:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            dismissButton: .default(Text("确定"))
+                        )
+                    case .info, .error:
+                        return Alert(
+                            title: Text(alertItem.title),
+                            message: Text(alertItem.message),
+                            dismissButton: .default(Text("确定"))
+                        )
                     }
                 }
         }
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var aiGuideButtonBackground: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(shouldShowBreathingEffect ? 
+                LinearGradient(colors: [.purple, .pink], startPoint: .leading, endPoint: .trailing) : 
+                LinearGradient(colors: [.clear], startPoint: .leading, endPoint: .trailing)
+            )
+            .scaleEffect(shouldShowBreathingEffect ? breathingScale : 1.0)
+            .shadow(color: shouldShowBreathingEffect ? .purple.opacity(0.6) : .clear, radius: shouldShowBreathingEffect ? 8 : 0)
     }
     
     // MARK: - Subviews
@@ -122,37 +198,58 @@ struct TransactionFormView: View {
             
             Section(header: Text("交易日期")) {
                 DatePicker("", selection: $viewModel.formData.date, displayedComponents: [.date, .hourAndMinute])
+                .datePickerStyle(CompactDatePickerStyle())
+                .labelsHidden()
+                .environment(\.locale, Locale(identifier: "zh_CN"))
             }
             
+            
             Section(header: Text("收/支类型")) {
-                Picker("请选择", selection: $viewModel.formData.type) {
+                Picker("收/支类型", selection: $viewModel.formData.type) {
                     ForEach(Transaction.TransactionType.allCases, id: \.self) { type in
                         Text(type.rawValue).tag(type)
                     }
                 }
-                .pickerStyle(SegmentedPickerStyle())
+                .pickerStyle(MenuPickerStyle())
+                .onChange(of: viewModel.formData.type) { newType in
+                    viewModel.updateCategoryForType(newType)
+                }
             }
 
             Section(header: Text("交易分类")) {
                 Picker("请选择分类", selection: $viewModel.formData.category) {
-                    ForEach(viewModel.categoriesForSelectedType, id: \.self) { Text($0) }
+                    ForEach(viewModel.categoriesForSelectedType, id: \.self) { category in
+                        Text(category).tag(category)
+                    }
                 }
                 .pickerStyle(MenuPickerStyle())
             }
 
-            Section(header: Text("商品明细")) {
-                TextField("例：超市购物/餐饮消费", text: $viewModel.formData.description)
+            Section("商品明细") {
+                TextField("请输入商品明细", text: $viewModel.formData.description)
                     .focused($focusedField, equals: .description)
             }
 
             Section(header: Text("付款/收款方式")) {
-                Picker("请选择", selection: $viewModel.formData.paymentMethod) {
-                    ForEach(viewModel.paymentMethodsForSelectedType, id: \.self) { Text($0) }
+                Picker("请选择收/付款方式", selection: $viewModel.formData.paymentMethod) {
+                    // 显示现有账户
+                    ForEach(accountViewModel.accounts, id: \.id) { account in
+                        Text(account.name ?? "未知账户").tag(account.name ?? "")
+                    }
+                    
+                    // 显示传统支付方式（向后兼容）
+                    ForEach(viewModel.paymentMethodsForSelectedType.filter { method in
+                        !accountViewModel.accounts.contains { $0.name == method }
+                    }, id: \.self) { method in
+                        Text(method).tag(method)
+                    }
                 }
                 .pickerStyle(MenuPickerStyle())
+                
+
             }
 
-            Section(header: Text("备注")) {
+            Section("备注") {
                 TextEditor(text: $viewModel.formData.note)
                     .frame(minHeight: 100)
                     .focused($focusedField, equals: .note)
@@ -210,13 +307,16 @@ struct TransactionFormView: View {
                 Image(systemName: "plus.circle.fill").font(.title2)
             }
             
-            Text("一句话记录～")
-                .foregroundColor(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(10)
-                .onTapGesture { viewModel.presentSheet(.manualInput) }
+            HStack {
+                Text("一句话记录～")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+            }
+            .padding(8)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(10)
+            .onTapGesture { viewModel.presentSheet(.manualInput) }
 
             Button(action: { viewModel.changeInputMode(to: .voice) }) {
                 Image(systemName: "mic.fill").foregroundColor(.blue)
@@ -233,25 +333,28 @@ struct TransactionFormView: View {
                 Image(systemName: "plus.circle.fill").font(.title2)
             }
             
-            Text(viewModel.isRecording ? "正在录音..." : "长按说话，快速记录")
-                .foregroundColor(viewModel.isRecording ? .red : .secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(8)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(10)
-                .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    if !viewModel.isRecording {
-                                        viewModel.startVoiceRecording()
-                                    }
+            HStack {
+                Text(viewModel.isRecording ? "正在录音..." : "长按说话，快速记录")
+                    .foregroundColor(viewModel.isRecording ? .red : .secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer()
+            }
+            .padding(8)
+            .background(Color(UIColor.systemBackground))
+            .cornerRadius(10)
+            .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !viewModel.isRecording {
+                                    viewModel.startVoiceRecording()
                                 }
-                                .onEnded { _ in
-                                    if viewModel.isRecording {
-                                        viewModel.stopVoiceRecordingAndProcess()
-                                    }
+                            }
+                            .onEnded { _ in
+                                if viewModel.isRecording {
+                                    viewModel.stopVoiceRecordingAndProcess()
                                 }
-                        )
+                            }
+                    )
 
             Button(action: { viewModel.changeInputMode(to: .text) }) {
                 Image(systemName: "keyboard").foregroundColor(.blue)
@@ -265,34 +368,38 @@ struct TransactionFormView: View {
     private var actionButtonsRowView: some View {
         HStack(spacing: 16) {
             Spacer()
-            actionButton(title: "相册", icon: "photo.on.rectangle.angled") {
+            actionButton(title: "相册", icon: "photo.on.rectangle.angled", disabled: viewModel.isProcessingAI) {
                 viewModel.presentSheet(.imagePicker)
             }
             Spacer()
-            actionButton(title: "拍照", icon: "camera.fill") {
+            actionButton(title: "拍照", icon: "camera.fill", disabled: viewModel.isProcessingAI) {
                 // You'd add camera availability check in ViewModel
                 viewModel.presentSheet(.camera)
             }
             Spacer()
-            actionButton(title: "账单导入", icon: "doc.badge.plus") {
+            actionButton(title: "账单导入", icon: "doc.badge.plus", disabled: false) {
                 viewModel.presentSheet(.csvImport)
             }
             Spacer()
         }
     }
 
-    private func actionButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func actionButton(title: String, icon: String, disabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack {
                 Image(systemName: icon)
                     .font(.title)
                     .frame(width: 60, height: 60)
-                    .background(Color(UIColor.systemBackground))
+                    .background(disabled ? Color(UIColor.systemGray4) : Color(UIColor.systemBackground))
                     .cornerRadius(12)
                     .shadow(radius: 2, y: 1)
-                Text(title).font(.caption)
+                    .opacity(disabled ? 0.6 : 1.0)
+                Text(title)
+                    .font(.caption)
+                    .opacity(disabled ? 0.6 : 1.0)
             }
         }
+        .disabled(disabled)
         .buttonStyle(PlainButtonStyle())
     }
 }
@@ -300,11 +407,12 @@ struct TransactionFormView: View {
 // Dummy views for compilation. Replace with your actual implementations.
 struct ManualInputView: View {
     @Binding var inputText: String
-    @State private var showImageConfirmation = false
-    @State private var pendingImage: UIImage?
     @State private var isProcessing = false
     @Environment(\.presentationMode) private var presentationMode
     var onProcess: () -> Void
+    
+    // 添加对viewModel的引用
+    let viewModel: TransactionFormViewModel
     
     var body: some View {
         ZStack {
@@ -343,28 +451,22 @@ struct ManualInputView: View {
                     // 左侧按钮组
                     HStack(spacing: 20) {
                         Button(action: {
-                            // 确保当前没有其他sheet正在显示
-                            if !showImageConfirmation {
-                                // 使用 ImagePicker 直接获取图片
-                                showImagePicker()
-                            }
-                        }) {
+                        viewModel.activeSheet = .imagePicker
+                    }) {
                             Image(systemName: "photo.on.rectangle.angled")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(viewModel.isProcessingAI ? .secondary : .primary)
                         }
+                        .disabled(viewModel.isProcessingAI)
                         
                         Button(action: {
-                            // 确保当前没有其他sheet正在显示
-                            if !showImageConfirmation {
-                                // 使用 CameraView 直接获取图片
-                                showCamera()
-                            }
-                        }) {
+                        viewModel.activeSheet = .camera
+                    }) {
                             Image(systemName: "camera.fill")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundColor(viewModel.isProcessingAI ? .secondary : .primary)
                         }
+                        .disabled(viewModel.isProcessingAI)
                     }
                     .padding(.leading)
                     
@@ -376,7 +478,7 @@ struct ManualInputView: View {
                         onProcess() // 调用 onProcess 回调，触发 processQuickInput 方法
                         presentationMode.wrappedValue.dismiss() // 自动退出到记账页面
                     }) {
-                        Text("上传并识别")
+                        Text(viewModel.isProcessingAI ? "处理中..." : "上传并识别")
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding(.horizontal, 16)
@@ -384,154 +486,15 @@ struct ManualInputView: View {
                             .background(Color.accentColor)
                             .cornerRadius(8)
                     }
-                    .disabled(isProcessing || inputText.isEmpty)
+                    .disabled(isProcessing || inputText.isEmpty || viewModel.isProcessingAI)
                     .padding(.trailing)
                 }
                 .padding(.vertical, 10)
                 .background(Color(UIColor.systemGray6))
             }
             
-            // 使用全屏覆盖的方式显示确认对话框
-            if showImageConfirmation, let imageToConfirm = pendingImage {
-                Color.black.opacity(0.4)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {
-                        // 点击背景取消确认
-                        showImageConfirmation = false
-                        pendingImage = nil
-                    }
-                
-                VStack(spacing: 20) {
-                    Text("确认使用此截图?")
-                        .font(.headline)
-                    
-                    Image(uiImage: imageToConfirm)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxHeight: 300)
-                        .cornerRadius(8)
-                    
-                    Text("确认使用选择的截图进行账单识别?")
-                        .font(.subheadline)
-                        .multilineTextAlignment(.center)
-                    
-                    HStack(spacing: 30) {
-                        Button(action: {
-                            showImageConfirmation = false
-                            pendingImage = nil
-                        }) {
-                            Text("取消")
-                                .frame(width: 100)
-                                .padding(.vertical, 10)
-                                .background(Color.gray.opacity(0.2))
-                                .cornerRadius(8)
-                        }
-                        
-                        Button(action: {
-                            if let confirmedImage = pendingImage {
-                                // 在主线程更新UI
-                                DispatchQueue.main.async {
-                                    handleSelectedImage(confirmedImage)
-                                }
-                            }
-                            showImageConfirmation = false
-                            pendingImage = nil
-                        }) {
-                            Text("确认")
-                                .frame(width: 100)
-                                .padding(.vertical, 10)
-                                .background(Color.accentColor)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                        }
-                    }
-                }
-                .padding(30)
-                .background(Color(UIColor.systemBackground))
-                .cornerRadius(16)
-                .shadow(radius: 10)
-                .padding(30)
-            }
-        }
-        // 移除重复的 sheet 定义，统一使用 SheetAndAlertModifier 管理
-    }
-    
-    // 添加显示图片选择器的方法
-    private func showImagePicker() {
-        // 使用 ImagePicker 获取图片
-        let picker = UIImagePickerController()
-        picker.sourceType = .photoLibrary
-        picker.delegate = ImagePickerDelegate(onImagePicked: { selectedImage in
-            self.pendingImage = selectedImage
-            self.showImageConfirmation = true
-        })
-        UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
-    }
-    
-    // 添加显示相机的方法
-    private func showCamera() {
-        // 检查相机是否可用
-        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
-            return
-        }
-        
-        let picker = UIImagePickerController()
-        picker.sourceType = .camera
-        picker.delegate = ImagePickerDelegate(onImagePicked: { selectedImage in
-            self.pendingImage = selectedImage
-            self.showImageConfirmation = true
-        })
-        UIApplication.shared.windows.first?.rootViewController?.present(picker, animated: true)
-    }
-    
-    // 图片选择器代理
-    private class ImagePickerDelegate: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let onImagePicked: (UIImage) -> Void
-        
-        init(onImagePicked: @escaping (UIImage) -> Void) {
-            self.onImagePicked = onImagePicked
-            super.init()
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                // 延迟处理图片，避免视图控制器冲突
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.onImagePicked(image)
-                }
-            }
-            picker.dismiss(animated: true)
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
+
         }
     }
-    
-    private func handleSelectedImage(_ selectedImage: UIImage) {
-        isProcessing = true
-        
-        // 1. 使用 OCR 服务识别图片文本
-        let ocrService = OCRService()
-        ocrService.recognizeText(from: selectedImage) { ocrResult in
-            // 2. 使用 AI 服务处理识别结果
-            if let textResult = ocrResult {
-                AIService.shared.processText(textResult.description, completion: { aiResponse in
-                    // 确保在主线程更新UI
-                    DispatchQueue.main.async {
-                        // 使用 BillProcessingService 格式化 AI 响应
-                        let formattedText = BillProcessingService.shared.formatAIResponseToText(aiResponse)
-                        self.inputText = formattedText
-                        self.isProcessing = false
-                    }
-                })
-            } else {
-                // 确保在主线程更新UI
-                DispatchQueue.main.async {
-                    self.inputText = "无法识别图片文本，请重试或手动输入。"
-                    self.isProcessing = false
-                }
-            }
-        }
-    }
+
 }

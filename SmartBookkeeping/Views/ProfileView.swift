@@ -12,10 +12,61 @@ struct ProfileView: View {
     // @State private var showingShareSheet = false // Removed
     // @State private var documentURL: URL? // This will now drive the sheet presentation - Replaced by shareableUrl
     @State private var shareableUrl: ShareableURL? // Wrapper to make URL Identifiable
+    @State private var showingCategoryManagement = false
+    @State private var showingAPIConfiguration = false
+    @State private var isAPIConfigured = false
+    
+    private let configManager = ConfigurationManager.shared
 
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
+                Button(action: {
+                    showingCategoryManagement = true
+                }) {
+                    HStack {
+                        Image(systemName: "gear")
+                        Text("交易分类与账户管理")
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
+                Button(action: {
+                    showingAPIConfiguration = true
+                }) {
+                    VStack(spacing: 8) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "key")
+                            Text("API配置")
+                        }
+                        
+                        HStack(spacing: 4) {
+                            if isAPIConfigured {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text("已配置")
+                                    .font(.caption)
+                            } else {
+                                Image(systemName: "exclamationmark.circle.fill")
+                                    .foregroundColor(.red)
+                                Text("未配置")
+                                    .font(.caption)
+                            }
+                        }
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal)
+                
                 Button(action: {
                     exportTransactions()
                 }) {
@@ -36,6 +87,18 @@ struct ProfileView: View {
             .navigationTitle("我的")
             .sheet(item: $shareableUrl) { identifiableUrl in
                 ShareSheet(activityItems: [identifiableUrl.url])
+            }
+            .sheet(isPresented: $showingCategoryManagement) {
+                CategoryManagementView()
+            }
+            .sheet(isPresented: $showingAPIConfiguration) {
+                APIConfigurationView()
+                    .onDisappear {
+                        updateAPIConfigurationStatus()
+                    }
+            }
+            .onAppear {
+                updateAPIConfigurationStatus()
             }
         }
     }
@@ -103,6 +166,10 @@ struct ProfileView: View {
             return "\"\(escapedField)\""
         }
         return field // 如果没有特殊字符，直接返回原字段
+    }
+    
+    private func updateAPIConfigurationStatus() {
+        isAPIConfigured = configManager.isAPIConfigured
     }
 }
 

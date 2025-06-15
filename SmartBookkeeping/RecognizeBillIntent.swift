@@ -26,7 +26,6 @@ struct RecognizeBillIntent: AppIntent {
     )
     var billImage: IntentFile?
     
-    @MainActor
     func perform() async throws -> IntentResultContainer<String, Never, Never, Never> {
         // 检查是否有图片输入
         guard let billImage = billImage else {
@@ -62,25 +61,28 @@ struct RecognizeBillIntent: AppIntent {
             return .result(value: "识别失败：无法从图片中提取账单信息")
         }
         
-        // 保存到 Core Data
-        let context = PersistenceController.shared.container.viewContext
-        let newTransaction = TransactionItem(context: context)
-        newTransaction.id = UUID()
-        newTransaction.amount = recognizedTransaction.amount
-        newTransaction.date = recognizedTransaction.date
-        newTransaction.desc = recognizedTransaction.description
-        newTransaction.category = recognizedTransaction.category
-        newTransaction.type = recognizedTransaction.type.rawValue
-        newTransaction.paymentMethod = recognizedTransaction.paymentMethod
-        newTransaction.note = recognizedTransaction.note
-        newTransaction.timestamp = Date()
-        
-        do {
-            try context.save()
-            let resultMessage = "识别成功！\n金额：¥\(recognizedTransaction.amount)\n类别：\(recognizedTransaction.category)\n描述：\(recognizedTransaction.description)"
-            return .result(value: resultMessage)
-        } catch {
-            return .result(value: "保存失败：\(error.localizedDescription)")
+        // 保存到 Core Data (在主线程执行)
+        return await MainActor.run {
+            let context = PersistenceController.shared.container.viewContext
+            let newTransaction = TransactionItem(context: context)
+            let transactionId = UUID()
+            newTransaction.id = transactionId
+            newTransaction.amount = recognizedTransaction.amount
+            newTransaction.date = recognizedTransaction.date
+            newTransaction.desc = recognizedTransaction.description
+            newTransaction.category = recognizedTransaction.category
+            newTransaction.type = recognizedTransaction.type.rawValue
+            newTransaction.paymentMethod = recognizedTransaction.paymentMethod
+            newTransaction.note = recognizedTransaction.note
+            newTransaction.timestamp = Date()
+            
+            do {
+                try context.save()
+                let resultMessage = formatTransactionResult(recognizedTransaction, transactionId: transactionId)
+                return .result(value: resultMessage)
+            } catch {
+                return .result(value: "保存失败：\(error.localizedDescription)")
+            }
         }
     }
     
@@ -132,4 +134,28 @@ struct RecognizeBillIntent: AppIntent {
             print("保存 OCR 交易失败: \(error)")
         }
     }
+    
+    private func formatTransactionResult(_ transaction: Transaction, transactionId: UUID) -> String {
+        var result = "✅ 账单识别成功！\n\n"
+        result += "💰 金额：¥\(String(format: "%.2f", transaction.amount))\n"
+        result += "📅 日期：\(DateFormatter.localizedString(from: transaction.date, dateStyle: .medium, timeStyle: .none))\n"
+        result += "📝 描述：\(transaction.description)\n"
+        result += "🏷️ 类别：\(transaction.category)\n"
+        result += "💳 支付方式：\(transaction.paymentMethod)\n"
+        result += "📋 类型：\(transaction.type.rawValue)\n"
+        
+        if !transaction.note.isEmpty {
+            result += "📄 备注：\(transaction.note)\n"
+        }
+        
+        result += "\n✨ 已自动保存到记账本\n"
+        // result += "\n❓ 请检查信息是否准确？需要编辑就点击完成进入下一步。\n"
+        
+        // 使用零宽字符隐藏URL显示但保持快捷指令能够获取
+        let editURL = "smartbookkeeping://edit?transactionId=\(transactionId.uuidString)&action=quickEdit"
+        result += "\n🔗 [编辑链接](\(editURL))\u{200B}" // 添加零宽字符
+        
+        return result
+    }
+ 
 }
