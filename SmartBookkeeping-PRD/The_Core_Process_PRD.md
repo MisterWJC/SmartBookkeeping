@@ -181,7 +181,7 @@ AI的识别并非100%准确。UI可以体现出这种“置信度”的差异，
 Text(viewModel.isRecording ? "正在录音..." : "长按说话，快速记录")
 2. 对于 AI 识别结果页面，修改显示的字段为，风格还是按照目前 UI 的格式：
 amount (金额，数字类型), transaction_time (交易时间，格式 YYYY年MM月DD日 HH:MM:SS), item_description (商品说明), category (交易分类，从预定义列表中选择), transaction_type (收入/支出), payment_method (付款方式), notes (备注)。
-3. 当用户通过 initialize 触发的 AIService 默认使用对应 aiBaseURL，aiModelName，aiAPIKey是"6478f55ce43641d99966ed79355c0e6f.OKofLW4z3kFSXGkw",而不是从APIConfigurationView读取的。
+3. 当用户通过 initialize 触发的 AIService 默认使用对应 aiBaseURL，aiModelName，aiAPIKey是"${Zhipu API Key}",而不是从APIConfigurationView读取的。
 4. 在 APIConfigurationView 中手动配置 APIkey 之后，对应的profileview 中的配置状态没有立马同步变成绿色，请修复。
 
 ```prompt3
