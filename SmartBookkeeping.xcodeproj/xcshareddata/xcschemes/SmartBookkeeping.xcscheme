@@ -29,6 +29,32 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
       shouldAutocreateTestPlan = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D4126C542DE1B83D0077F67A"
+               BuildableName = "SmartBookkeepingTests.xctest"
+               BlueprintName = "SmartBookkeepingTests"
+               ReferencedContainer = "container:SmartBookkeeping.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES"
+            testExecutionOrdering = "random">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D4126C5E2DE1B83D0077F67A"
+               BuildableName = "SmartBookkeepingUITests.xctest"
+               BlueprintName = "SmartBookkeepingUITests"
+               ReferencedContainer = "container:SmartBookkeeping.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"

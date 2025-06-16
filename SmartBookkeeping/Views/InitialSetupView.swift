@@ -766,7 +766,7 @@ struct InitialSetupView: View {
             
             VStack(spacing: 16) {
                 Button("查看我的第一笔记账") {
-                    completeOnboarding()
+                    completeOnboardingAndShowDetail()
                 }
                 .font(.title3)
                 .fontWeight(.semibold)

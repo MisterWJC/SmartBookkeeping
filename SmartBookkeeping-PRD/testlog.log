@@ -1,0 +1,840 @@
+DEBUG: AppInitializer - Starting app initialization
+DEBUG: AppInitializer - Core services initialized
+DEBUG: AppInitializer - App initialization completed
+DEBUG: AppInitializer - Cleaned up old UserDefaults data
+DEBUG: ConfidenceCacheService - Cache warmed up with 33 entries
+DEBUG: AudioSessionManager - Preconfiguring audio session
+AddInstanceForFactory: No factory registered for id <CFUUID 0x60000024d9e0> F8BB1C28-BAE8-11D6-9C31-00039315CD46
+DEBUG: AudioSessionManager - Audio session preconfigured successfully
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+load_eligibility_plist: Failed to open /Users/jasonwang/Library/Developer/CoreSimulator/Devices/4364EB4C-84DA-446D-B0DC-A35DA7823C76/data/Containers/Data/Application/665CA498-F539-4246-BE3D-89A7DDF9D4E2/private/var/db/eligibilityd/eligibility.plist: No such file or directory(2)
+默认分类已存在，跳过创建
+默认账户已存在，跳过创建
+DEBUG: AppInitializer - Confidence cache warmed up
+检测到持久化存储远程变化
+load_eligibility_plist: Failed to open /Users/jasonwang/Library/Developer/CoreSimulator/Devices/4364EB4C-84DA-446D-B0DC-A35DA7823C76/data/Containers/Data/Application/665CA498-F539-4246-BE3D-89A7DDF9D4E2/private/var/db/eligibilityd/eligibility.plist: No such file or directory(2)
+默认分类已存在，跳过创建
+默认账户已存在，跳过创建
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: Recognized text: 
+DEBUG: SpeechRecognitionService - Preheating audio engine
+DEBUG: SpeechRecognitionService - Audio engine preheated successfully
+DEBUG: Starting voice recognition immediately
+DEBUG: RecognitionCoordinator - startVoiceRecognition() called
+DEBUG: SpeechRecognitionService - Attempting to start recording...
+[SpeechRecognitionService] Audio resources cleaned up
+DEBUG: SpeechRecognitionService - Configuring audio session...
+DEBUG: SpeechRecognitionService - Using preconfigured audio session
+DEBUG: SpeechRecognitionService - Recording format: <AVAudioFormat 0x60000213a7b0:  1 ch,  48000 Hz, Float32>
+DEBUG: SpeechRecognitionService - Tap installed.
+DEBUG: SpeechRecognitionService - Recognition task started.
+DEBUG: SpeechRecognitionService - Audio engine prepared.
+iOSSimulatorAudioDevice-84998-1: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine started.
+DEBUG: SpeechRecognitionService started recording successfully.
+DEBUG: RecognitionCoordinator - Voice recognition started successfully
+118531          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+fopen failed for data file: errno = 2 (No such file or directory)
+Errors found! Invalidating cache...
+fopen failed for data file: errno = 2 (No such file or directory)
+Errors found! Invalidating cache...
+DEBUG: VoiceRecordingGuideView - Performing network permission precheck (first time)
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: 开始检测静音，音频级别: -56.447212dB
+DEBUG: VoiceRecordingGuideView - Network permission precheck completed successfully
+DEBUG: 检测到2.5秒静音，自动停止录音
+DEBUG: Recording duration: 3.2004250288009644s
+DEBUG: Recording duration sufficient, stopping voice recognition
+DEBUG: RecognitionCoordinator - stopVoiceRecognition called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] stopRecordingInternal completed
+DEBUG: RecognitionCoordinator - Current recognized text: ''
+DEBUG: RecognitionCoordinator - No text recognized yet, waiting for final result...
+[SpeechRecognitionService] Audio engine stopped
+[SpeechRecognitionService] Audio tap removed
+[SpeechRecognitionService] External call - task cancelled immediately
+DEBUG: Speech recognition error object: Error Domain=kAFAssistantErrorDomain Code=216 "(null)"
+DEBUG: Speech recognition error localizedDescription: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.
+DEBUG: RecognitionCoordinator - Speech recognition error: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+           AQMEIO_HAL.cpp:2786  timeout
+AudioHardware-mac-imp.cpp:2706   AudioDeviceStop: no device with given ID
+[SpeechRecognitionService] Audio session deactivated safely
+DEBUG: RecognitionCoordinator - After waiting, recognized text: ''
+DEBUG: RecognitionCoordinator - No text recognized after waiting, resetting to idle
+[RecognitionCoordinator] reset() called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] Already stopped, skipping
+[SpeechRecognitionService] Force resetting audio session...
+[SpeechRecognitionService] Audio resources cleaned up
+[RecognitionCoordinator] reset() completed
+[SpeechRecognitionService] Audio session force reset completed
+DEBUG: SpeechRecognitionService - Audio engine already preheated, skipping
+DEBUG: Starting voice recognition immediately
+DEBUG: RecognitionCoordinator - startVoiceRecognition() called
+DEBUG: SpeechRecognitionService - Attempting to start recording...
+[SpeechRecognitionService] Audio resources cleaned up
+DEBUG: SpeechRecognitionService - Configuring audio session...
+DEBUG: SpeechRecognitionService - Using preconfigured audio session
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+           AQMEIO_HAL.cpp:2786  timeout
+AudioHardware-mac-imp.cpp:2706   AudioDeviceStop: no device with given ID
+DEBUG: SpeechRecognitionService - Recording format: <AVAudioFormat 0x60000233dc20:  1 ch,  48000 Hz, Float32>
+DEBUG: SpeechRecognitionService - Tap installed.
+DEBUG: SpeechRecognitionService - Recognition task started.
+DEBUG: SpeechRecognitionService - Audio engine prepared.
+iOSSimulatorAudioDevice-84998-3: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine started.
+DEBUG: SpeechRecognitionService started recording successfully.
+DEBUG: RecognitionCoordinator - Voice recognition started successfully
+DEBUG: VoiceRecordingGuideView - Performing network permission precheck (first time)
+DEBUG: 开始检测静音，音频级别: -61.423073dB
+DEBUG: VoiceRecordingGuideView - Network permission precheck completed successfully
+DEBUG: 检测到声音，重置静音计时，音频级别: -37.397873dB
+DEBUG: Recognized text: 喂喂
+DEBUG: Recognized text: 喂喂
+DEBUG: 开始检测静音，音频级别: -58.43443dB
+DEBUG: Recognized text: 喂
+DEBUG: Recognized text: 喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: Recognized text: 喂喂喂
+DEBUG: 检测到声音，重置静音计时，音频级别: -43.567917dB
+DEBUG: Recognized text: 喂喂喂嗯
+DEBUG: Recognized text: 喂喂喂嗯
+DEBUG: Recognized text: 喂喂喂我
+DEBUG: Recognized text: 喂喂喂我
+DEBUG: Recognized text: 喂喂喂我今天
+DEBUG: Recognized text: 喂喂喂我今天
+DEBUG: 开始检测静音，音频级别: -51.725372dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -45.28724dB
+DEBUG: Recognized text: 喂喂喂我今天中午
+DEBUG: Recognized text: 喂喂喂我今天中午
+DEBUG: 开始检测静音，音频级别: -52.152294dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: Recognized text: 喂喂喂我今天中午吃了
+DEBUG: 检测到声音，重置静音计时，音频级别: -38.396263dB
+DEBUG: 开始检测静音，音频级别: -57.412247dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -41.414482dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了10
+DEBUG: Recognized text: 喂喂喂我今天中午吃了10
+DEBUG: Recognized text: 喂喂喂我今天中午吃了15
+DEBUG: Recognized text: 喂喂喂我今天中午吃了15
+DEBUG: 开始检测静音，音频级别: -50.304497dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的
+DEBUG: 检测到声音，重置静音计时，音频级别: -41.680946dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的差价
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的差价
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的差价
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的差价
+DEBUG: 开始检测静音，音频级别: -53.27686dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面
+DEBUG: 检测到声音，重置静音计时，音频级别: -42.34954dB
+DEBUG: 开始检测静音，音频级别: -50.410877dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -46.872543dB
+DEBUG: 开始检测静音，音频级别: -52.251858dB
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信支付
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信支付
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信支付的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的查看牛肉面用微信支付的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的
+DEBUG: Recognized text: 喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的
+DEBUG: 检测到2.5秒静音，自动停止录音
+DEBUG: Recording duration: 14.601112008094788s
+DEBUG: Recording duration sufficient, stopping voice recognition
+DEBUG: RecognitionCoordinator - stopVoiceRecognition called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] stopRecordingInternal completed
+DEBUG: RecognitionCoordinator - Current recognized text: '喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的'
+DEBUG: RecognitionCoordinator - Processing recognized text immediately
+DEBUG: RecognitionCoordinator - processRecognizedText called with text: '喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的'
+DEBUG: RecognitionCoordinator - Starting AI processing...
+DEBUG: RecognitionCoordinator - Performing network permission precheck
+[SpeechRecognitionService] Audio engine stopped
+[SpeechRecognitionService] Audio tap removed
+[SpeechRecognitionService] External call - task cancelled immediately
+DEBUG: Speech recognition error object: Error Domain=kAFAssistantErrorDomain Code=216 "(null)"
+DEBUG: Speech recognition error localizedDescription: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.
+DEBUG: RecognitionCoordinator - Speech recognition error: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: RecognitionCoordinator - Ignoring speech error as we have recognized text: '喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的'
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+DEBUG: RecognitionCoordinator - Network permission precheck completed successfully
+DEBUG: AIService - Sending request to: https://open.bigmodel.cn/api/paas/v4/chat/completions
+DEBUG: AIService - Request body: {"model":"glm-4-air-250414","messages":[{"content":"# 角色\n你是一个逻辑严谨、经验丰富的财务数据提取专家。你的专长是从非结构化、甚至带有错误的文本（如语音识别稿、OCR扫描件）中，精准地提取结构化的记账信息。\n\n# 任务\n请深度分析以下【用户输入文本】，忽略所有无关的口语化词汇和干扰信息，并严格按照【输出要求】返回一个纯净的JSON对象。\n\n# 输出要求\n1.  严格返回一个单一、原始的JSON对象。\n2.  绝不允许包含任何解释性文字、注释、Markdown格式（如```json）或JSON主体之外的任何字符。\n3.  如果【用户输入文本】中完全不包含任何有效的记账信息，则返回一个所有值为 null 的JSON结构。\n\n**文本:**\n喂喂喂我今天中午吃了¥15.9的那个牛肉面用微信支付的\n\n# JSON结构与字段说明\n{\n    \"amount\": Number, \/\/ 交易金额，必须是数字。正数代表收入，负数在文本中也应提取为正数，通过 type 字段区分。\n    \"category\": String, \/\/ 必须从下方【预设选项列表】中选择最匹配的一项。\n    \"description\": String, \/\/ 对交易核心内容的简洁概括，优先使用商品或服务名。\n    \"date\": \"YYYY-MM-DD HH:mm:ss\", \/\/ 交易时间。请将\"昨天\"等相对时间转换为绝对时间。若无具体时间，默认为\"12:00:00\"。若无日期，使用1970-01-01。\n    \"type\": String, \/\/ 必须是 \"收入\" 或 \"支出\"。根据关键词（如“收到”、“花了”）或分类来判断。\n    \"account\": String, \/\/ 账户，必须从下方【预设选项列表】中选择最匹配的一项。\n    \"notes\": String \/\/ 记录额外但有用的上下文信息。\n}\n\n# 核心逻辑与规则\n1.  **抗干扰性**: 必须忽略语音识别产生的填充词（如“嗯”、“啊”、“那个”）和OCR的无关文本（如“交易单号”、“优惠说明”）。\n2.  **分类层级**: 分类决策的优先级为：明确的商品名\/服务名 > 商户名 > 上下文推断。例如，“在星巴克买了杯拿铁”，分类为“餐饮美食”，描述为“拿铁咖啡”或“星巴克咖啡”。\n3.  **智能映射**: 对分类和支付方式进行模糊匹配。例如，“KFC”、“肯德基”都应映射到“餐饮美食”；“用微信付的”应映射到“微信”。\n4.  **空值处理**: 对于在文本中确实无法找到或推断出的信息（尤其是 `amount` 和 `description`），其值必须为 `null`，而不是空字符串 `\"\"` 或编造的数据。\n\n# 预设选项列表\n* **支出类别**: [\"数码电器\", \"餐饮美食\", \"自我提升\", \"服装饰品\", \"日用百货\", \"车辆交通\", \"娱乐休闲\", \"医疗健康\", \"家庭支出\", \"充值缴费\", \"其他\"]\n* **收入类别**: [\"主业收入\", \"副业收入\", \"投资理财\", \"红包礼金\", \"其他收入\"]\n* **支付方式**: [\"现金\", \"招商银行卡\", \"中信银行卡\", \"交通银行卡\", \"建设银行卡\", \"工商银行卡\", \"农业银行卡\", \"中国银行卡\", \"民生银行卡\", \"光大银行卡\", \"夏银行卡\", \"平安银行卡\", \"浦发银行卡\", \"兴业银行卡\", \"信用卡\", \"招商信用卡\", \"建行信用卡\", \"工行信用卡\", \"微信\", \"支付宝\", \"Apple Pay\", \"Samsung Pay\", \"云闪付\", \"数字人民币\", \"银行转账\", \"网银转账\", \"手机银行\"]","role":"user"}],"temperature":0.29999999999999999}
+DEBUG: AIService - HTTP Status Code: 200
+DEBUG: AIService - Raw response: {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\"amount\": 15.9, \"category\": \"餐饮美食\", \"description\": \"牛肉面\", \"date\": \"1970-01-01 12:00:00\", \"type\": \"支出\", \"account\": \"微信\", \"notes\": null}","role":"assistant"}}],"created":1749981646,"id":"20250615180045e4c4814d13504a85","model":"glm-4-air-250414","request_id":"20250615180045e4c4814d13504a85","usage":{"completion_tokens":59,"prompt_tokens":799,"total_tokens":858}}
+DEBUG: AIService - AI response content: {"amount": 15.9, "category": "餐饮美食", "description": "牛肉面", "date": "1970-01-01 12:00:00", "type": "支出", "account": "微信", "notes": null}
+DEBUG: AIService - Cleaned JSON content: {"amount": 15.9, "category": "餐饮美食", "description": "牛肉面", "date": "1970-01-01 12:00:00", "type": "支出", "account": "微信", "notes": null}
+DEBUG: AIService - Parsed AI result: ["notes": <null>, "date": 1970-01-01 12:00:00, "amount": 15.9, "type": 支出, "account": 微信, "description": 牛肉面, "category": 餐饮美食]
+DEBUG: AIService - Created AIResponse: AIResponse(amount: Optional(15.9), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("牛肉面"), category: Optional("餐饮美食"), transaction_type: Optional("支出"), payment_method: Optional("微信"), notes: Optional(""))
+DEBUG: RecognitionCoordinator - AI processing completed successfully
+DEBUG: RecognitionCoordinator - Recognition completed, calling callback
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+           AQMEIO_HAL.cpp:2786  timeout
+AudioHardware-mac-imp.cpp:2706   AudioDeviceStop: no device with given ID
+[SpeechRecognitionService] Audio session deactivated safely
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 33
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+108559          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+应用返回前台，刷新交易数据
+应用返回前台，刷新交易数据
+应用返回前台，刷新交易数据
+应用返回前台，刷新交易数据
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: Recognized text: 
+DEBUG: SpeechRecognitionService - Preheating audio engine
+iOSSimulatorAudioDevice-84998-4: Abandoning I/O cycle because reconfig pending
+     HALC_ProxySystem.cpp:175    HALC_ProxySystem::GetObjectInfo: got an error from the server, Error: 560947818 (!obj)
+      HALC_ShellObject.mm:264    HALC_ShellObject::HasProperty: there is no proxy object
+     HALC_ProxySystem.cpp:175    HALC_ProxySystem::GetObjectInfo: got an error from the server, Error: 560947818 (!obj)
+      HALC_ShellObject.mm:264    HALC_ShellObject::HasProperty: there is no proxy object
+AudioHardware-mac-imp.cpp:1224   AudioObjectRemovePropertyListener: no object with given ID 183
+AudioHardware-mac-imp.cpp:1224   AudioObjectRemovePropertyListener: no object with given ID 183
+AudioHardware-mac-imp.cpp:1224   AudioObjectRemovePropertyListener: no object with given ID 183
+AudioHardware-mac-imp.cpp:1224   AudioObjectRemovePropertyListener: no object with given ID 183
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+DEBUG: SpeechRecognitionService - Audio engine preheated successfully
+DEBUG: Starting voice recognition immediately
+DEBUG: RecognitionCoordinator - startVoiceRecognition() called
+DEBUG: SpeechRecognitionService - Attempting to start recording...
+[SpeechRecognitionService] Audio resources cleaned up
+DEBUG: SpeechRecognitionService - Configuring audio session...
+DEBUG: SpeechRecognitionService - Using preconfigured audio session
+DEBUG: SpeechRecognitionService - Recording format: <AVAudioFormat 0x600002106620:  1 ch,  48000 Hz, Float32>
+DEBUG: SpeechRecognitionService - Tap installed.
+DEBUG: SpeechRecognitionService - Recognition task started.
+DEBUG: SpeechRecognitionService - Audio engine prepared.
+iOSSimulatorAudioDevice-84998-5: Abandoning I/O cycle because reconfig pending
+iOSSimulatorAudioDevice-84998-5: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine started.
+DEBUG: SpeechRecognitionService started recording successfully.
+DEBUG: RecognitionCoordinator - Voice recognition started successfully
+DEBUG: VoiceRecordingGuideView - Performing network permission precheck (first time)
+DEBUG: 开始检测静音，音频级别: -51.375103dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.505615dB
+DEBUG: 开始检测静音，音频级别: -51.254383dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.961716dB
+DEBUG: 开始检测静音，音频级别: -52.13911dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.46338dB
+DEBUG: VoiceRecordingGuideView - Network permission precheck completed successfully
+DEBUG: 开始检测静音，音频级别: -50.000416dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.468853dB
+DEBUG: Recognized text: 今天
+DEBUG: Recognized text: 今天
+DEBUG: Recognized text: 今天中午
+DEBUG: Recognized text: 今天中午
+DEBUG: Recognized text: 今天中午我
+DEBUG: Recognized text: 今天中午我
+DEBUG: Recognized text: 今天中午我吃了
+DEBUG: Recognized text: 今天中午我吃了
+DEBUG: Recognized text: 今天中午我吃了早餐
+DEBUG: Recognized text: 今天中午我吃了早餐
+DEBUG: Recognized text: 今天中午我吃了潮汕
+DEBUG: Recognized text: 今天中午我吃了潮汕
+DEBUG: 开始检测静音，音频级别: -50.40544dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -43.949364dB
+DEBUG: Recognized text: 今天中午我吃的潮汕
+DEBUG: Recognized text: 今天中午我吃的潮汕
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿
+DEBUG: 开始检测静音，音频级别: -51.133575dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.790916dB
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条发了
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条发了
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条发了10
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条发了10
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了10
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了10
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了16
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了16
+DEBUG: 开始检测静音，音频级别: -50.201855dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.70742dB
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16
+DEBUG: 开始检测静音，音频级别: -51.954998dB
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9
+DEBUG: 检测到声音，重置静音计时，音频级别: -46.95597dB
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的
+DEBUG: 开始检测静音，音频级别: -50.27642dB
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的微信
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的微信
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.472393dB
+DEBUG: 开始检测静音，音频级别: -50.58559dB
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: Recognized text: 今天中午我吃的潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.20217dB
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: Recognized text: 今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付
+DEBUG: 开始检测静音，音频级别: -50.078197dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -46.42094dB
+DEBUG: 开始检测静音，音频级别: -50.374435dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.05056dB
+DEBUG: 开始检测静音，音频级别: -51.037678dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.88824dB
+DEBUG: 开始检测静音，音频级别: -51.34868dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.76902dB
+DEBUG: 开始检测静音，音频级别: -50.73574dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.7036dB
+DEBUG: 开始检测静音，音频级别: -51.956406dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.7389dB
+DEBUG: 开始检测静音，音频级别: -51.47828dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.173393dB
+DEBUG: 开始检测静音，音频级别: -50.095253dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -46.844334dB
+DEBUG: 开始检测静音，音频级别: -51.211327dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.127155dB
+DEBUG: 开始检测静音，音频级别: -50.554253dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.09782dB
+DEBUG: 开始检测静音，音频级别: -50.519127dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.747158dB
+DEBUG: 开始检测静音，音频级别: -51.45005dB
+DEBUG: Maximum recording time reached (15.0s), stopping recording
+DEBUG: RecognitionCoordinator - stopVoiceRecognition called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] stopRecordingInternal completed
+DEBUG: RecognitionCoordinator - Current recognized text: '今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付'
+DEBUG: RecognitionCoordinator - Processing recognized text immediately
+DEBUG: RecognitionCoordinator - processRecognizedText called with text: '今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付'
+DEBUG: RecognitionCoordinator - Starting AI processing...
+DEBUG: RecognitionCoordinator - Performing network permission precheck
+[SpeechRecognitionService] Audio engine stopped
+[SpeechRecognitionService] Audio tap removed
+[SpeechRecognitionService] External call - task cancelled immediately
+DEBUG: Speech recognition error object: Error Domain=kAFAssistantErrorDomain Code=216 "(null)"
+DEBUG: Speech recognition error localizedDescription: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.
+DEBUG: RecognitionCoordinator - Speech recognition error: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: RecognitionCoordinator - Ignoring speech error as we have recognized text: '今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付'
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+DEBUG: RecognitionCoordinator - Network permission precheck completed successfully
+DEBUG: AIService - Sending request to: https://open.bigmodel.cn/api/paas/v4/chat/completions
+DEBUG: AIService - Request body: {"temperature":0.29999999999999999,"model":"glm-4-air-250414","messages":[{"content":"# 角色\n你是一个逻辑严谨、经验丰富的财务数据提取专家。你的专长是从非结构化、甚至带有错误的文本（如语音识别稿、OCR扫描件）中，精准地提取结构化的记账信息。\n\n# 任务\n请深度分析以下【用户输入文本】，忽略所有无关的口语化词汇和干扰信息，并严格按照【输出要求】返回一个纯净的JSON对象。\n\n# 输出要求\n1.  严格返回一个单一、原始的JSON对象。\n2.  绝不允许包含任何解释性文字、注释、Markdown格式（如```json）或JSON主体之外的任何字符。\n3.  如果【用户输入文本】中完全不包含任何有效的记账信息，则返回一个所有值为 null 的JSON结构。\n\n**文本:**\n今天中午我吃了潮汕牛肉粿条花了¥16.9用的微信支付\n\n# JSON结构与字段说明\n{\n    \"amount\": Number, \/\/ 交易金额，必须是数字。正数代表收入，负数在文本中也应提取为正数，通过 type 字段区分。\n    \"category\": String, \/\/ 必须从下方【预设选项列表】中选择最匹配的一项。\n    \"description\": String, \/\/ 对交易核心内容的简洁概括，优先使用商品或服务名。\n    \"date\": \"YYYY-MM-DD HH:mm:ss\", \/\/ 交易时间。请将\"昨天\"等相对时间转换为绝对时间。若无具体时间，默认为\"12:00:00\"。若无日期，使用1970-01-01。\n    \"type\": String, \/\/ 必须是 \"收入\" 或 \"支出\"。根据关键词（如“收到”、“花了”）或分类来判断。\n    \"account\": String, \/\/ 账户，必须从下方【预设选项列表】中选择最匹配的一项。\n    \"notes\": String \/\/ 记录额外但有用的上下文信息。\n}\n\n# 核心逻辑与规则\n1.  **抗干扰性**: 必须忽略语音识别产生的填充词（如“嗯”、“啊”、“那个”）和OCR的无关文本（如“交易单号”、“优惠说明”）。\n2.  **分类层级**: 分类决策的优先级为：明确的商品名\/服务名 > 商户名 > 上下文推断。例如，“在星巴克买了杯拿铁”，分类为“餐饮美食”，描述为“拿铁咖啡”或“星巴克咖啡”。\n3.  **智能映射**: 对分类和支付方式进行模糊匹配。例如，“KFC”、“肯德基”都应映射到“餐饮美食”；“用微信付的”应映射到“微信”。\n4.  **空值处理**: 对于在文本中确实无法找到或推断出的信息（尤其是 `amount` 和 `description`），其值必须为 `null`，而不是空字符串 `\"\"` 或编造的数据。\n\n# 预设选项列表\n* **支出类别**: [\"数码电器\", \"餐饮美食\", \"自我提升\", \"服装饰品\", \"日用百货\", \"车辆交通\", \"娱乐休闲\", \"医疗健康\", \"家庭支出\", \"充值缴费\", \"其他\"]\n* **收入类别**: [\"主业收入\", \"副业收入\", \"投资理财\", \"红包礼金\", \"其他收入\"]\n* **支付方式**: [\"现金\", \"招商银行卡\", \"中信银行卡\", \"交通银行卡\", \"建设银行卡\", \"工商银行卡\", \"农业银行卡\", \"中国银行卡\", \"民生银行卡\", \"光大银行卡\", \"夏银行卡\", \"平安银行卡\", \"浦发银行卡\", \"兴业银行卡\", \"信用卡\", \"招商信用卡\", \"建行信用卡\", \"工行信用卡\", \"微信\", \"支付宝\", \"Apple Pay\", \"Samsung Pay\", \"云闪付\", \"数字人民币\", \"银行转账\", \"网银转账\", \"手机银行\"]","role":"user"}]}
+           AQMEIO_HAL.cpp:2786  timeout
+AudioHardware-mac-imp.cpp:2706   AudioDeviceStop: no device with given ID
+[SpeechRecognitionService] Audio session deactivated safely
+DEBUG: AIService - HTTP Status Code: 200
+DEBUG: AIService - Raw response: {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\"amount\": 16.9, \"category\": \"餐饮美食\", \"description\": \"潮汕牛肉粿条\", \"date\": \"1970-01-01 12:00:00\", \"type\": \"支出\", \"account\": \"微信\", \"notes\": null}","role":"assistant"}}],"created":1749991503,"id":"20250615204501e17729c6e5884860","model":"glm-4-air-250414","request_id":"20250615204501e17729c6e5884860","usage":{"completion_tokens":63,"prompt_tokens":801,"total_tokens":864}}
+DEBUG: AIService - AI response content: {"amount": 16.9, "category": "餐饮美食", "description": "潮汕牛肉粿条", "date": "1970-01-01 12:00:00", "type": "支出", "account": "微信", "notes": null}
+DEBUG: AIService - Cleaned JSON content: {"amount": 16.9, "category": "餐饮美食", "description": "潮汕牛肉粿条", "date": "1970-01-01 12:00:00", "type": "支出", "account": "微信", "notes": null}
+DEBUG: AIService - Parsed AI result: ["date": 1970-01-01 12:00:00, "category": 餐饮美食, "description": 潮汕牛肉粿条, "notes": <null>, "account": 微信, "amount": 16.9, "type": 支出]
+DEBUG: AIService - Created AIResponse: AIResponse(amount: Optional(16.9), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("潮汕牛肉粿条"), category: Optional("餐饮美食"), transaction_type: Optional("支出"), payment_method: Optional("微信"), notes: Optional(""))
+DEBUG: RecognitionCoordinator - AI processing completed successfully
+DEBUG: RecognitionCoordinator - Recognition completed, calling callback
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+保存上下文成功！
+检测到持久化存储远程变化
+DEBUG: ConfidenceCacheService - Cache cleaned up, current size: 0
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+保存上下文成功！
+交易更新成功，ID: 52A8D462-77C3-4497-8E39-FBD86A4073A1
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: Recognized text: 
+DEBUG: SpeechRecognitionService - Preheating audio engine
+iOSSimulatorAudioDevice-84998-6: Abandoning I/O cycle because reconfig pending
+            HALPlugIn.cpp:540    HALPlugIn::StopIOProc: got an error from the plug-in routine, Error: 560227702 (!dev)
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+DEBUG: SpeechRecognitionService - Audio engine preheated successfully
+DEBUG: Starting voice recognition immediately
+DEBUG: RecognitionCoordinator - startVoiceRecognition() called
+DEBUG: SpeechRecognitionService - Attempting to start recording...
+[SpeechRecognitionService] Audio resources cleaned up
+DEBUG: SpeechRecognitionService - Configuring audio session...
+DEBUG: SpeechRecognitionService - Using preconfigured audio session
+DEBUG: SpeechRecognitionService - Recording format: <AVAudioFormat 0x60000228b110:  1 ch,  48000 Hz, Float32>
+DEBUG: SpeechRecognitionService - Tap installed.
+DEBUG: SpeechRecognitionService - Recognition task started.
+DEBUG: SpeechRecognitionService - Audio engine prepared.
+iOSSimulatorAudioDevice-84998-7: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine started.
+DEBUG: SpeechRecognitionService started recording successfully.
+DEBUG: RecognitionCoordinator - Voice recognition started successfully
+DEBUG: VoiceRecordingGuideView - Performing network permission precheck (first time)
+DEBUG: 开始检测静音，音频级别: -51.87879dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.02758dB
+DEBUG: 开始检测静音，音频级别: -52.06163dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -42.014915dB
+DEBUG: Recognized text: 今天
+DEBUG: Recognized text: 今天
+DEBUG: VoiceRecordingGuideView - Network permission precheck completed successfully
+DEBUG: Recognized text: 今天中午
+DEBUG: Recognized text: 今天中午
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: Recognized text: 今天中午吃了
+DEBUG: 开始检测静音，音频级别: -51.454147dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.521362dB
+DEBUG: 开始检测静音，音频级别: -50.15861dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.144894dB
+DEBUG: 开始检测静音，音频级别: -51.48073dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.40489dB
+DEBUG: 开始检测静音，音频级别: -52.85845dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.430824dB
+DEBUG: 开始检测静音，音频级别: -51.376656dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -45.90394dB
+DEBUG: Recognized text: 今天中午吃饭
+DEBUG: Recognized text: 今天中午吃饭
+DEBUG: Recognized text: 今天中午吃饭花了
+DEBUG: Recognized text: 今天中午吃饭花了
+DEBUG: Recognized text: 今天中午吃了承认牛骨条发了
+DEBUG: Recognized text: 今天中午吃了承认牛骨条发了
+DEBUG: Recognized text: 今天中午吃了承认牛骨条发了
+DEBUG: Recognized text: 今天中午吃了承认牛骨条发了
+DEBUG: 开始检测静音，音频级别: -50.948395dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.35088dB
+DEBUG: 开始检测静音，音频级别: -50.608482dB
+DEBUG: Recognized text: 今天中午吃饭花了10
+DEBUG: Recognized text: 今天中午吃饭花了10
+DEBUG: 检测到声音，重置静音计时，音频级别: -38.411564dB
+DEBUG: Recognized text: 今天中午吃饭花了19
+DEBUG: Recognized text: 今天中午吃饭花了19
+DEBUG: 开始检测静音，音频级别: -50.049812dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.20834dB
+DEBUG: 开始检测静音，音频级别: -50.357094dB
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: 检测到声音，重置静音计时，音频级别: -45.591232dB
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: Recognized text: 今天中午吃饭花了¥19
+DEBUG: 开始检测静音，音频级别: -50.87018dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.99392dB
+DEBUG: 开始检测静音，音频级别: -51.62465dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.837006dB
+DEBUG: 开始检测静音，音频级别: -50.95318dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.700146dB
+DEBUG: 开始检测静音，音频级别: -54.582676dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.587524dB
+DEBUG: 开始检测静音，音频级别: -51.543633dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.61935dB
+DEBUG: 开始检测静音，音频级别: -50.351223dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.431454dB
+DEBUG: 开始检测静音，音频级别: -50.110306dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.539963dB
+DEBUG: 开始检测静音，音频级别: -51.1855dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.17564dB
+DEBUG: Maximum recording time reached (15.0s), stopping recording
+DEBUG: RecognitionCoordinator - stopVoiceRecognition called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] stopRecordingInternal completed
+DEBUG: RecognitionCoordinator - Current recognized text: '今天中午吃饭花了¥19'
+DEBUG: RecognitionCoordinator - Processing recognized text immediately
+DEBUG: RecognitionCoordinator - processRecognizedText called with text: '今天中午吃饭花了¥19'
+DEBUG: RecognitionCoordinator - Starting AI processing...
+DEBUG: RecognitionCoordinator - Performing network permission precheck
+[SpeechRecognitionService] Audio engine stopped
+[SpeechRecognitionService] Audio tap removed
+[SpeechRecognitionService] External call - task cancelled immediately
+DEBUG: Speech recognition error object: Error Domain=kAFAssistantErrorDomain Code=216 "(null)"
+DEBUG: Speech recognition error localizedDescription: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.
+DEBUG: RecognitionCoordinator - Speech recognition error: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: RecognitionCoordinator - Ignoring speech error as we have recognized text: '今天中午吃饭花了¥19'
+iOSSimulatorAudioDevice-84998-7: Abandoning I/O cycle because reconfig pending
+      HALC_ShellObject.mm:268    HALC_ShellObject::HasProperty: call to the proxy failed, Error: 268435459 (\^P)
+     HALC_ProxySystem.cpp:175    HALC_ProxySystem::GetObjectInfo: got an error from the server, Error: 560947818 (!obj)
+      HALC_ShellObject.mm:264    HALC_ShellObject::HasProperty: there is no proxy object
+     HALC_ProxySystem.cpp:175    HALC_ProxySystem::GetObjectInfo: got an error from the server, Error: 560947818 (!obj)
+      HALC_ShellObject.mm:264    HALC_ShellObject::HasProperty: there is no proxy object
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+[SpeechRecognitionService] Audio session deactivated safely
+DEBUG: RecognitionCoordinator - Network permission precheck completed successfully
+DEBUG: AIService - Sending request to: https://open.bigmodel.cn/api/paas/v4/chat/completions
+DEBUG: AIService - Request body: {"messages":[{"content":"# 角色\n你是一个逻辑严谨、经验丰富的财务数据提取专家。你的专长是从非结构化、甚至带有错误的文本（如语音识别稿、OCR扫描件）中，精准地提取结构化的记账信息。\n\n# 任务\n请深度分析以下【用户输入文本】，忽略所有无关的口语化词汇和干扰信息，并严格按照【输出要求】返回一个纯净的JSON对象。\n\n# 输出要求\n1.  严格返回一个单一、原始的JSON对象。\n2.  绝不允许包含任何解释性文字、注释、Markdown格式（如```json）或JSON主体之外的任何字符。\n3.  如果【用户输入文本】中完全不包含任何有效的记账信息，则返回一个所有值为 null 的JSON结构。\n\n**文本:**\n今天中午吃饭花了¥19\n\n# JSON结构与字段说明\n{\n    \"amount\": Number, \/\/ 交易金额，必须是数字。正数代表收入，负数在文本中也应提取为正数，通过 type 字段区分。\n    \"category\": String, \/\/ 必须从下方【预设选项列表】中选择最匹配的一项。\n    \"description\": String, \/\/ 对交易核心内容的简洁概括，优先使用商品或服务名。\n    \"date\": \"YYYY-MM-DD HH:mm:ss\", \/\/ 交易时间。请将\"昨天\"等相对时间转换为绝对时间。若无具体时间，默认为\"12:00:00\"。若无日期，使用1970-01-01。\n    \"type\": String, \/\/ 必须是 \"收入\" 或 \"支出\"。根据关键词（如“收到”、“花了”）或分类来判断。\n    \"account\": String, \/\/ 账户，必须从下方【预设选项列表】中选择最匹配的一项。\n    \"notes\": String \/\/ 记录额外但有用的上下文信息。\n}\n\n# 核心逻辑与规则\n1.  **抗干扰性**: 必须忽略语音识别产生的填充词（如“嗯”、“啊”、“那个”）和OCR的无关文本（如“交易单号”、“优惠说明”）。\n2.  **分类层级**: 分类决策的优先级为：明确的商品名\/服务名 > 商户名 > 上下文推断。例如，“在星巴克买了杯拿铁”，分类为“餐饮美食”，描述为“拿铁咖啡”或“星巴克咖啡”。\n3.  **智能映射**: 对分类和支付方式进行模糊匹配。例如，“KFC”、“肯德基”都应映射到“餐饮美食”；“用微信付的”应映射到“微信”。\n4.  **空值处理**: 对于在文本中确实无法找到或推断出的信息（尤其是 `amount` 和 `description`），其值必须为 `null`，而不是空字符串 `\"\"` 或编造的数据。\n\n# 预设选项列表\n* **支出类别**: [\"数码电器\", \"餐饮美食\", \"自我提升\", \"服装饰品\", \"日用百货\", \"车辆交通\", \"娱乐休闲\", \"医疗健康\", \"家庭支出\", \"充值缴费\", \"其他\"]\n* **收入类别**: [\"主业收入\", \"副业收入\", \"投资理财\", \"红包礼金\", \"其他收入\"]\n* **支付方式**: [\"现金\", \"招商银行卡\", \"中信银行卡\", \"交通银行卡\", \"建设银行卡\", \"工商银行卡\", \"农业银行卡\", \"中国银行卡\", \"民生银行卡\", \"光大银行卡\", \"夏银行卡\", \"平安银行卡\", \"浦发银行卡\", \"兴业银行卡\", \"信用卡\", \"招商信用卡\", \"建行信用卡\", \"工行信用卡\", \"微信\", \"支付宝\", \"Apple Pay\", \"Samsung Pay\", \"云闪付\", \"数字人民币\", \"银行转账\", \"网银转账\", \"手机银行\"]","role":"user"}],"temperature":0.29999999999999999,"model":"glm-4-air-250414"}
+DEBUG: AIService - HTTP Status Code: 200
+DEBUG: AIService - Raw response: {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\"amount\": 19, \"category\": \"餐饮美食\", \"description\": \"吃饭\", \"date\": \"1970-01-01 12:00:00\", \"type\": \"支出\", \"account\": null, \"notes\": null}","role":"assistant"}}],"created":1749991692,"id":"2025061520481119c1f9a0fc2f46cc","model":"glm-4-air-250414","request_id":"2025061520481119c1f9a0fc2f46cc","usage":{"completion_tokens":55,"prompt_tokens":789,"total_tokens":844}}
+DEBUG: AIService - AI response content: {"amount": 19, "category": "餐饮美食", "description": "吃饭", "date": "1970-01-01 12:00:00", "type": "支出", "account": null, "notes": null}
+DEBUG: AIService - Cleaned JSON content: {"amount": 19, "category": "餐饮美食", "description": "吃饭", "date": "1970-01-01 12:00:00", "type": "支出", "account": null, "notes": null}
+DEBUG: AIService - Parsed AI result: ["date": 1970-01-01 12:00:00, "amount": 19, "category": 餐饮美食, "description": 吃饭, "account": <null>, "notes": <null>, "type": 支出]
+DEBUG: AIService - Created AIResponse: AIResponse(amount: Optional(19.0), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("吃饭"), category: Optional("餐饮美食"), transaction_type: Optional("支出"), payment_method: Optional("默认账户"), notes: Optional(""))
+DEBUG: RecognitionCoordinator - AI processing completed successfully
+DEBUG: RecognitionCoordinator - Recognition completed, calling callback
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+ 98115          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+ 98115          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+ 98115          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+ 98115          HALC_ProxyIOContext.cpp:1621  HALC_ProxyIOContext::IOWorkLoop: skipping cycle due to overload
+DEBUG: OCRService - Found potential amount: 14.0 from text: 14:11
+DEBUG: OCRService - Found potential amount: 11.0 from text: 14:11
+DEBUG: OCRService - Found potential amount: 107.0 from text: 107057.00
+DEBUG: OCRService - Found potential amount: 57.0 from text: 107057.00
+DEBUG: OCRService - Found potential amount: 107.0 from text: 107057.00
+DEBUG: OCRService - Found potential amount: 57.0 from text: 107057.00
+DEBUG: OCRService - Found potential amount: 0.0 from text: 0.00
+DEBUG: OCRService - Found potential amount: 100.0 from text: 100401.00
+DEBUG: OCRService - Found potential amount: 401.0 from text: 100401.00
+DEBUG: OCRService - Found potential amount: 2.0 from text: Test2
+DEBUG: OCRService - Found potential amount: 100.0 from text: 100000.00
+DEBUG: OCRService - Found potential amount: 0.0 from text: 100000.00
+DEBUG: OCRService - Found potential amount: 401.0 from text: 401.00
+DEBUG: OCRService - Found potential amount: 0.0 from text: 0.00
+DEBUG: OCRService - Found potential amount: 0.0 from text: 0］
+DEBUG: OCRService - Found potential amount: 0.0 from text: 0.00
+DEBUG: OCRService - Found potential amount: 0.0 from text: 0.00
+DEBUG: OCRService - Found potential amount: 665.0 from text: 6656.00
+DEBUG: OCRService - Found potential amount: 6.0 from text: 6656.00
+DEBUG: OCRService - Found potential amount: 665.0 from text: 6656.00
+DEBUG: OCRService - Found potential amount: 6.0 from text: 6656.00
+DEBUG: OCRService - All potential amounts: [14.0, 11.0, 107.0, 57.0, 107.0, 57.0, 0.0, 100.0, 401.0, 2.0, 100.0, 0.0, 401.0, 0.0, 0.0, 0.0, 0.0, 665.0, 6.0, 665.0, 6.0]
+DEBUG: OCRService - Parsed bill details: 14:11
+账单明细
+账户明细
+107057.00
+107057.00
+0.00
+总资产
+总负债
+储蓄账户
+100401.00
+Test2
+储蓄
+100000.00
+Test
+储蓄
+401.00
+交通银行卡
+储蓄
+0.00
+0］
+支付宝
+储蓄
+0.00
+C］
+招商信用卡
+储蓄
+0.00
+虚拟账户
+6656.00
+Ali
+虚拟
+6656.00
+记账
+明细
+统计
+我的
+
+DEBUG: OCRService - Calling AI service with text: 14:11
+账单明细
+账户明细
+107057.00
+107057.00
+0.00
+总资产
+总负债
+储蓄账户
+100401.00
+Test2
+储蓄
+100000.00
+Test
+储蓄
+401.00
+交通银行卡
+储蓄
+0.00
+0］
+支付宝
+储蓄
+0.00
+C］
+招商信用卡
+储蓄
+0.00
+虚拟账户
+6656.00
+Ali
+虚拟
+6656.00
+记账
+明细
+统计
+我的
+
+DEBUG: AIService - Sending request to: https://open.bigmodel.cn/api/paas/v4/chat/completions
+DEBUG: AIService - Request body: {"model":"glm-4-air-250414","messages":[{"role":"user","content":"# 角色\n你是一个逻辑严谨、经验丰富的财务数据提取专家。你的专长是从非结构化、甚至带有错误的文本（如语音识别稿、OCR扫描件）中，精准地提取结构化的记账信息。\n\n# 任务\n请深度分析以下【用户输入文本】，忽略所有无关的口语化词汇和干扰信息，并严格按照【输出要求】返回一个纯净的JSON对象。\n\n# 输出要求\n1.  严格返回一个单一、原始的JSON对象。\n2.  绝不允许包含任何解释性文字、注释、Markdown格式（如```json）或JSON主体之外的任何字符。\n3.  如果【用户输入文本】中完全不包含任何有效的记账信息，则返回一个所有值为 null 的JSON结构。\n\n**文本:**\n14:11\n账单明细\n账户明细\n107057.00\n107057.00\n0.00\n总资产\n总负债\n储蓄账户\n100401.00\nTest2\n储蓄\n100000.00\nTest\n储蓄\n401.00\n交通银行卡\n储蓄\n0.00\n0］\n支付宝\n储蓄\n0.00\nC］\n招商信用卡\n储蓄\n0.00\n虚拟账户\n6656.00\nAli\n虚拟\n6656.00\n记账\n明细\n统计\n我的\n\n\n# JSON结构与字段说明\n{\n    \"amount\": Number, \/\/ 交易金额，必须是数字。正数代表收入，负数在文本中也应提取为正数，通过 type 字段区分。\n    \"category\": String, \/\/ 必须从下方【预设选项列表】中选择最匹配的一项。\n    \"description\": String, \/\/ 对交易核心内容的简洁概括，优先使用商品或服务名。\n    \"date\": \"YYYY-MM-DD HH:mm:ss\", \/\/ 交易时间。请将\"昨天\"等相对时间转换为绝对时间。若无具体时间，默认为\"12:00:00\"。若无日期，使用1970-01-01。\n    \"type\": String, \/\/ 必须是 \"收入\" 或 \"支出\"。根据关键词（如“收到”、“花了”）或分类来判断。\n    \"account\": String, \/\/ 账户，必须从下方【预设选项列表】中选择最匹配的一项。\n    \"notes\": String \/\/ 记录额外但有用的上下文信息。\n}\n\n# 核心逻辑与规则\n1.  **抗干扰性**: 必须忽略语音识别产生的填充词（如“嗯”、“啊”、“那个”）和OCR的无关文本（如“交易单号”、“优惠说明”）。\n2.  **分类层级**: 分类决策的优先级为：明确的商品名\/服务名 > 商户名 > 上下文推断。例如，“在星巴克买了杯拿铁”，分类为“餐饮美食”，描述为“拿铁咖啡”或“星巴克咖啡”。\n3.  **智能映射**: 对分类和支付方式进行模糊匹配。例如，“KFC”、“肯德基”都应映射到“餐饮美食”；“用微信付的”应映射到“微信”。\n4.  **空值处理**: 对于在文本中确实无法找到或推断出的信息（尤其是 `amount` 和 `description`），其值必须为 `null`，而不是空字符串 `\"\"` 或编造的数据。\n\n# 预设选项列表\n* **支出类别**: [\"数码电器\", \"餐饮美食\", \"自我提升\", \"服装饰品\", \"日用百货\", \"车辆交通\", \"娱乐休闲\", \"医疗健康\", \"家庭支出\", \"充值缴费\", \"其他\"]\n* **收入类别**: [\"主业收入\", \"副业收入\", \"投资理财\", \"红包礼金\", \"其他收入\"]\n* **支付方式**: [\"现金\", \"招商银行卡\", \"中信银行卡\", \"交通银行卡\", \"建设银行卡\", \"工商银行卡\", \"农业银行卡\", \"中国银行卡\", \"民生银行卡\", \"光大银行卡\", \"夏银行卡\", \"平安银行卡\", \"浦发银行卡\", \"兴业银行卡\", \"信用卡\", \"招商信用卡\", \"建行信用卡\", \"工行信用卡\", \"微信\", \"支付宝\", \"Apple Pay\", \"Samsung Pay\", \"云闪付\", \"数字人民币\", \"银行转账\", \"网银转账\", \"手机银行\"]"}],"temperature":0.29999999999999999}
+DEBUG: AIService - HTTP Status Code: 200
+DEBUG: AIService - Raw response: {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\n    \"amount\": 107057.00,\n    \"category\": \"其他收入\",\n    \"description\": \"总资产\",\n    \"date\": \"1970-01-01 12:00:00\",\n    \"type\": \"收入\",\n    \"account\": null,\n    \"notes\": null\n}","role":"assistant"}}],"created":1749991896,"id":"20250615205134e6788bf25670416b","model":"glm-4-air-250414","request_id":"20250615205134e6788bf25670416b","usage":{"completion_tokens":69,"prompt_tokens":902,"total_tokens":971}}
+DEBUG: AIService - AI response content: {
+    "amount": 107057.00,
+    "category": "其他收入",
+    "description": "总资产",
+    "date": "1970-01-01 12:00:00",
+    "type": "收入",
+    "account": null,
+    "notes": null
+}
+DEBUG: AIService - Cleaned JSON content: {
+    "amount": 107057.00,
+    "category": "其他收入",
+    "description": "总资产",
+    "date": "1970-01-01 12:00:00",
+    "type": "收入",
+    "account": null,
+    "notes": null
+}
+DEBUG: AIService - Parsed AI result: ["type": 收入, "account": <null>, "notes": <null>, "category": 其他收入, "amount": 107057, "date": 1970-01-01 12:00:00, "description": 总资产]
+DEBUG: AIService - Created AIResponse: AIResponse(amount: Optional(107057.0), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("总资产"), category: Optional("其他收入"), transaction_type: Optional("收入"), payment_method: Optional("默认账户"), notes: Optional(""))
+DEBUG: OCRService - AI service response: AIResponse(amount: Optional(107057.0), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("总资产"), category: Optional("其他收入"), transaction_type: Optional("收入"), payment_method: Optional("默认账户"), notes: Optional(""))
+DEBUG: BillProcessingService - Processing AI response: Optional(SmartBookkeeping.AIResponse(amount: Optional(107057.0), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("总资产"), category: Optional("其他收入"), transaction_type: Optional("收入"), payment_method: Optional("默认账户"), notes: Optional("")))
+DEBUG: BillProcessingService - Determined transaction type: income
+DEBUG: BillProcessingService - Parsed transaction date: 2025-06-15 12:51:36 +0000
+DEBUG: BillProcessingService - Matched category: 其他收入, payment method: 未知
+DEBUG: BillProcessingService - Created transaction: Transaction(id: FFB4E3AF-EE47-436E-8B61-BB86F3B64261, amount: 107057.0, date: 2025-06-15 12:51:36 +0000, category: "其他收入", description: "总资产", type: SmartBookkeeping.Transaction.TransactionType.income, paymentMethod: "未知", note: "", account: "")
+DEBUG: OCRService - Successfully processed AI response to transaction
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+DEBUG: Recognized text: 
+DEBUG: SpeechRecognitionService - Preheating audio engine
+iOSSimulatorAudioDevice-84998-8: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine preheated successfully
+DEBUG: Starting voice recognition immediately
+DEBUG: RecognitionCoordinator - startVoiceRecognition() called
+DEBUG: SpeechRecognitionService - Attempting to start recording...
+[SpeechRecognitionService] Audio resources cleaned up
+DEBUG: SpeechRecognitionService - Configuring audio session...
+DEBUG: SpeechRecognitionService - Using preconfigured audio session
+DEBUG: SpeechRecognitionService - Recording format: <AVAudioFormat 0x6000023a8b40:  1 ch,  48000 Hz, Float32>
+DEBUG: SpeechRecognitionService - Tap installed.
+DEBUG: SpeechRecognitionService - Recognition task started.
+DEBUG: SpeechRecognitionService - Audio engine prepared.
+iOSSimulatorAudioDevice-84998-9: Abandoning I/O cycle because reconfig pending
+iOSSimulatorAudioDevice-84998-9: Abandoning I/O cycle because reconfig pending
+DEBUG: SpeechRecognitionService - Audio engine started.
+DEBUG: SpeechRecognitionService started recording successfully.
+DEBUG: RecognitionCoordinator - Voice recognition started successfully
+DEBUG: VoiceRecordingGuideView - Performing network permission precheck (first time)
+DEBUG: 开始检测静音，音频级别: -58.959637dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.723286dB
+DEBUG: VoiceRecordingGuideView - Network permission precheck completed successfully
+DEBUG: Recognized text: 我
+DEBUG: Recognized text: 我
+DEBUG: Recognized text: 我吃饭
+DEBUG: Recognized text: 我吃饭
+DEBUG: Recognized text: 我吃饭花了
+DEBUG: Recognized text: 我吃饭花了
+DEBUG: Recognized text: 我吃饭花了一
+DEBUG: Recognized text: 我吃饭花了一
+DEBUG: Recognized text: 我吃饭花了100
+DEBUG: Recognized text: 我吃饭花了100
+DEBUG: 开始检测静音，音频级别: -52.11004dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.82723dB
+DEBUG: Recognized text: 我吃饭花了¥100
+DEBUG: Recognized text: 我吃饭花了¥100
+DEBUG: Recognized text: 我吃饭花了¥100
+DEBUG: Recognized text: 我吃饭花了¥100
+DEBUG: 开始检测静音，音频级别: -50.312286dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.97915dB
+DEBUG: 开始检测静音，音频级别: -50.52044dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.80475dB
+DEBUG: 开始检测静音，音频级别: -53.081837dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -46.392727dB
+DEBUG: 开始检测静音，音频级别: -51.165672dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.167347dB
+DEBUG: 开始检测静音，音频级别: -51.06972dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.96238dB
+DEBUG: 开始检测静音，音频级别: -53.668114dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.661278dB
+DEBUG: 开始检测静音，音频级别: -50.224037dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -47.88309dB
+DEBUG: 开始检测静音，音频级别: -50.265793dB
+DEBUG: Recognized text: 我吃饭花了¥100中午
+DEBUG: Recognized text: 我吃饭花了¥100中午
+DEBUG: Recognized text: 我吃饭花了¥100中午中午
+DEBUG: Recognized text: 我吃饭花了¥100中午中午
+DEBUG: Recognized text: 我吃饭花了¥100中午中午
+DEBUG: Recognized text: 我吃饭花了¥100中午中午
+DEBUG: 检测到声音，重置静音计时，音频级别: -40.258064dB
+DEBUG: 开始检测静音，音频级别: -56.409203dB
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: Recognized text: 我吃饭花了¥100中午支付宝
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.8496dB
+DEBUG: 开始检测静音，音频级别: -51.143684dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.418594dB
+DEBUG: 开始检测静音，音频级别: -50.406986dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.72036dB
+DEBUG: 开始检测静音，音频级别: -50.829826dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -49.79633dB
+DEBUG: 开始检测静音，音频级别: -56.1019dB
+DEBUG: 检测到声音，重置静音计时，音频级别: -48.280266dB
+DEBUG: Maximum recording time reached (15.0s), stopping recording
+DEBUG: RecognitionCoordinator - stopVoiceRecognition called
+[SpeechRecognitionService] stopRecordingInternal called, isExternal: true
+[SpeechRecognitionService] stopRecordingInternal completed
+DEBUG: RecognitionCoordinator - Current recognized text: '我吃饭花了¥100中午支付宝'
+DEBUG: RecognitionCoordinator - Processing recognized text immediately
+DEBUG: RecognitionCoordinator - processRecognizedText called with text: '我吃饭花了¥100中午支付宝'
+DEBUG: RecognitionCoordinator - Starting AI processing...
+DEBUG: RecognitionCoordinator - Performing network permission precheck
+[SpeechRecognitionService] Audio engine stopped
+[SpeechRecognitionService] Audio tap removed
+[SpeechRecognitionService] External call - task cancelled immediately
+DEBUG: Speech recognition error object: Error Domain=kAFAssistantErrorDomain Code=216 "(null)"
+DEBUG: Speech recognition error localizedDescription: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: SpeechRecognitionService - recognitionTask completion: Not isFinal, but an error occurred. Calling stop for error cleanup if recording.
+DEBUG: RecognitionCoordinator - Speech recognition error: The operation couldn’t be completed. (kAFAssistantErrorDomain error 216.)
+DEBUG: RecognitionCoordinator - Ignoring speech error as we have recognized text: '我吃饭花了¥100中午支付宝'
+            HALSystem.cpp:2170   AudioObjectPropertiesChanged: no such object
+           AQMEIO_HAL.cpp:2786  timeout
+AudioHardware-mac-imp.cpp:2706   AudioDeviceStop: no device with given ID
+[SpeechRecognitionService] Audio session deactivated safely
+Task <09E96D8B-2B41-41AD-A6AF-1EEC2C5B64B7>.<13> finished with error [-1001] Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000d20a50 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <09E96D8B-2B41-41AD-A6AF-1EEC2C5B64B7>.<13>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <09E96D8B-2B41-41AD-A6AF-1EEC2C5B64B7>.<13>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://httpbin.org/get, NSErrorFailingURLKey=https://httpbin.org/get, _kCFStreamErrorDomainKey=4}
+DEBUG: RecognitionCoordinator - Network permission precheck failed (expected for first time): Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000d20a50 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <09E96D8B-2B41-41AD-A6AF-1EEC2C5B64B7>.<13>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <09E96D8B-2B41-41AD-A6AF-1EEC2C5B64B7>.<13>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://httpbin.org/get, NSErrorFailingURLKey=https://httpbin.org/get, _kCFStreamErrorDomainKey=4}
+DEBUG: AIService - Sending request to: https://open.bigmodel.cn/api/paas/v4/chat/completions
+DEBUG: AIService - Request body: {"model":"glm-4-air-250414","temperature":0.29999999999999999,"messages":[{"content":"# 角色\n你是一个逻辑严谨、经验丰富的财务数据提取专家。你的专长是从非结构化、甚至带有错误的文本（如语音识别稿、OCR扫描件）中，精准地提取结构化的记账信息。\n\n# 任务\n请深度分析以下【用户输入文本】，忽略所有无关的口语化词汇和干扰信息，并严格按照【输出要求】返回一个纯净的JSON对象。\n\n# 输出要求\n1.  严格返回一个单一、原始的JSON对象。\n2.  绝不允许包含任何解释性文字、注释、Markdown格式（如```json）或JSON主体之外的任何字符。\n3.  如果【用户输入文本】中完全不包含任何有效的记账信息，则返回一个所有值为 null 的JSON结构。\n\n**文本:**\n我吃饭花了¥100中午支付宝\n\n# JSON结构与字段说明\n{\n    \"amount\": Number, \/\/ 交易金额，必须是数字。正数代表收入，负数在文本中也应提取为正数，通过 type 字段区分。\n    \"category\": String, \/\/ 必须从下方【预设选项列表】中选择最匹配的一项。\n    \"description\": String, \/\/ 对交易核心内容的简洁概括，优先使用商品或服务名。\n    \"date\": \"YYYY-MM-DD HH:mm:ss\", \/\/ 交易时间。请将\"昨天\"等相对时间转换为绝对时间。若无具体时间，默认为\"12:00:00\"。若无日期，使用1970-01-01。\n    \"type\": String, \/\/ 必须是 \"收入\" 或 \"支出\"。根据关键词（如“收到”、“花了”）或分类来判断。\n    \"account\": String, \/\/ 账户，必须从下方【预设选项列表】中选择最匹配的一项。\n    \"notes\": String \/\/ 记录额外但有用的上下文信息。\n}\n\n# 核心逻辑与规则\n1.  **抗干扰性**: 必须忽略语音识别产生的填充词（如“嗯”、“啊”、“那个”）和OCR的无关文本（如“交易单号”、“优惠说明”）。\n2.  **分类层级**: 分类决策的优先级为：明确的商品名\/服务名 > 商户名 > 上下文推断。例如，“在星巴克买了杯拿铁”，分类为“餐饮美食”，描述为“拿铁咖啡”或“星巴克咖啡”。\n3.  **智能映射**: 对分类和支付方式进行模糊匹配。例如，“KFC”、“肯德基”都应映射到“餐饮美食”；“用微信付的”应映射到“微信”。\n4.  **空值处理**: 对于在文本中确实无法找到或推断出的信息（尤其是 `amount` 和 `description`），其值必须为 `null`，而不是空字符串 `\"\"` 或编造的数据。\n\n# 预设选项列表\n* **支出类别**: [\"数码电器\", \"餐饮美食\", \"自我提升\", \"服装饰品\", \"日用百货\", \"车辆交通\", \"娱乐休闲\", \"医疗健康\", \"家庭支出\", \"充值缴费\", \"其他\"]\n* **收入类别**: [\"主业收入\", \"副业收入\", \"投资理财\", \"红包礼金\", \"其他收入\"]\n* **支付方式**: [\"现金\", \"招商银行卡\", \"中信银行卡\", \"交通银行卡\", \"建设银行卡\", \"工商银行卡\", \"农业银行卡\", \"中国银行卡\", \"民生银行卡\", \"光大银行卡\", \"夏银行卡\", \"平安银行卡\", \"浦发银行卡\", \"兴业银行卡\", \"信用卡\", \"招商信用卡\", \"建行信用卡\", \"工行信用卡\", \"微信\", \"支付宝\", \"Apple Pay\", \"Samsung Pay\", \"云闪付\", \"数字人民币\", \"银行转账\", \"网银转账\", \"手机银行\"]","role":"user"}]}
+DEBUG: AIService - HTTP Status Code: 200
+DEBUG: AIService - Raw response: {"choices":[{"finish_reason":"stop","index":0,"message":{"content":"{\"amount\": 100, \"category\": \"餐饮美食\", \"description\": \"吃饭\", \"date\": \"1970-01-01 12:00:00\", \"type\": \"支出\", \"account\": \"支付宝\", \"notes\": null}","role":"assistant"}}],"created":1749991932,"id":"20250615205211d9f9068689f44f25","model":"glm-4-air-250414","request_id":"20250615205211d9f9068689f44f25","usage":{"completion_tokens":56,"prompt_tokens":790,"total_tokens":846}}
+DEBUG: AIService - AI response content: {"amount": 100, "category": "餐饮美食", "description": "吃饭", "date": "1970-01-01 12:00:00", "type": "支出", "account": "支付宝", "notes": null}
+DEBUG: AIService - Cleaned JSON content: {"amount": 100, "category": "餐饮美食", "description": "吃饭", "date": "1970-01-01 12:00:00", "type": "支出", "account": "支付宝", "notes": null}
+DEBUG: AIService - Parsed AI result: ["date": 1970-01-01 12:00:00, "notes": <null>, "account": 支付宝, "type": 支出, "description": 吃饭, "category": 餐饮美食, "amount": 100]
+DEBUG: AIService - Created AIResponse: AIResponse(amount: Optional(100.0), transaction_time: Optional("1970-01-01 12:00:00"), item_description: Optional("吃饭"), category: Optional("餐饮美食"), transaction_type: Optional("支出"), payment_method: Optional("支付宝"), notes: Optional(""))
+DEBUG: RecognitionCoordinator - AI processing completed successfully
+DEBUG: RecognitionCoordinator - Recognition completed, calling callback
+DEBUG: AudioSessionManager - Audio session already configured, skipping
+保存上下文成功！
+检测到持久化存储远程变化
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
+检测到持久化存储远程变化，刷新交易数据
