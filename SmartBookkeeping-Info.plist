@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Image</string>
+			<key>LSHandlerRank</key>
+			<string>Default</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.image</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>SmartBookkeeping</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>smartbookkeeping</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>需要访问麦克风来进行语音输入，以便将您的语音转换为文字</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>需要语音识别权限来将您的语音转换为文字，以便快速记录交易信息</string>
+	<key>NSCameraUsageDescription</key>
+	<string>需要访问相机来拍摄账单照片，以便进行智能识别</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问相册来选择账单照片，以便进行智能识别</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>需要访问相册来保存处理后的账单照片</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

@@ -47,7 +47,45 @@
 4.  Build and run the app on a simulator or physical device
 
 ### Configuration
-*   **AI API Setup:** Configure your Zhipu AI API key in Settings > API Configuration
+
+#### API Key Setup
+To protect sensitive information, this project uses configuration files to manage API keys and other configuration data.
+
+**Setup Steps:**
+1. **Copy the example configuration file**
+   ```bash
+   cp SmartBookkeeping/Config.example.plist SmartBookkeeping/Config.plist
+   ```
+
+2. **Edit the configuration file**
+   Open `SmartBookkeeping/Config.plist` and replace `YOUR_API_KEY_HERE` with your actual API key:
+   ```xml
+   <key>DefaultAPIKey</key>
+   <string>your_actual_api_key</string>
+   ```
+
+3. **Get API Key**
+   - Visit [Zhipu AI Open Platform](https://open.bigmodel.cn/)
+   - Register an account and obtain an API key
+   - Fill the key into the configuration file
+
+**Configuration Files:**
+- `Config.plist` - Actual configuration file (contains sensitive info, ignored by .gitignore)
+- `Config.example.plist` - Example configuration file (safe to commit to version control)
+
+**Important Notes:**
+⚠️ **Important**: The `Config.plist` file contains sensitive information and should not be committed to version control.
+✅ This file has been added to `.gitignore` to prevent accidental commits.
+
+**Default Configuration:**
+If `Config.plist` is not found, the app will use these defaults:
+- Base URL: `https://open.bigmodel.cn/api/paas/v4`
+- Model Name: `glm-4-air-250414`
+- Free Uses: `50`
+- API Key: None (requires manual configuration)
+
+#### Other Settings
+*   **AI API Setup:** Configure your Zhipu AI API key in Settings > API Configuration (alternative method)
 *   **Permissions:** Grant microphone and photo library access for full functionality
 *   **Categories:** Customize transaction categories to match your spending patterns
 

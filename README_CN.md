@@ -47,7 +47,45 @@
 4.  在模拟器或真机上构建并运行应用
 
 ### 配置说明
-*   **AI API 设置：** 在 设置 > API配置 中配置您的智谱AI API密钥
+
+#### API 密钥配置
+为了保护敏感信息，本项目使用配置文件来管理 API 密钥和其他配置信息。
+
+**设置步骤：**
+1. **复制示例配置文件**
+   ```bash
+   cp SmartBookkeeping/Config.example.plist SmartBookkeeping/Config.plist
+   ```
+
+2. **编辑配置文件**
+   打开 `SmartBookkeeping/Config.plist` 文件，将 `YOUR_API_KEY_HERE` 替换为你的实际 API 密钥：
+   ```xml
+   <key>DefaultAPIKey</key>
+   <string>你的实际API密钥</string>
+   ```
+
+3. **获取 API 密钥**
+   - 访问 [智谱AI开放平台](https://open.bigmodel.cn/)
+   - 注册账号并获取 API 密钥
+   - 将密钥填入配置文件
+
+**配置文件说明：**
+- `Config.plist` - 实际配置文件（包含敏感信息，已被 .gitignore 忽略）
+- `Config.example.plist` - 示例配置文件（可以提交到版本控制）
+
+**注意事项：**
+⚠️ **重要**: `Config.plist` 文件包含敏感信息，请勿将其提交到版本控制系统。
+✅ 该文件已被添加到 `.gitignore` 中，确保不会意外提交。
+
+**默认配置：**
+如果没有找到 `Config.plist` 文件，应用会使用以下默认值：
+- Base URL: `https://open.bigmodel.cn/api/paas/v4`
+- Model Name: `glm-4-air-250414`
+- Free Uses: `50`
+- API Key: 无（需要用户手动配置）
+
+#### 其他设置
+*   **AI API 设置：** 在 设置 > API配置 中配置您的智谱AI API密钥（备选方法）
 *   **权限设置：** 授予麦克风和相册访问权限以获得完整功能
 *   **分类设置：** 自定义交易分类以匹配您的消费模式
 

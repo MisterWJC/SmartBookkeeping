@@ -21,8 +21,10 @@ DerivedData/
 xcuserdata/
 
 ## Generated plist files
-*.plist
 Info.plist # If you don't want to track this file
+
+# Configuration files with sensitive data
+Config.plist
 
 ## *.xcodeproj
 *.xcodeproj/project.xcworkspace
