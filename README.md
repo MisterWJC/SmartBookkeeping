@@ -1,4 +1,7 @@
 # SmartBookkeeping App
+
+[🇨🇳 中文文档 / Chinese Documentation](./README_CN.md)
+
 Smart Bookkeeping App - Your personal finance companion that gets smarter with every use.
 
 ## Key Features
