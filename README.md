@@ -1,5 +1,5 @@
 # SmartBookkeeping App
-智能记账 App，让你的账本，越用越懂你。
+Smart Bookkeeping App - Your personal finance companion that gets smarter with every use.RetryClaude can make mistakes. Please double-check responses.
 
 ## Key Features
 
@@ -117,18 +117,16 @@ If `Config.plist` is not found, the app will use these defaults:
       </video>
       
 
+## 💖 Support the Project
+If this project has been helpful to you, consider buying me a coffee ☕
+### WeChat Tip
+<img src="./SmartBookkeeping-PRD/images/ali_reward.JPG" width="200" alt="WeChat Tip Code">
 
-## 💖 支持项目
+### Alipay Donation
+<img src="./SmartBookkeeping-PRD/images/wechat_reward.JPG" width="200" alt="Alipay Payment Code">
 
-如果这个项目对您有帮助，欢迎请我喝杯咖啡 ☕
+### Other Ways to Support
 
-### 微信赞赏码
-<img src="./SmartBookkeeping-PRD/images/ali_reward.JPG" width="200" alt="微信赞赏码">
-
-### 支付宝收款码  
-<img src="./SmartBookkeeping-PRD/images/wechat_reward.JPG" width="200" alt="支付宝收款码">
-
-### 其他支持方式
-- ⭐ 给项目点个Star
-- 🐛 提交Issue或PR
-- 📢 推荐给更多朋友
+- ⭐ Star the project on GitHub
+- 🐛 Submit issues or pull requests
+- 📢 Share with friends and colleagues
