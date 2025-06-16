@@ -1,5 +1,5 @@
 # SmartBookkeeping App
-Smart Bookkeeping App - Your personal finance companion that gets smarter with every use.RetryClaude can make mistakes. Please double-check responses.
+Smart Bookkeeping App - Your personal finance companion that gets smarter with every use.
 
 ## Key Features
 
