@@ -73,12 +73,7 @@ To protect sensitive information, this project uses configuration files to manag
    - Fill the key into the configuration file
 
 **Configuration Files:**
-- `Config.plist` - Actual configuration file (contains sensitive info, ignored by .gitignore)
 - `Config.example.plist` - Example configuration file (safe to commit to version control)
-
-**Important Notes:**
-⚠️ **Important**: The `Config.plist` file contains sensitive information and should not be committed to version control.
-✅ This file has been added to `.gitignore` to prevent accidental commits.
 
 **Default Configuration:**
 If `Config.plist` is not found, the app will use these defaults:
